@@ -1,3 +1,6 @@
-ignoredBuiltDependencies:
-  - '@nestjs/core'
-  - unrs-resolver
+# ignoredBuiltDependencies:
+# - '@nestjs/core'
+# - '@prisma/engines'
+# - bcrypt
+# - prisma
+# - unrs-resolver
