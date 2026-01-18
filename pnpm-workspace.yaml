@@ -1,6 +1,10 @@
-# ignoredBuiltDependencies:
-# - '@nestjs/core'
-# - '@prisma/engines'
-# - bcrypt
-# - prisma
-# - unrs-resolver
+packages:
+  - 'apps/*'
+onlyBuiltDependencies:
+  - "@nestjs/core"
+  - "@parcel/watcher"
+  - "@prisma/engines"
+  - bcrypt
+  - esbuild
+  - prisma
+  - unrs-resolver
