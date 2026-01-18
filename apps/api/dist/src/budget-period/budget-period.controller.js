@@ -33,6 +33,9 @@ let BudgetPeriodController = class BudgetPeriodController {
         const targetYear = year ? parseInt(year, 10) : new Date().getFullYear();
         return this.budgetPeriodService.getYearlyMetrics(userId, targetYear);
     }
+    getOverallMetrics(userId) {
+        return this.budgetPeriodService.getOverallMetrics(userId);
+    }
     getSummary(userId, id) {
         return this.budgetPeriodService.getSummary(userId, id);
     }
@@ -73,6 +76,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], BudgetPeriodController.prototype, "getYearlyMetrics", null);
+__decorate([
+    (0, common_1.Get)('metrics/overall'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BudgetPeriodController.prototype, "getOverallMetrics", null);
 __decorate([
     (0, common_1.Get)(':id/summary'),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),

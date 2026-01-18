@@ -32,6 +32,10 @@ class CreateExpenseDto {
 
   @IsUUID()
   budgetPeriodId: string;
+
+  @IsOptional()
+  @IsUUID()
+  expenseGroupId?: string;
 }
 
 class UpdateExpenseDto {
@@ -54,6 +58,10 @@ class UpdateExpenseDto {
   @IsOptional()
   @IsUUID()
   categoryId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  expenseGroupId?: string | null;
 }
 
 class BulkExpenseItemDto {
@@ -73,6 +81,10 @@ class BulkExpenseItemDto {
 
   @IsUUID()
   categoryId: string;
+
+  @IsOptional()
+  @IsUUID()
+  expenseGroupId?: string;
 }
 
 class CreateBulkExpenseDto {

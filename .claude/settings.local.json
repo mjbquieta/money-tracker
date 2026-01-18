@@ -4,7 +4,9 @@
       "Bash(pnpm dlx:*)",
       "Bash(pnpm install)",
       "Bash(pnpm approve-builds:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx nest build:*)"
     ]
   }
 }

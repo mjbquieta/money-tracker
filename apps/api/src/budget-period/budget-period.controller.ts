@@ -43,6 +43,11 @@ export class BudgetPeriodController {
     return this.budgetPeriodService.getYearlyMetrics(userId, targetYear);
   }
 
+  @Get('metrics/overall')
+  getOverallMetrics(@CurrentUser('id') userId: UUID) {
+    return this.budgetPeriodService.getOverallMetrics(userId);
+  }
+
   @Get(':id/summary')
   getSummary(@CurrentUser('id') userId: UUID, @Param('id') id: UUID) {
     return this.budgetPeriodService.getSummary(userId, id);

@@ -34,7 +34,7 @@ const createForm = reactive({
 onMounted(async () => {
   await Promise.all([
     budgetStore.fetchBudgetPeriods(),
-    budgetStore.fetchYearlyMetrics(),
+    budgetStore.fetchOverallMetrics(),
   ]);
 });
 
@@ -100,7 +100,7 @@ function viewBudgetPeriod(id: string) {
   router.push(`/budget/${id}`);
 }
 
-const metrics = computed(() => budgetStore.yearlyMetrics);
+const metrics = computed(() => budgetStore.overallMetrics);
 </script>
 
 <template>
@@ -118,7 +118,7 @@ const metrics = computed(() => budgetStore.yearlyMetrics);
       <div class="flex justify-between items-center mb-5">
         <h2 class="text-lg font-semibold text-secondary-800 flex items-center gap-2">
           <SparklesIcon class="w-5 h-5 text-accent-500" />
-          {{ new Date().getFullYear() }} Overview
+          Overall Summary
         </h2>
         <NuxtLink
           to="/metrics"

@@ -71,11 +71,28 @@ model BudgetPeriod {
   deletedAt DateTime? @map("deleted_at")
 
   // Relations
-  userId   String
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expenses Expense[]
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses      Expense[]
+  expenseGroups ExpenseGroup[]
 
   @@map("budget_periods")
+}
+
+model ExpenseGroup {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  budgetPeriodId String       @map("budget_period_id")
+  budgetPeriod   BudgetPeriod @relation(fields: [budgetPeriodId], references: [id], onDelete: Cascade)
+  expenses       Expense[]
+
+  @@map("expense_groups")
 }
 
 model Category {
@@ -109,9 +126,11 @@ model Expense {
 
   // Relations
   categoryId     String
-  category       Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  budgetPeriodId String       @map("budget_period_id")
-  budgetPeriod   BudgetPeriod @relation(fields: [budgetPeriodId], references: [id], onDelete: Cascade)
+  category       Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  budgetPeriodId String        @map("budget_period_id")
+  budgetPeriod   BudgetPeriod  @relation(fields: [budgetPeriodId], references: [id], onDelete: Cascade)
+  expenseGroupId String?       @map("expense_group_id")
+  expenseGroup   ExpenseGroup? @relation(fields: [expenseGroupId], references: [id], onDelete: SetNull)
 
   @@map("expenses")
 }

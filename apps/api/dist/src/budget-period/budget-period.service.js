@@ -104,6 +104,12 @@ let BudgetPeriodService = class BudgetPeriodService {
     }
     async duplicate(userId, budgetPeriodId, payload) {
         const original = await this.findOne(userId, budgetPeriodId);
+        const originalGroups = await this.prisma.expenseGroup.findMany({
+            where: {
+                budgetPeriodId,
+                deletedAt: null,
+            },
+        });
         const startDate = new Date(payload.startDate);
         const endDate = new Date(payload.endDate);
         if (startDate >= endDate) {
@@ -119,6 +125,17 @@ let BudgetPeriodService = class BudgetPeriodService {
                     income: payload.income ?? original.income,
                 },
             });
+            const groupIdMapping = {};
+            for (const group of originalGroups) {
+                const newGroup = await tx.expenseGroup.create({
+                    data: {
+                        name: group.name,
+                        description: group.description,
+                        budgetPeriodId: newBudgetPeriod.id,
+                    },
+                });
+                groupIdMapping[group.id] = newGroup.id;
+            }
             if (original.expenses.length > 0) {
                 await tx.expense.createMany({
                     data: original.expenses.map((expense) => ({
@@ -127,6 +144,9 @@ let BudgetPeriodService = class BudgetPeriodService {
                         amount: expense.amount,
                         categoryId: expense.categoryId,
                         budgetPeriodId: newBudgetPeriod.id,
+                        expenseGroupId: expense.expenseGroupId
+                            ? groupIdMapping[expense.expenseGroupId]
+                            : null,
                     })),
                 });
             }
@@ -238,6 +258,41 @@ let BudgetPeriodService = class BudgetPeriodService {
             savingsRate: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0,
             expensesByCategory,
             monthlyBreakdown,
+            budgetPeriodsCount: budgetPeriods.length,
+        };
+    }
+    async getOverallMetrics(userId) {
+        const budgetPeriods = await this.prisma.budgetPeriod.findMany({
+            where: {
+                userId,
+                deletedAt: null,
+            },
+            include: {
+                expenses: {
+                    where: { deletedAt: null },
+                    include: { category: true },
+                },
+            },
+            orderBy: { startDate: 'asc' },
+        });
+        const totalIncome = budgetPeriods.reduce((sum, bp) => sum + bp.income, 0);
+        const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
+        const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const expensesByCategory = allExpenses.reduce((acc, expense) => {
+            const categoryName = expense.category.name;
+            if (!acc[categoryName]) {
+                acc[categoryName] = { total: 0, count: 0 };
+            }
+            acc[categoryName].total += expense.amount;
+            acc[categoryName].count += 1;
+            return acc;
+        }, {});
+        return {
+            totalIncome,
+            totalExpenses,
+            savings: totalIncome - totalExpenses,
+            savingsRate: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0,
+            expensesByCategory,
             budgetPeriodsCount: budgetPeriods.length,
         };
     }

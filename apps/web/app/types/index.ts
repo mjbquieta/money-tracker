@@ -47,7 +47,19 @@ export interface Expense {
   amount: number;
   categoryId: string;
   budgetPeriodId: string;
+  expenseGroupId: string | null;
   category: Category;
+  expenseGroup?: ExpenseGroup | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseGroup {
+  id: string;
+  name: string;
+  description: string | null;
+  budgetPeriodId: string;
+  expenses: Expense[];
   createdAt: string;
   updatedAt: string;
 }
@@ -80,6 +92,15 @@ export interface CreateExpensePayload {
   amount: number;
   categoryId: string;
   budgetPeriodId: string;
+  expenseGroupId?: string;
+}
+
+export interface UpdateExpensePayload {
+  name?: string;
+  description?: string;
+  amount?: number;
+  categoryId?: string;
+  expenseGroupId?: string | null;
 }
 
 export interface BulkExpenseItem {
@@ -87,6 +108,7 @@ export interface BulkExpenseItem {
   description?: string;
   amount: number;
   categoryId: string;
+  expenseGroupId?: string;
 }
 
 export interface CreateBulkExpensePayload {
@@ -97,6 +119,26 @@ export interface CreateBulkExpensePayload {
 export interface CreateCategoryPayload {
   name: string;
   description?: string;
+}
+
+export interface CreateExpenseGroupPayload {
+  name: string;
+  description?: string;
+  budgetPeriodId: string;
+}
+
+export interface UpdateExpenseGroupPayload {
+  name?: string;
+  description?: string;
+}
+
+export interface AddExpensesToGroupPayload {
+  expenseIds: string[];
+}
+
+export interface MoveExpensesToGroupPayload {
+  expenseIds: string[];
+  targetGroupId: string | null;
 }
 
 export interface UpdateSettingsPayload {
@@ -134,6 +176,15 @@ export interface YearlyMetrics {
   savingsRate: number;
   expensesByCategory: Record<string, { total: number; count: number }>;
   monthlyBreakdown: MonthlyBreakdown[];
+  budgetPeriodsCount: number;
+}
+
+export interface OverallMetrics {
+  totalIncome: number;
+  totalExpenses: number;
+  savings: number;
+  savingsRate: number;
+  expensesByCategory: Record<string, { total: number; count: number }>;
   budgetPeriodsCount: number;
 }
 

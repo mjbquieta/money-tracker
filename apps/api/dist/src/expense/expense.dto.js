@@ -18,6 +18,7 @@ class CreateExpenseDto {
     amount;
     categoryId;
     budgetPeriodId;
+    expenseGroupId;
 }
 exports.CreateExpenseDto = CreateExpenseDto;
 __decorate([
@@ -45,11 +46,17 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateExpenseDto.prototype, "budgetPeriodId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateExpenseDto.prototype, "expenseGroupId", void 0);
 class UpdateExpenseDto {
     name;
     description;
     amount;
     categoryId;
+    expenseGroupId;
 }
 exports.UpdateExpenseDto = UpdateExpenseDto;
 __decorate([
@@ -76,11 +83,17 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], UpdateExpenseDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", Object)
+], UpdateExpenseDto.prototype, "expenseGroupId", void 0);
 class BulkExpenseItemDto {
     name;
     description;
     amount;
     categoryId;
+    expenseGroupId;
 }
 exports.BulkExpenseItemDto = BulkExpenseItemDto;
 __decorate([
@@ -104,6 +117,11 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], BulkExpenseItemDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], BulkExpenseItemDto.prototype, "expenseGroupId", void 0);
 class CreateBulkExpenseDto {
     budgetPeriodId;
     expenses;

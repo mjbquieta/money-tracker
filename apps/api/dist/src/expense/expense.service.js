@@ -38,6 +38,18 @@ let ExpenseService = class ExpenseService {
         if (!category) {
             throw new common_1.NotFoundException('Category not found');
         }
+        if (payload.expenseGroupId) {
+            const expenseGroup = await this.prisma.expenseGroup.findFirst({
+                where: {
+                    id: payload.expenseGroupId,
+                    budgetPeriodId: payload.budgetPeriodId,
+                    deletedAt: null,
+                },
+            });
+            if (!expenseGroup) {
+                throw new common_1.NotFoundException('Expense group not found');
+            }
+        }
         return this.prisma.expense.create({
             data: {
                 name: payload.name,
@@ -45,6 +57,7 @@ let ExpenseService = class ExpenseService {
                 amount: payload.amount,
                 categoryId: payload.categoryId,
                 budgetPeriodId: payload.budgetPeriodId,
+                expenseGroupId: payload.expenseGroupId,
             },
             include: { category: true },
         });
@@ -90,7 +103,7 @@ let ExpenseService = class ExpenseService {
         return expense;
     }
     async update(userId, expenseId, payload) {
-        await this.findOne(userId, expenseId);
+        const expense = await this.findOne(userId, expenseId);
         if (payload.categoryId) {
             const category = await this.prisma.category.findFirst({
                 where: {
@@ -101,6 +114,18 @@ let ExpenseService = class ExpenseService {
             });
             if (!category) {
                 throw new common_1.NotFoundException('Category not found');
+            }
+        }
+        if (payload.expenseGroupId) {
+            const expenseGroup = await this.prisma.expenseGroup.findFirst({
+                where: {
+                    id: payload.expenseGroupId,
+                    budgetPeriodId: expense.budgetPeriodId,
+                    deletedAt: null,
+                },
+            });
+            if (!expenseGroup) {
+                throw new common_1.NotFoundException('Expense group not found');
             }
         }
         return this.prisma.expense.update({
@@ -138,6 +163,21 @@ let ExpenseService = class ExpenseService {
         if (categories.length !== categoryIds.length) {
             throw new common_1.NotFoundException('One or more categories not found');
         }
+        const expenseGroupIds = [
+            ...new Set(payload.expenses.map((e) => e.expenseGroupId).filter(Boolean)),
+        ];
+        if (expenseGroupIds.length > 0) {
+            const expenseGroups = await this.prisma.expenseGroup.findMany({
+                where: {
+                    id: { in: expenseGroupIds },
+                    budgetPeriodId: payload.budgetPeriodId,
+                    deletedAt: null,
+                },
+            });
+            if (expenseGroups.length !== expenseGroupIds.length) {
+                throw new common_1.NotFoundException('One or more expense groups not found');
+            }
+        }
         const expenses = await this.prisma.$transaction(payload.expenses.map((expense) => this.prisma.expense.create({
             data: {
                 name: expense.name,
@@ -145,6 +185,7 @@ let ExpenseService = class ExpenseService {
                 amount: expense.amount,
                 categoryId: expense.categoryId,
                 budgetPeriodId: payload.budgetPeriodId,
+                expenseGroupId: expense.expenseGroupId,
             },
             include: { category: true },
         })));

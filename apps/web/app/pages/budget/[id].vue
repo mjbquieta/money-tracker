@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Expense, BulkExpenseItem } from '~/types';
+import type { Expense, BulkExpenseItem, ExpenseGroup } from '~/types';
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -17,6 +17,13 @@ import {
   CheckCircleIcon,
   QueueListIcon,
   XMarkIcon,
+  FolderIcon,
+  FolderPlusIcon,
+  ArrowsRightLeftIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ChevronDoubleDownIcon,
+  ChevronDoubleUpIcon,
 } from '@heroicons/vue/24/outline';
 
 definePageMeta({
@@ -28,6 +35,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
+const expenseGroupStore = useExpenseGroupStore();
 
 const budgetPeriodId = route.params.id as string;
 
@@ -38,7 +46,12 @@ const showEditPeriodModal = ref(false);
 const showDuplicateModal = ref(false);
 const showNewCategoryInput = ref(false);
 const showBulkNewCategoryInput = ref(false);
+const showGroupModal = ref(false);
+const showMoveExpenseModal = ref(false);
 const editingExpense = ref<Expense | null>(null);
+const editingGroup = ref<ExpenseGroup | null>(null);
+const selectedExpenseForMove = ref<Expense | null>(null);
+const expandedGroups = ref<Set<string>>(new Set());
 const loading = ref(false);
 const categoryLoading = ref(false);
 const error = ref<string | null>(null);
@@ -50,10 +63,17 @@ const expenseForm = reactive({
   description: '',
   amount: 0,
   categoryId: '',
+  expenseGroupId: '',
 });
+
+const showNewGroupInput = ref(false);
+const newGroupName = ref('');
+const groupLoading = ref(false);
 
 const editPeriodForm = reactive({
   name: '',
+  startDate: '',
+  endDate: '',
   income: 0,
 });
 
@@ -64,12 +84,17 @@ const duplicateForm = reactive({
   income: 0,
 });
 
+const groupForm = reactive({
+  name: '',
+  description: '',
+});
+
 const bulkExpenses = ref<BulkExpenseItem[]>([
-  { name: '', description: '', amount: 0, categoryId: '' },
+  { name: '', description: '', amount: 0, categoryId: '', expenseGroupId: '' },
 ]);
 
 function addBulkExpenseRow() {
-  bulkExpenses.value.push({ name: '', description: '', amount: 0, categoryId: '' });
+  bulkExpenses.value.push({ name: '', description: '', amount: 0, categoryId: '', expenseGroupId: '' });
 }
 
 function removeBulkExpenseRow(index: number) {
@@ -78,10 +103,15 @@ function removeBulkExpenseRow(index: number) {
   }
 }
 
+const showBulkNewGroupInput = ref(false);
+const bulkNewGroupName = ref('');
+
 function resetBulkExpenseForm() {
-  bulkExpenses.value = [{ name: '', description: '', amount: 0, categoryId: '' }];
+  bulkExpenses.value = [{ name: '', description: '', amount: 0, categoryId: '', expenseGroupId: '' }];
   showBulkNewCategoryInput.value = false;
   bulkNewCategoryName.value = '';
+  showBulkNewGroupInput.value = false;
+  bulkNewGroupName.value = '';
   error.value = null;
 }
 
@@ -115,6 +145,34 @@ function cancelBulkNewCategory() {
   bulkNewCategoryName.value = '';
 }
 
+async function handleBulkCreateGroup() {
+  if (!bulkNewGroupName.value.trim()) {
+    return;
+  }
+
+  groupLoading.value = true;
+  const result = await expenseGroupStore.createGroup({
+    name: bulkNewGroupName.value.trim(),
+    budgetPeriodId,
+  });
+  groupLoading.value = false;
+
+  if (!result.success && result.error) {
+    error.value = typeof result.error.message === 'string'
+      ? result.error.message
+      : result.error.message[0];
+    return;
+  }
+
+  showBulkNewGroupInput.value = false;
+  bulkNewGroupName.value = '';
+}
+
+function cancelBulkNewGroup() {
+  showBulkNewGroupInput.value = false;
+  bulkNewGroupName.value = '';
+}
+
 async function handleBulkExpenseSubmit() {
   error.value = null;
 
@@ -137,6 +195,7 @@ async function handleBulkExpenseSubmit() {
       description: e.description || undefined,
       amount: e.amount,
       categoryId: e.categoryId,
+      ...(e.expenseGroupId && { expenseGroupId: e.expenseGroupId }),
     })),
   });
 
@@ -155,6 +214,7 @@ async function handleBulkExpenseSubmit() {
   await Promise.all([
     budgetStore.fetchBudgetPeriod(budgetPeriodId),
     budgetStore.fetchBudgetSummary(budgetPeriodId),
+    expenseGroupStore.fetchGroups(budgetPeriodId),
   ]);
 }
 
@@ -166,11 +226,163 @@ const validBulkExpensesCount = computed(() => {
   return bulkExpenses.value.filter((e) => e.name && e.amount > 0 && e.categoryId).length;
 });
 
+// Expense Group Functions
+function resetGroupForm() {
+  groupForm.name = '';
+  groupForm.description = '';
+  editingGroup.value = null;
+  error.value = null;
+}
+
+function openCreateGroupModal() {
+  resetGroupForm();
+  showGroupModal.value = true;
+}
+
+function openEditGroupModal(group: ExpenseGroup) {
+  editingGroup.value = group;
+  groupForm.name = group.name;
+  groupForm.description = group.description || '';
+  error.value = null;
+  showGroupModal.value = true;
+}
+
+function toggleGroupExpanded(groupId: string) {
+  if (expandedGroups.value.has(groupId)) {
+    expandedGroups.value.delete(groupId);
+  } else {
+    expandedGroups.value.add(groupId);
+  }
+}
+
+const allGroupsExpanded = computed(() => {
+  return expenseGroupStore.groups.length > 0 &&
+    expenseGroupStore.groups.every((g) => expandedGroups.value.has(g.id));
+});
+
+function toggleAllGroups() {
+  if (allGroupsExpanded.value) {
+    expandedGroups.value.clear();
+  } else {
+    expenseGroupStore.groups.forEach((g) => expandedGroups.value.add(g.id));
+  }
+}
+
+function openMoveExpenseModal(expense: Expense) {
+  selectedExpenseForMove.value = expense;
+  error.value = null;
+  showMoveExpenseModal.value = true;
+}
+
+async function handleGroupSubmit() {
+  error.value = null;
+
+  if (!groupForm.name.trim()) {
+    error.value = 'Please enter a group name.';
+    return;
+  }
+
+  loading.value = true;
+
+  if (editingGroup.value) {
+    const result = await expenseGroupStore.updateGroup(editingGroup.value.id, {
+      name: groupForm.name,
+      description: groupForm.description || undefined,
+    });
+
+    if (!result.success && result.error) {
+      error.value = typeof result.error.message === 'string'
+        ? result.error.message
+        : result.error.message[0];
+      loading.value = false;
+      return;
+    }
+  } else {
+    const result = await expenseGroupStore.createGroup({
+      name: groupForm.name,
+      description: groupForm.description || undefined,
+      budgetPeriodId,
+    });
+
+    if (!result.success && result.error) {
+      error.value = typeof result.error.message === 'string'
+        ? result.error.message
+        : result.error.message[0];
+      loading.value = false;
+      return;
+    }
+  }
+
+  loading.value = false;
+  showGroupModal.value = false;
+  resetGroupForm();
+}
+
+async function handleDeleteGroup(group: ExpenseGroup) {
+  const result = await expenseGroupStore.deleteGroup(group.id);
+
+  if (result.success) {
+    await Promise.all([
+      budgetStore.fetchBudgetPeriod(budgetPeriodId),
+      expenseGroupStore.fetchGroups(budgetPeriodId),
+    ]);
+  }
+}
+
+async function handleMoveExpense(targetGroupId: string | null) {
+  if (!selectedExpenseForMove.value) return;
+
+  loading.value = true;
+
+  const result = await expenseGroupStore.moveExpenses({
+    expenseIds: [selectedExpenseForMove.value.id],
+    targetGroupId,
+  });
+
+  loading.value = false;
+
+  if (!result.success && result.error) {
+    error.value = typeof result.error.message === 'string'
+      ? result.error.message
+      : result.error.message[0];
+    return;
+  }
+
+  showMoveExpenseModal.value = false;
+  selectedExpenseForMove.value = null;
+
+  await Promise.all([
+    budgetStore.fetchBudgetPeriod(budgetPeriodId),
+    expenseGroupStore.fetchGroups(budgetPeriodId),
+  ]);
+}
+
+async function handleRemoveFromGroup(expense: Expense) {
+  const result = await expenseGroupStore.removeExpenseFromGroup(expense.id);
+
+  if (result.success) {
+    await Promise.all([
+      budgetStore.fetchBudgetPeriod(budgetPeriodId),
+      expenseGroupStore.fetchGroups(budgetPeriodId),
+    ]);
+  }
+}
+
+function getGroupTotal(group: ExpenseGroup) {
+  return group.expenses.reduce((sum, e) => sum + e.amount, 0);
+}
+
+const ungroupedExpenses = computed(() => {
+  if (!period.value) return [];
+  return period.value.expenses.filter((e) => !e.expenseGroupId);
+});
+
 onMounted(async () => {
   await Promise.all([
     budgetStore.fetchBudgetPeriod(budgetPeriodId),
     budgetStore.fetchBudgetSummary(budgetPeriodId),
     expenseStore.fetchCategories(),
+    expenseGroupStore.fetchGroups(budgetPeriodId),
   ]);
 });
 
@@ -217,6 +429,9 @@ function resetExpenseForm() {
   showNewCategoryInput.value = false;
   newCategoryName.value = '';
   expenseForm.categoryId = '';
+  expenseForm.expenseGroupId = '';
+  showNewGroupInput.value = false;
+  newGroupName.value = '';
   editingExpense.value = null;
 }
 
@@ -231,12 +446,17 @@ function openEditExpense(expense: Expense) {
   expenseForm.description = expense.description || '';
   expenseForm.amount = expense.amount;
   expenseForm.categoryId = expense.categoryId;
+  expenseForm.expenseGroupId = expense.expenseGroupId || '';
+  showNewGroupInput.value = false;
+  newGroupName.value = '';
   showExpenseModal.value = true;
 }
 
 function openEditPeriod() {
   if (period.value) {
     editPeriodForm.name = period.value.name || '';
+    editPeriodForm.startDate = period.value.startDate.split('T')[0];
+    editPeriodForm.endDate = period.value.endDate.split('T')[0];
     editPeriodForm.income = period.value.income;
   }
   error.value = null;
@@ -285,6 +505,39 @@ function cancelNewCategory() {
   newCategoryName.value = '';
 }
 
+async function handleCreateGroupInline() {
+  if (!newGroupName.value.trim()) {
+    return;
+  }
+
+  groupLoading.value = true;
+  const result = await expenseGroupStore.createGroup({
+    name: newGroupName.value.trim(),
+    budgetPeriodId,
+  });
+  groupLoading.value = false;
+
+  if (!result.success && result.error) {
+    error.value = typeof result.error.message === 'string'
+      ? result.error.message
+      : result.error.message[0];
+    return;
+  }
+
+  // Select the newly created group
+  if (result.data) {
+    expenseForm.expenseGroupId = result.data.id;
+  }
+
+  showNewGroupInput.value = false;
+  newGroupName.value = '';
+}
+
+function cancelNewGroup() {
+  showNewGroupInput.value = false;
+  newGroupName.value = '';
+}
+
 async function handleExpenseSubmit() {
   error.value = null;
 
@@ -296,11 +549,16 @@ async function handleExpenseSubmit() {
   loading.value = true;
 
   if (editingExpense.value) {
+    // Determine the group change - handle setting to null for removing from group
+    const groupIdToSend = expenseForm.expenseGroupId || null;
+    const hasGroupChanged = groupIdToSend !== (editingExpense.value.expenseGroupId || null);
+
     const result = await expenseStore.updateExpense(editingExpense.value.id, {
       name: expenseForm.name,
       description: expenseForm.description || undefined,
       amount: expenseForm.amount,
       categoryId: expenseForm.categoryId,
+      ...(hasGroupChanged && { expenseGroupId: groupIdToSend }),
     });
 
     if (!result.success && result.error) {
@@ -317,6 +575,7 @@ async function handleExpenseSubmit() {
       amount: expenseForm.amount,
       categoryId: expenseForm.categoryId,
       budgetPeriodId,
+      ...(expenseForm.expenseGroupId && { expenseGroupId: expenseForm.expenseGroupId }),
     });
 
     if (!result.success && result.error) {
@@ -335,11 +594,22 @@ async function handleExpenseSubmit() {
   await Promise.all([
     budgetStore.fetchBudgetPeriod(budgetPeriodId),
     budgetStore.fetchBudgetSummary(budgetPeriodId),
+    expenseGroupStore.fetchGroups(budgetPeriodId),
   ]);
 }
 
 async function handleEditPeriodSubmit() {
   error.value = null;
+
+  if (!editPeriodForm.startDate || !editPeriodForm.endDate) {
+    error.value = 'Please fill in the date range.';
+    return;
+  }
+
+  if (new Date(editPeriodForm.startDate) >= new Date(editPeriodForm.endDate)) {
+    error.value = 'Start date must be before end date.';
+    return;
+  }
 
   if (!editPeriodForm.income || editPeriodForm.income <= 0) {
     error.value = 'Please enter a valid income amount.';
@@ -350,6 +620,8 @@ async function handleEditPeriodSubmit() {
 
   const result = await budgetStore.updateBudgetPeriod(budgetPeriodId, {
     name: editPeriodForm.name || undefined,
+    startDate: editPeriodForm.startDate,
+    endDate: editPeriodForm.endDate,
     income: editPeriodForm.income,
   });
 
@@ -363,7 +635,10 @@ async function handleEditPeriodSubmit() {
   }
 
   showEditPeriodModal.value = false;
-  await budgetStore.fetchBudgetSummary(budgetPeriodId);
+  await Promise.all([
+    budgetStore.fetchBudgetPeriod(budgetPeriodId),
+    budgetStore.fetchBudgetSummary(budgetPeriodId),
+  ]);
 }
 
 async function handleDuplicateSubmit() {
@@ -412,6 +687,7 @@ async function handleDeleteExpense(expense: Expense) {
     await Promise.all([
       budgetStore.fetchBudgetPeriod(budgetPeriodId),
       budgetStore.fetchBudgetSummary(budgetPeriodId),
+      expenseGroupStore.fetchGroups(budgetPeriodId),
     ]);
   }
 }
@@ -623,14 +899,33 @@ function getCategoryStyle(categoryName: string) {
           </h2>
           <div class="flex gap-2">
             <button
-              class="flex items-center gap-2 px-4 py-2.5 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
+              v-if="expenseGroupStore.groups.length > 0"
+              class="flex items-center gap-2 px-3 py-2 text-secondary-600 hover:text-accent-600 hover:bg-accent-50 border border-secondary-200 rounded-lg transition-colors font-medium"
+              :title="allGroupsExpanded ? 'Collapse all groups' : 'Expand all groups'"
+              @click="toggleAllGroups"
+            >
+              <component
+                :is="allGroupsExpanded ? ChevronDoubleUpIcon : ChevronDoubleDownIcon"
+                class="w-5 h-5"
+              />
+              <span class="hidden sm:inline">{{ allGroupsExpanded ? 'Collapse' : 'Expand' }}</span>
+            </button>
+            <button
+              class="flex items-center gap-2 px-3 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 border border-secondary-200 rounded-lg transition-colors font-medium"
+              @click="openCreateGroupModal"
+            >
+              <FolderPlusIcon class="w-5 h-5" />
+              <span class="hidden sm:inline">New Group</span>
+            </button>
+            <button
+              class="flex items-center gap-2 px-3 py-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
               @click="openBulkExpenseModal"
             >
               <QueueListIcon class="w-5 h-5" />
               <span class="hidden sm:inline">Bulk Add</span>
             </button>
             <button
-              class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
+              class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
               @click="openAddExpense"
             >
               <PlusIcon class="w-5 h-5" />
@@ -663,40 +958,152 @@ function getCategoryStyle(categoryName: string) {
           </div>
         </div>
 
-        <!-- Expenses Grid -->
-        <div v-else class="space-y-3">
-          <div
-            v-for="expense in period.expenses"
-            :key="expense.id"
-            class="flex justify-between items-center p-4 bg-secondary-50 rounded-xl hover:bg-secondary-100 transition-colors group"
-          >
-            <div class="flex-1">
-              <div class="flex items-center gap-3">
-                <p class="font-medium text-secondary-900">{{ expense.name }}</p>
-                <span
-                  class="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  :class="[getCategoryStyle(expense.category.name).bg, getCategoryStyle(expense.category.name).text]"
-                >
-                  {{ expense.category.name }}
-                </span>
+        <!-- Expenses Content -->
+        <div v-else class="space-y-4">
+          <!-- Expense Groups -->
+          <div v-if="expenseGroupStore.groups.length > 0" class="space-y-3">
+            <div
+              v-for="group in expenseGroupStore.groups"
+              :key="group.id"
+              class="border border-secondary-200 rounded-xl overflow-hidden"
+            >
+              <!-- Group Header -->
+              <div
+                class="flex items-center justify-between p-4 bg-secondary-50 cursor-pointer hover:bg-secondary-100 transition-colors"
+                @click="toggleGroupExpanded(group.id)"
+              >
+                <div class="flex items-center gap-3">
+                  <component
+                    :is="expandedGroups.has(group.id) ? ChevronDownIcon : ChevronRightIcon"
+                    class="w-5 h-5 text-secondary-400"
+                  />
+                  <FolderIcon class="w-5 h-5 text-accent-500" />
+                  <div>
+                    <p class="font-medium text-secondary-900">{{ group.name }}</p>
+                    <p v-if="group.description" class="text-xs text-secondary-500">{{ group.description }}</p>
+                  </div>
+                  <span class="px-2 py-0.5 bg-secondary-200 text-secondary-600 text-xs rounded-full">
+                    {{ group.expenses.length }} expense{{ group.expenses.length === 1 ? '' : 's' }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <p class="font-bold text-danger-600">{{ formatCurrency(getGroupTotal(group)) }}</p>
+                  <div class="flex gap-1" @click.stop>
+                    <button
+                      class="p-1.5 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                      @click="openEditGroupModal(group)"
+                    >
+                      <PencilIcon class="w-4 h-4" />
+                    </button>
+                    <button
+                      class="p-1.5 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                      @click="handleDeleteGroup(group)"
+                    >
+                      <TrashIcon class="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p v-if="expense.description" class="text-sm text-secondary-500 mt-1">{{ expense.description }}</p>
+
+              <!-- Group Expenses -->
+              <div v-if="expandedGroups.has(group.id)" class="border-t border-secondary-200">
+                <div v-if="group.expenses.length === 0" class="p-4 text-center text-secondary-400 text-sm">
+                  No expenses in this group
+                </div>
+                <div v-else class="divide-y divide-secondary-100">
+                  <div
+                    v-for="expense in group.expenses"
+                    :key="expense.id"
+                    class="flex justify-between items-center p-4 hover:bg-secondary-50 transition-colors group"
+                  >
+                    <div class="flex-1">
+                      <div class="flex items-center gap-3">
+                        <p class="font-medium text-secondary-900">{{ expense.name }}</p>
+                        <span
+                          class="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          :class="[getCategoryStyle(expense.category.name).bg, getCategoryStyle(expense.category.name).text]"
+                        >
+                          {{ expense.category.name }}
+                        </span>
+                      </div>
+                      <p v-if="expense.description" class="text-sm text-secondary-500 mt-1">{{ expense.description }}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                      <p class="font-bold text-danger-600">{{ formatCurrency(expense.amount) }}</p>
+                      <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          class="p-2 text-secondary-400 hover:text-accent-600 hover:bg-accent-50 rounded-lg transition-colors"
+                          title="Move to another group"
+                          @click="openMoveExpenseModal(expense)"
+                        >
+                          <ArrowsRightLeftIcon class="w-4 h-4" />
+                        </button>
+                        <button
+                          class="p-2 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                          @click="openEditExpense(expense)"
+                        >
+                          <PencilIcon class="w-4 h-4" />
+                        </button>
+                        <button
+                          class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                          @click="handleDeleteExpense(expense)"
+                        >
+                          <TrashIcon class="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="flex items-center gap-4">
-              <p class="font-bold text-danger-600 text-lg">{{ formatCurrency(expense.amount) }}</p>
-              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  class="p-2 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                  @click="openEditExpense(expense)"
-                >
-                  <PencilIcon class="w-4 h-4" />
-                </button>
-                <button
-                  class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
-                  @click="handleDeleteExpense(expense)"
-                >
-                  <TrashIcon class="w-4 h-4" />
-                </button>
+          </div>
+
+          <!-- Ungrouped Expenses -->
+          <div v-if="ungroupedExpenses.length > 0" class="space-y-3">
+            <p v-if="expenseGroupStore.groups.length > 0" class="text-sm font-medium text-secondary-500 mt-4">
+              Ungrouped Expenses
+            </p>
+            <div
+              v-for="expense in ungroupedExpenses"
+              :key="expense.id"
+              class="flex justify-between items-center p-4 bg-secondary-50 rounded-xl hover:bg-secondary-100 transition-colors group"
+            >
+              <div class="flex-1">
+                <div class="flex items-center gap-3">
+                  <p class="font-medium text-secondary-900">{{ expense.name }}</p>
+                  <span
+                    class="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    :class="[getCategoryStyle(expense.category.name).bg, getCategoryStyle(expense.category.name).text]"
+                  >
+                    {{ expense.category.name }}
+                  </span>
+                </div>
+                <p v-if="expense.description" class="text-sm text-secondary-500 mt-1">{{ expense.description }}</p>
+              </div>
+              <div class="flex items-center gap-4">
+                <p class="font-bold text-danger-600 text-lg">{{ formatCurrency(expense.amount) }}</p>
+                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    v-if="expenseGroupStore.groups.length > 0"
+                    class="p-2 text-secondary-400 hover:text-accent-600 hover:bg-accent-50 rounded-lg transition-colors"
+                    title="Move to a group"
+                    @click="openMoveExpenseModal(expense)"
+                  >
+                    <ArrowsRightLeftIcon class="w-4 h-4" />
+                  </button>
+                  <button
+                    class="p-2 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                    @click="openEditExpense(expense)"
+                  >
+                    <PencilIcon class="w-4 h-4" />
+                  </button>
+                  <button
+                    class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                    @click="handleDeleteExpense(expense)"
+                  >
+                    <TrashIcon class="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -805,6 +1212,63 @@ function getCategoryStyle(categoryName: string) {
               </button>
             </div>
 
+            <!-- Group Selection (Optional) -->
+            <div class="space-y-2">
+              <UiBaseSelect
+                v-if="!showNewGroupInput"
+                v-model="expenseForm.expenseGroupId"
+                label="Group (Optional)"
+              >
+                <option value="">No group</option>
+                <option
+                  v-for="group in expenseGroupStore.groups"
+                  :key="group.id"
+                  :value="group.id"
+                >
+                  {{ group.name }}
+                </option>
+              </UiBaseSelect>
+
+              <div v-if="showNewGroupInput" class="space-y-2">
+                <label class="text-sm font-medium text-secondary-700">New Group</label>
+                <div class="flex gap-2">
+                  <input
+                    v-model="newGroupName"
+                    type="text"
+                    placeholder="Group name"
+                    class="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
+                    @keyup.enter.prevent="handleCreateGroupInline"
+                  />
+                  <button
+                    type="button"
+                    class="px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50"
+                    :disabled="groupLoading"
+                    @click="handleCreateGroupInline"
+                  >
+                    <span v-if="groupLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+                    <span v-else>Add</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="px-4 py-2 text-secondary-600 hover:bg-secondary-50 border border-secondary-200 rounded-lg transition-colors"
+                    @click="cancelNewGroup"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+
+              <button
+                v-if="!showNewGroupInput"
+                type="button"
+                class="flex items-center gap-1 text-sm text-accent-600 hover:text-accent-700 font-medium"
+                @click="showNewGroupInput = true"
+              >
+                <FolderPlusIcon class="w-4 h-4" />
+                Create new group
+              </button>
+            </div>
+
             <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
               <button
                 type="button"
@@ -854,6 +1318,21 @@ function getCategoryStyle(categoryName: string) {
               label="Name (Optional)"
               placeholder="e.g., January 2026"
             />
+
+            <div class="grid grid-cols-2 gap-4">
+              <UiBaseInput
+                v-model="editPeriodForm.startDate"
+                label="Start Date"
+                type="date"
+                required
+              />
+              <UiBaseInput
+                v-model="editPeriodForm.endDate"
+                label="End Date"
+                type="date"
+                required
+              />
+            </div>
 
             <UiBaseInput
               v-model="editPeriodForm.income"
@@ -1070,6 +1549,46 @@ function getCategoryStyle(categoryName: string) {
               Add custom category
             </button>
 
+            <!-- Group Creation -->
+            <div v-if="showBulkNewGroupInput" class="bg-accent-50 rounded-xl p-4 mb-4">
+              <label class="text-sm font-medium text-secondary-700 mb-2 block">Create New Group</label>
+              <div class="flex gap-2">
+                <input
+                  v-model="bulkNewGroupName"
+                  type="text"
+                  placeholder="Group name"
+                  class="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
+                  @keyup.enter.prevent="handleBulkCreateGroup"
+                />
+                <button
+                  type="button"
+                  class="px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50"
+                  :disabled="groupLoading"
+                  @click="handleBulkCreateGroup"
+                >
+                  <span v-if="groupLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+                  <span v-else>Add</span>
+                </button>
+                <button
+                  type="button"
+                  class="px-4 py-2 text-secondary-600 hover:bg-secondary-100 border border-secondary-200 rounded-lg transition-colors"
+                  @click="cancelBulkNewGroup"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <button
+              v-if="!showBulkNewGroupInput"
+              type="button"
+              class="flex items-center gap-1 text-sm text-accent-600 hover:text-accent-700 font-medium mb-4"
+              @click="showBulkNewGroupInput = true"
+            >
+              <FolderPlusIcon class="w-4 h-4" />
+              Create new group
+            </button>
+
             <!-- Expense Rows -->
             <div class="space-y-3">
               <div
@@ -1089,7 +1608,7 @@ function getCategoryStyle(categoryName: string) {
                   </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                   <input
                     v-model="expense.name"
                     type="text"
@@ -1124,6 +1643,20 @@ function getCategoryStyle(categoryName: string) {
                       :value="category.id"
                     >
                       {{ category.name }}
+                    </option>
+                  </select>
+
+                  <select
+                    v-model="expense.expenseGroupId"
+                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent text-sm bg-white"
+                  >
+                    <option value="">No group</option>
+                    <option
+                      v-for="group in expenseGroupStore.groups"
+                      :key="group.id"
+                      :value="group.id"
+                    >
+                      {{ group.name }}
                     </option>
                   </select>
                 </div>
@@ -1173,6 +1706,141 @@ function getCategoryStyle(categoryName: string) {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Create/Edit Group Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showGroupModal"
+        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showGroupModal = false"
+      >
+        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-accent-50 rounded-xl flex items-center justify-center">
+              <FolderIcon class="w-6 h-6 text-accent-600" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900">
+                {{ editingGroup ? 'Edit Group' : 'Create Group' }}
+              </h2>
+              <p class="text-sm text-secondary-500">
+                {{ editingGroup ? 'Update group details' : 'Organize your expenses into groups' }}
+              </p>
+            </div>
+          </div>
+
+          <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
+
+          <form @submit.prevent="handleGroupSubmit" class="space-y-5">
+            <UiBaseInput
+              v-model="groupForm.name"
+              label="Group Name"
+              placeholder="e.g., Monthly Bills, Groceries"
+              required
+            />
+
+            <UiBaseInput
+              v-model="groupForm.description"
+              label="Description (Optional)"
+              placeholder="Brief description of this group"
+            />
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+              <button
+                type="button"
+                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                @click="showGroupModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium disabled:opacity-50"
+                :disabled="loading"
+              >
+                <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <CheckCircleIcon v-else class="w-5 h-5" />
+                {{ editingGroup ? 'Update' : 'Create Group' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Move Expense Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showMoveExpenseModal"
+        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showMoveExpenseModal = false"
+      >
+        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-accent-50 rounded-xl flex items-center justify-center">
+              <ArrowsRightLeftIcon class="w-6 h-6 text-accent-600" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900">Move Expense</h2>
+              <p class="text-sm text-secondary-500">
+                Move "{{ selectedExpenseForMove?.name }}" to a group
+              </p>
+            </div>
+          </div>
+
+          <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
+
+          <div class="space-y-2">
+            <!-- Remove from group option -->
+            <button
+              v-if="selectedExpenseForMove?.expenseGroupId"
+              type="button"
+              class="w-full flex items-center gap-3 p-4 border border-secondary-200 rounded-xl hover:bg-secondary-50 transition-colors text-left"
+              @click="handleMoveExpense(null)"
+            >
+              <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center">
+                <XMarkIcon class="w-5 h-5 text-secondary-500" />
+              </div>
+              <div>
+                <p class="font-medium text-secondary-900">Remove from group</p>
+                <p class="text-sm text-secondary-500">Move to ungrouped expenses</p>
+              </div>
+            </button>
+
+            <!-- Group options -->
+            <button
+              v-for="group in expenseGroupStore.groups.filter(g => g.id !== selectedExpenseForMove?.expenseGroupId)"
+              :key="group.id"
+              type="button"
+              class="w-full flex items-center gap-3 p-4 border border-secondary-200 rounded-xl hover:bg-accent-50 hover:border-accent-300 transition-colors text-left"
+              @click="handleMoveExpense(group.id)"
+            >
+              <div class="w-10 h-10 bg-accent-50 rounded-lg flex items-center justify-center">
+                <FolderIcon class="w-5 h-5 text-accent-500" />
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-secondary-900">{{ group.name }}</p>
+                <p class="text-sm text-secondary-500">{{ group.expenses.length }} expense{{ group.expenses.length === 1 ? '' : 's' }}</p>
+              </div>
+            </button>
+
+            <div v-if="expenseGroupStore.groups.length === 0" class="text-center py-6 text-secondary-500">
+              No groups available. Create a group first.
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4 mt-4 border-t border-secondary-100">
+            <button
+              type="button"
+              class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+              @click="showMoveExpenseModal = false"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </Teleport>

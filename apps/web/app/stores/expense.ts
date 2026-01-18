@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Expense, CreateExpensePayload, CreateBulkExpensePayload, Category, CreateCategoryPayload } from '~/types';
+import type { Expense, CreateExpensePayload, UpdateExpensePayload, CreateBulkExpensePayload, Category, CreateCategoryPayload } from '~/types';
 
 export const useExpenseStore = defineStore('expense', () => {
   const categories = ref<Category[]>([]);
@@ -52,7 +52,7 @@ export const useExpenseStore = defineStore('expense', () => {
     return { success: true, error: null, data };
   }
 
-  async function updateExpense(id: string, payload: Partial<CreateExpensePayload>) {
+  async function updateExpense(id: string, payload: UpdateExpensePayload) {
     const { data, error } = await api.patch<Expense>(`/api/v1/expenses/${id}`, payload);
 
     if (error) {
