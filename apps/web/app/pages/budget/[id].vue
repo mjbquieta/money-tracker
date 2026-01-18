@@ -208,14 +208,37 @@ async function handleBulkExpenseSubmit() {
     return;
   }
 
+  // Update local state
+  if (result.data && budgetStore.currentPeriod) {
+    // Add all new expenses to the period
+    budgetStore.currentPeriod.expenses.unshift(...result.data);
+
+    // Update summary
+    if (budgetStore.currentSummary) {
+      for (const expense of result.data) {
+        budgetStore.currentSummary.totalExpenses += expense.amount;
+        budgetStore.currentSummary.remaining -= expense.amount;
+
+        const categoryName = expense.category.name;
+        if (!budgetStore.currentSummary.expensesByCategory[categoryName]) {
+          budgetStore.currentSummary.expensesByCategory[categoryName] = { total: 0, count: 0 };
+        }
+        budgetStore.currentSummary.expensesByCategory[categoryName].total += expense.amount;
+        budgetStore.currentSummary.expensesByCategory[categoryName].count += 1;
+
+        // Add to expense group if specified
+        if (expense.expenseGroupId) {
+          const group = expenseGroupStore.groups.find((g) => g.id === expense.expenseGroupId);
+          if (group) {
+            group.expenses.push(expense);
+          }
+        }
+      }
+    }
+  }
+
   showBulkExpenseModal.value = false;
   resetBulkExpenseForm();
-
-  await Promise.all([
-    budgetStore.fetchBudgetPeriod(budgetPeriodId),
-    budgetStore.fetchBudgetSummary(budgetPeriodId),
-    expenseGroupStore.fetchGroups(budgetPeriodId),
-  ]);
 }
 
 const bulkExpensesTotal = computed(() => {
@@ -552,6 +575,9 @@ async function handleExpenseSubmit() {
     // Determine the group change - handle setting to null for removing from group
     const groupIdToSend = expenseForm.expenseGroupId || null;
     const hasGroupChanged = groupIdToSend !== (editingExpense.value.expenseGroupId || null);
+    const oldAmount = editingExpense.value.amount;
+    const oldCategoryName = editingExpense.value.category.name;
+    const oldGroupId = editingExpense.value.expenseGroupId;
 
     const result = await expenseStore.updateExpense(editingExpense.value.id, {
       name: expenseForm.name,
@@ -567,6 +593,70 @@ async function handleExpenseSubmit() {
         : result.error.message[0];
       loading.value = false;
       return;
+    }
+
+    // Update local state
+    if (result.data && budgetStore.currentPeriod) {
+      const index = budgetStore.currentPeriod.expenses.findIndex((e) => e.id === result.data!.id);
+      if (index !== -1) {
+        budgetStore.currentPeriod.expenses[index] = result.data;
+      }
+
+      // Update summary
+      if (budgetStore.currentSummary) {
+        const amountDiff = expenseForm.amount - oldAmount;
+        budgetStore.currentSummary.totalExpenses += amountDiff;
+        budgetStore.currentSummary.remaining -= amountDiff;
+
+        // Update category totals if category changed
+        const newCategoryName = result.data.category.name;
+        if (oldCategoryName !== newCategoryName) {
+          // Remove from old category
+          if (budgetStore.currentSummary.expensesByCategory[oldCategoryName]) {
+            budgetStore.currentSummary.expensesByCategory[oldCategoryName].total -= oldAmount;
+            budgetStore.currentSummary.expensesByCategory[oldCategoryName].count -= 1;
+            if (budgetStore.currentSummary.expensesByCategory[oldCategoryName].count === 0) {
+              delete budgetStore.currentSummary.expensesByCategory[oldCategoryName];
+            }
+          }
+          // Add to new category
+          if (!budgetStore.currentSummary.expensesByCategory[newCategoryName]) {
+            budgetStore.currentSummary.expensesByCategory[newCategoryName] = { total: 0, count: 0 };
+          }
+          budgetStore.currentSummary.expensesByCategory[newCategoryName].total += expenseForm.amount;
+          budgetStore.currentSummary.expensesByCategory[newCategoryName].count += 1;
+        } else {
+          // Same category, just update amount
+          budgetStore.currentSummary.expensesByCategory[oldCategoryName].total += amountDiff;
+        }
+      }
+
+      // Update expense groups if group changed
+      if (hasGroupChanged) {
+        // Remove from old group
+        if (oldGroupId) {
+          const oldGroup = expenseGroupStore.groups.find((g) => g.id === oldGroupId);
+          if (oldGroup) {
+            oldGroup.expenses = oldGroup.expenses.filter((e) => e.id !== result.data!.id);
+          }
+        }
+        // Add to new group
+        if (groupIdToSend) {
+          const newGroup = expenseGroupStore.groups.find((g) => g.id === groupIdToSend);
+          if (newGroup) {
+            newGroup.expenses.push(result.data);
+          }
+        }
+      } else if (oldGroupId) {
+        // Same group, update the expense in place
+        const group = expenseGroupStore.groups.find((g) => g.id === oldGroupId);
+        if (group) {
+          const groupIndex = group.expenses.findIndex((e) => e.id === result.data!.id);
+          if (groupIndex !== -1) {
+            group.expenses[groupIndex] = result.data;
+          }
+        }
+      }
     }
   } else {
     const result = await expenseStore.createExpense({
@@ -585,17 +675,37 @@ async function handleExpenseSubmit() {
       loading.value = false;
       return;
     }
+
+    // Update local state
+    if (result.data && budgetStore.currentPeriod) {
+      budgetStore.currentPeriod.expenses.unshift(result.data);
+
+      // Update summary
+      if (budgetStore.currentSummary) {
+        budgetStore.currentSummary.totalExpenses += result.data.amount;
+        budgetStore.currentSummary.remaining -= result.data.amount;
+
+        const categoryName = result.data.category.name;
+        if (!budgetStore.currentSummary.expensesByCategory[categoryName]) {
+          budgetStore.currentSummary.expensesByCategory[categoryName] = { total: 0, count: 0 };
+        }
+        budgetStore.currentSummary.expensesByCategory[categoryName].total += result.data.amount;
+        budgetStore.currentSummary.expensesByCategory[categoryName].count += 1;
+      }
+
+      // Add to expense group if specified
+      if (expenseForm.expenseGroupId) {
+        const group = expenseGroupStore.groups.find((g) => g.id === expenseForm.expenseGroupId);
+        if (group) {
+          group.expenses.push(result.data);
+        }
+      }
+    }
   }
 
   loading.value = false;
   showExpenseModal.value = false;
   resetExpenseForm();
-
-  await Promise.all([
-    budgetStore.fetchBudgetPeriod(budgetPeriodId),
-    budgetStore.fetchBudgetSummary(budgetPeriodId),
-    expenseGroupStore.fetchGroups(budgetPeriodId),
-  ]);
 }
 
 async function handleEditPeriodSubmit() {
@@ -634,11 +744,13 @@ async function handleEditPeriodSubmit() {
     return;
   }
 
+  // Update summary - the store already updates currentPeriod
+  if (budgetStore.currentSummary) {
+    budgetStore.currentSummary.income = editPeriodForm.income;
+    budgetStore.currentSummary.remaining = editPeriodForm.income - budgetStore.currentSummary.totalExpenses;
+  }
+
   showEditPeriodModal.value = false;
-  await Promise.all([
-    budgetStore.fetchBudgetPeriod(budgetPeriodId),
-    budgetStore.fetchBudgetSummary(budgetPeriodId),
-  ]);
 }
 
 async function handleDuplicateSubmit() {
@@ -683,12 +795,34 @@ async function handleDuplicateSubmit() {
 async function handleDeleteExpense(expense: Expense) {
   const result = await expenseStore.deleteExpense(expense.id);
 
-  if (result.success) {
-    await Promise.all([
-      budgetStore.fetchBudgetPeriod(budgetPeriodId),
-      budgetStore.fetchBudgetSummary(budgetPeriodId),
-      expenseGroupStore.fetchGroups(budgetPeriodId),
-    ]);
+  if (result.success && budgetStore.currentPeriod) {
+    // Update local state instead of refetching
+    budgetStore.currentPeriod.expenses = budgetStore.currentPeriod.expenses.filter(
+      (e) => e.id !== expense.id
+    );
+
+    // Update summary
+    if (budgetStore.currentSummary) {
+      budgetStore.currentSummary.totalExpenses -= expense.amount;
+      budgetStore.currentSummary.remaining += expense.amount;
+
+      const categoryName = expense.category.name;
+      if (budgetStore.currentSummary.expensesByCategory[categoryName]) {
+        budgetStore.currentSummary.expensesByCategory[categoryName].total -= expense.amount;
+        budgetStore.currentSummary.expensesByCategory[categoryName].count -= 1;
+        if (budgetStore.currentSummary.expensesByCategory[categoryName].count === 0) {
+          delete budgetStore.currentSummary.expensesByCategory[categoryName];
+        }
+      }
+    }
+
+    // Update expense group if the expense was in a group
+    if (expense.expenseGroupId) {
+      const group = expenseGroupStore.groups.find((g) => g.id === expense.expenseGroupId);
+      if (group) {
+        group.expenses = group.expenses.filter((e) => e.id !== expense.id);
+      }
+    }
   }
 }
 
