@@ -37,7 +37,6 @@ class CreateBudgetPeriodDto {
     name;
     startDate;
     endDate;
-    income;
     incomes;
 }
 exports.CreateBudgetPeriodDto = CreateBudgetPeriodDto;
@@ -59,12 +58,6 @@ __decorate([
 ], CreateBudgetPeriodDto.prototype, "endDate", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsPositive)(),
-    __metadata("design:type", Number)
-], CreateBudgetPeriodDto.prototype, "income", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ArrayMinSize)(1),
     (0, class_validator_1.ValidateNested)({ each: true }),
@@ -75,7 +68,6 @@ class UpdateBudgetPeriodDto {
     name;
     startDate;
     endDate;
-    income;
 }
 exports.UpdateBudgetPeriodDto = UpdateBudgetPeriodDto;
 __decorate([
@@ -96,17 +88,10 @@ __decorate([
     (0, class_transformer_1.Type)(() => Date),
     __metadata("design:type", Date)
 ], UpdateBudgetPeriodDto.prototype, "endDate", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsPositive)(),
-    __metadata("design:type", Number)
-], UpdateBudgetPeriodDto.prototype, "income", void 0);
 class DuplicateBudgetPeriodDto {
     name;
     startDate;
     endDate;
-    income;
 }
 exports.DuplicateBudgetPeriodDto = DuplicateBudgetPeriodDto;
 __decorate([
@@ -125,10 +110,4 @@ __decorate([
     (0, class_transformer_1.Type)(() => Date),
     __metadata("design:type", Date)
 ], DuplicateBudgetPeriodDto.prototype, "endDate", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsPositive)(),
-    __metadata("design:type", Number)
-], DuplicateBudgetPeriodDto.prototype, "income", void 0);
 //# sourceMappingURL=budget-period.dto.js.map

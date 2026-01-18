@@ -96,7 +96,7 @@ export const useBudgetStore = defineStore('budget', () => {
 
   async function duplicateBudgetPeriod(
     id: string,
-    payload: { name?: string; startDate: string; endDate: string; income?: number }
+    payload: { name?: string; startDate: string; endDate: string }
   ) {
     const { data, error } = await api.post<BudgetPeriod>(`/api/v1/budget-periods/${id}/duplicate`, payload);
 
@@ -156,7 +156,6 @@ export const useBudgetStore = defineStore('budget', () => {
 
     if (data && currentPeriod.value?.id === payload.budgetPeriodId) {
       currentPeriod.value.incomes.push(data);
-      currentPeriod.value.income += data.amount;
     }
     return { success: true, error: null, data };
   }
@@ -171,9 +170,7 @@ export const useBudgetStore = defineStore('budget', () => {
     if (data && currentPeriod.value) {
       const index = currentPeriod.value.incomes.findIndex((i) => i.id === id);
       if (index !== -1) {
-        const oldAmount = currentPeriod.value.incomes[index].amount;
         currentPeriod.value.incomes[index] = data;
-        currentPeriod.value.income = currentPeriod.value.income - oldAmount + data.amount;
       }
     }
     return { success: true, error: null, data };
@@ -187,11 +184,7 @@ export const useBudgetStore = defineStore('budget', () => {
     }
 
     if (currentPeriod.value) {
-      const income = currentPeriod.value.incomes.find((i) => i.id === id);
-      if (income) {
-        currentPeriod.value.income -= income.amount;
-        currentPeriod.value.incomes = currentPeriod.value.incomes.filter((i) => i.id !== id);
-      }
+      currentPeriod.value.incomes = currentPeriod.value.incomes.filter((i) => i.id !== id);
     }
     return { success: true, error: null };
   }

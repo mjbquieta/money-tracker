@@ -11,6 +11,10 @@ import {
   HomeIcon,
 } from "@heroicons/vue/24/outline";
 
+definePageMeta({
+  layout: false,
+});
+
 const authStore = useAuthStore();
 const mounted = ref(false);
 
@@ -73,8 +77,11 @@ const colorClasses = {
 
 <template>
   <div>
+    <!-- Navbar -->
+    <LayoutPublicNavbar transparent />
+
     <!-- Hero Section -->
-    <section class="relative overflow-hidden">
+    <section class="relative overflow-hidden pt-16 sm:pt-20">
       <!-- Background decoration - hidden on mobile for performance -->
       <div
         class="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50/30"
@@ -394,5 +401,38 @@ const colorClasses = {
         </div>
       </div>
     </section>
+
+    <!-- Footer -->
+    <footer class="py-8 sm:py-12 bg-white border-t border-secondary-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+          <div class="flex items-center gap-3">
+            <img
+              src="/prospera-icon.png"
+              alt="Prospera"
+              class="w-8 h-8"
+            />
+            <span class="font-semibold text-secondary-700">Prospera</span>
+          </div>
+          <div class="flex items-center gap-6 sm:gap-8">
+            <NuxtLink
+              to="/feedback"
+              class="text-secondary-500 hover:text-primary-600 transition-colors font-medium"
+            >
+              Request Improvements
+            </NuxtLink>
+            <NuxtLink
+              to="/about"
+              class="text-secondary-500 hover:text-primary-600 transition-colors font-medium"
+            >
+              About & Donate
+            </NuxtLink>
+          </div>
+          <p class="text-sm text-secondary-400 flex items-center gap-1">
+            Made with <HeartIcon class="w-4 h-4 text-danger-500" /> for everyone
+          </p>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>

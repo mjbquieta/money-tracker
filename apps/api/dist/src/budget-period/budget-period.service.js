@@ -12,6 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BudgetPeriodService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+function computeIncome(budgetPeriod) {
+    return budgetPeriod.incomes.reduce((sum, inc) => sum + inc.amount, 0);
+}
 let BudgetPeriodService = class BudgetPeriodService {
     prisma;
     constructor(prisma) {
@@ -23,10 +26,6 @@ let BudgetPeriodService = class BudgetPeriodService {
         if (startDate >= endDate) {
             throw new common_1.BadRequestException('Start date must be before end date');
         }
-        let totalIncome = payload.income ?? 0;
-        if (payload.incomes && payload.incomes.length > 0) {
-            totalIncome = payload.incomes.reduce((sum, inc) => sum + inc.amount, 0);
-        }
         return this.prisma.$transaction(async (tx) => {
             const budgetPeriod = await tx.budgetPeriod.create({
                 data: {
@@ -34,7 +33,6 @@ let BudgetPeriodService = class BudgetPeriodService {
                     name: payload.name,
                     startDate,
                     endDate,
-                    income: totalIncome,
                 },
             });
             if (payload.incomes && payload.incomes.length > 0) {
@@ -112,7 +110,7 @@ let BudgetPeriodService = class BudgetPeriodService {
         return this.prisma.budgetPeriod.update({
             where: { id: budgetPeriodId },
             data: {
-                ...payload,
+                name: payload.name,
                 startDate,
                 endDate,
             },
@@ -148,20 +146,12 @@ let BudgetPeriodService = class BudgetPeriodService {
             throw new common_1.BadRequestException('Start date must be before end date');
         }
         return this.prisma.$transaction(async (tx) => {
-            const originalWithIncomes = original;
-            let totalIncome = payload.income ?? original.income;
-            if (!payload.income &&
-                originalWithIncomes.incomes &&
-                originalWithIncomes.incomes.length > 0) {
-                totalIncome = originalWithIncomes.incomes.reduce((sum, inc) => sum + inc.amount, 0);
-            }
             const newBudgetPeriod = await tx.budgetPeriod.create({
                 data: {
                     userId,
                     name: payload.name ?? original.name,
                     startDate,
                     endDate,
-                    income: totalIncome,
                 },
             });
             const groupIdMapping = {};
@@ -189,9 +179,9 @@ let BudgetPeriodService = class BudgetPeriodService {
                     })),
                 });
             }
-            if (originalWithIncomes.incomes && originalWithIncomes.incomes.length > 0) {
+            if (original.incomes && original.incomes.length > 0) {
                 await tx.income.createMany({
-                    data: originalWithIncomes.incomes.map((income) => ({
+                    data: original.incomes.map((income) => ({
                         name: income.name,
                         description: income.description,
                         amount: income.amount,
@@ -214,6 +204,7 @@ let BudgetPeriodService = class BudgetPeriodService {
     }
     async getSummary(userId, budgetPeriodId) {
         const budgetPeriod = await this.findOne(userId, budgetPeriodId);
+        const totalIncome = computeIncome(budgetPeriod);
         const totalExpenses = budgetPeriod.expenses.reduce((sum, expense) => sum + expense.amount, 0);
         const expensesByCategory = budgetPeriod.expenses.reduce((acc, expense) => {
             const categoryName = expense.category.name;
@@ -225,9 +216,9 @@ let BudgetPeriodService = class BudgetPeriodService {
             return acc;
         }, {});
         return {
-            income: budgetPeriod.income,
+            income: totalIncome,
             totalExpenses,
-            remaining: budgetPeriod.income - totalExpenses,
+            remaining: totalIncome - totalExpenses,
             expensesByCategory,
         };
     }
@@ -258,10 +249,13 @@ let BudgetPeriodService = class BudgetPeriodService {
                     where: { deletedAt: null },
                     include: { category: true },
                 },
+                incomes: {
+                    where: { deletedAt: null },
+                },
             },
             orderBy: { startDate: 'asc' },
         });
-        const totalIncome = budgetPeriods.reduce((sum, bp) => sum + bp.income, 0);
+        const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
         const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
         const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
         const expensesByCategory = allExpenses.reduce((acc, expense) => {
@@ -281,6 +275,7 @@ let BudgetPeriodService = class BudgetPeriodService {
         for (const bp of budgetPeriods) {
             const bpStart = bp.startDate;
             const bpEnd = bp.endDate;
+            const bpIncome = computeIncome(bp);
             const bpMonths = [];
             for (let m = 0; m < 12; m++) {
                 const monthStart = new Date(year, m, 1);
@@ -290,7 +285,7 @@ let BudgetPeriodService = class BudgetPeriodService {
                 }
             }
             if (bpMonths.length > 0) {
-                const incomePerMonth = bp.income / bpMonths.length;
+                const incomePerMonth = bpIncome / bpMonths.length;
                 for (const m of bpMonths) {
                     monthlyBreakdown[m].income += incomePerMonth;
                 }
@@ -324,10 +319,13 @@ let BudgetPeriodService = class BudgetPeriodService {
                     where: { deletedAt: null },
                     include: { category: true },
                 },
+                incomes: {
+                    where: { deletedAt: null },
+                },
             },
             orderBy: { startDate: 'asc' },
         });
-        const totalIncome = budgetPeriods.reduce((sum, bp) => sum + bp.income, 0);
+        const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
         const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
         const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
         const expensesByCategory = allExpenses.reduce((acc, expense) => {
@@ -375,10 +373,13 @@ let BudgetPeriodService = class BudgetPeriodService {
                     where: { deletedAt: null },
                     include: { category: true },
                 },
+                incomes: {
+                    where: { deletedAt: null },
+                },
             },
             orderBy: { startDate: 'asc' },
         });
-        const totalIncome = budgetPeriods.reduce((sum, bp) => sum + bp.income, 0);
+        const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
         const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
         const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
         const expensesByCategory = allExpenses.reduce((acc, expense) => {
@@ -402,6 +403,7 @@ let BudgetPeriodService = class BudgetPeriodService {
             for (const bp of budgetPeriods) {
                 const bpStart = bp.startDate;
                 const bpEnd = bp.endDate;
+                const bpIncome = computeIncome(bp);
                 const bpMonths = [];
                 for (let m = 0; m < 12; m++) {
                     const monthStart = new Date(year, m, 1);
@@ -411,7 +413,7 @@ let BudgetPeriodService = class BudgetPeriodService {
                     }
                 }
                 if (bpMonths.length > 0) {
-                    const incomePerMonth = bp.income / bpMonths.length;
+                    const incomePerMonth = bpIncome / bpMonths.length;
                     for (const m of bpMonths) {
                         monthlyBreakdown[m].income += incomePerMonth;
                         yearIncome += incomePerMonth;

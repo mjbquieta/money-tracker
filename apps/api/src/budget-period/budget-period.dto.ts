@@ -41,11 +41,6 @@ class CreateBudgetPeriodDto {
   endDate: Date;
 
   @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  income?: number; // Kept for backwards compatibility
-
-  @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
@@ -68,11 +63,6 @@ class UpdateBudgetPeriodDto {
   @IsDate()
   @Type(() => Date)
   endDate?: Date;
-
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  income?: number;
 }
 
 class DuplicateBudgetPeriodDto {
@@ -88,11 +78,6 @@ class DuplicateBudgetPeriodDto {
   @IsDate()
   @Type(() => Date)
   endDate: Date;
-
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  income?: number;
 }
 
 export {

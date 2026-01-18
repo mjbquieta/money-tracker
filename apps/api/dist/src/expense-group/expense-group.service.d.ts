@@ -74,7 +74,6 @@ export declare class ExpenseGroupService {
     })[]>;
     findOne(userId: UUID, groupId: UUID): Promise<{
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -162,7 +161,6 @@ export declare class ExpenseGroupService {
     }>;
     addExpenses(userId: UUID, groupId: UUID, payload: AddExpensesToGroupDto): Promise<{
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;

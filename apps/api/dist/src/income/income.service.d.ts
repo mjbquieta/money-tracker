@@ -26,7 +26,6 @@ export declare class IncomeService {
     }[]>;
     findOne(userId: UUID, incomeId: UUID): Promise<{
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -59,5 +58,4 @@ export declare class IncomeService {
     delete(userId: UUID, incomeId: UUID): Promise<{
         success: boolean;
     }>;
-    private updateBudgetPeriodIncome;
 }

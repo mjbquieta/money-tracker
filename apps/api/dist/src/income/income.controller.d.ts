@@ -26,7 +26,6 @@ export declare class IncomeController {
     }[]>;
     findOne(userId: UUID, id: UUID): Promise<{
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;

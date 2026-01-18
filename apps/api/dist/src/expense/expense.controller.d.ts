@@ -6,7 +6,6 @@ export declare class ExpenseController {
     constructor(expenseService: ExpenseService);
     findAll(userId: UUID, budgetPeriodId?: UUID): Promise<({
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -41,7 +40,6 @@ export declare class ExpenseController {
     })[]>;
     findOne(userId: UUID, id: UUID): Promise<{
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;

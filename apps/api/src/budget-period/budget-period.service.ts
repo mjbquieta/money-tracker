@@ -11,6 +11,16 @@ import {
   UpdateBudgetPeriodDto,
 } from './budget-period.dto';
 
+// Helper type for budget period with incomes
+type BudgetPeriodWithIncomes = {
+  incomes: { amount: number }[];
+};
+
+// Helper function to compute total income from incomes array
+function computeIncome(budgetPeriod: BudgetPeriodWithIncomes): number {
+  return budgetPeriod.incomes.reduce((sum, inc) => sum + inc.amount, 0);
+}
+
 @Injectable()
 export class BudgetPeriodService {
   constructor(private readonly prisma: PrismaService) {}
@@ -23,12 +33,6 @@ export class BudgetPeriodService {
       throw new BadRequestException('Start date must be before end date');
     }
 
-    // Calculate total income from incomes array or use legacy income field
-    let totalIncome = payload.income ?? 0;
-    if (payload.incomes && payload.incomes.length > 0) {
-      totalIncome = payload.incomes.reduce((sum, inc) => sum + inc.amount, 0);
-    }
-
     return this.prisma.$transaction(async (tx) => {
       const budgetPeriod = await tx.budgetPeriod.create({
         data: {
@@ -36,7 +40,6 @@ export class BudgetPeriodService {
           name: payload.name,
           startDate,
           endDate,
-          income: totalIncome,
         },
       });
 
@@ -125,7 +128,7 @@ export class BudgetPeriodService {
     return this.prisma.budgetPeriod.update({
       where: { id: budgetPeriodId },
       data: {
-        ...payload,
+        name: payload.name,
         startDate,
         endDate,
       },
@@ -169,30 +172,12 @@ export class BudgetPeriodService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      // Calculate income from duplicated incomes if not explicitly provided
-      // original is returned from findOne which includes incomes
-      const originalWithIncomes = original as typeof original & {
-        incomes: { name: string; description: string | null; amount: number }[];
-      };
-      let totalIncome = payload.income ?? original.income;
-      if (
-        !payload.income &&
-        originalWithIncomes.incomes &&
-        originalWithIncomes.incomes.length > 0
-      ) {
-        totalIncome = originalWithIncomes.incomes.reduce(
-          (sum, inc) => sum + inc.amount,
-          0,
-        );
-      }
-
       const newBudgetPeriod = await tx.budgetPeriod.create({
         data: {
           userId,
           name: payload.name ?? original.name,
           startDate,
           endDate,
-          income: totalIncome,
         },
       });
 
@@ -228,9 +213,9 @@ export class BudgetPeriodService {
       }
 
       // Duplicate incomes
-      if (originalWithIncomes.incomes && originalWithIncomes.incomes.length > 0) {
+      if (original.incomes && original.incomes.length > 0) {
         await tx.income.createMany({
-          data: originalWithIncomes.incomes.map((income) => ({
+          data: original.incomes.map((income) => ({
             name: income.name,
             description: income.description,
             amount: income.amount,
@@ -256,6 +241,7 @@ export class BudgetPeriodService {
   async getSummary(userId: UUID, budgetPeriodId: UUID) {
     const budgetPeriod = await this.findOne(userId, budgetPeriodId);
 
+    const totalIncome = computeIncome(budgetPeriod);
     const totalExpenses = budgetPeriod.expenses.reduce(
       (sum, expense) => sum + expense.amount,
       0,
@@ -275,9 +261,9 @@ export class BudgetPeriodService {
     );
 
     return {
-      income: budgetPeriod.income,
+      income: totalIncome,
       totalExpenses,
-      remaining: budgetPeriod.income - totalExpenses,
+      remaining: totalIncome - totalExpenses,
       expensesByCategory,
     };
   }
@@ -310,11 +296,14 @@ export class BudgetPeriodService {
           where: { deletedAt: null },
           include: { category: true },
         },
+        incomes: {
+          where: { deletedAt: null },
+        },
       },
       orderBy: { startDate: 'asc' },
     });
 
-    const totalIncome = budgetPeriods.reduce((sum, bp) => sum + bp.income, 0);
+    const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
     const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
     const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
@@ -340,6 +329,7 @@ export class BudgetPeriodService {
     for (const bp of budgetPeriods) {
       const bpStart = bp.startDate;
       const bpEnd = bp.endDate;
+      const bpIncome = computeIncome(bp);
       const bpMonths: number[] = [];
 
       for (let m = 0; m < 12; m++) {
@@ -351,7 +341,7 @@ export class BudgetPeriodService {
       }
 
       if (bpMonths.length > 0) {
-        const incomePerMonth = bp.income / bpMonths.length;
+        const incomePerMonth = bpIncome / bpMonths.length;
         for (const m of bpMonths) {
           monthlyBreakdown[m].income += incomePerMonth;
         }
@@ -388,11 +378,14 @@ export class BudgetPeriodService {
           where: { deletedAt: null },
           include: { category: true },
         },
+        incomes: {
+          where: { deletedAt: null },
+        },
       },
       orderBy: { startDate: 'asc' },
     });
 
-    const totalIncome = budgetPeriods.reduce((sum, bp) => sum + bp.income, 0);
+    const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
     const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
     const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
@@ -447,11 +440,14 @@ export class BudgetPeriodService {
           where: { deletedAt: null },
           include: { category: true },
         },
+        incomes: {
+          where: { deletedAt: null },
+        },
       },
       orderBy: { startDate: 'asc' },
     });
 
-    const totalIncome = budgetPeriods.reduce((sum, bp) => sum + bp.income, 0);
+    const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
     const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
     const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
@@ -490,6 +486,7 @@ export class BudgetPeriodService {
       for (const bp of budgetPeriods) {
         const bpStart = bp.startDate;
         const bpEnd = bp.endDate;
+        const bpIncome = computeIncome(bp);
         const bpMonths: number[] = [];
 
         for (let m = 0; m < 12; m++) {
@@ -501,7 +498,7 @@ export class BudgetPeriodService {
         }
 
         if (bpMonths.length > 0) {
-          const incomePerMonth = bp.income / bpMonths.length;
+          const incomePerMonth = bpIncome / bpMonths.length;
           for (const m of bpMonths) {
             monthlyBreakdown[m].income += incomePerMonth;
             yearIncome += incomePerMonth;

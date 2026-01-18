@@ -30,7 +30,6 @@ export declare class ExpenseService {
     }>;
     findAll(userId: UUID, budgetPeriodId?: UUID): Promise<({
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -65,7 +64,6 @@ export declare class ExpenseService {
     })[]>;
     findOne(userId: UUID, expenseId: UUID): Promise<{
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;

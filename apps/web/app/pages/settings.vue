@@ -32,6 +32,11 @@ const success = ref<string | null>(null);
 const newCategoryName = ref('');
 const showNewCategoryInput = ref(false);
 
+// Delete category confirmation
+const showDeleteCategoryConfirm = ref(false);
+const categoryToDelete = ref<{ id: string; name: string } | null>(null);
+const deleteLoading = ref(false);
+
 // Profile editing
 const isEditingProfile = ref(false);
 const profileForm = reactive({
@@ -137,14 +142,20 @@ async function handleCreateCategory() {
   }, 3000);
 }
 
-async function handleDeleteCategory(categoryId: string, categoryName: string) {
-  if (!confirm(`Are you sure you want to delete the category "${categoryName}"? Expenses with this category will need to be reassigned.`)) {
-    return;
-  }
+function confirmDeleteCategory(categoryId: string, categoryName: string) {
+  categoryToDelete.value = { id: categoryId, name: categoryName };
+  showDeleteCategoryConfirm.value = true;
+}
+
+async function handleDeleteCategory() {
+  if (!categoryToDelete.value) return;
 
   error.value = null;
+  deleteLoading.value = true;
 
-  const result = await expenseStore.deleteCategory(categoryId);
+  const result = await expenseStore.deleteCategory(categoryToDelete.value.id);
+
+  deleteLoading.value = false;
 
   if (!result.success && result.error) {
     error.value = typeof result.error.message === 'string'
@@ -153,6 +164,8 @@ async function handleDeleteCategory(categoryId: string, categoryName: string) {
     return;
   }
 
+  showDeleteCategoryConfirm.value = false;
+  categoryToDelete.value = null;
   success.value = 'Category deleted successfully!';
   setTimeout(() => {
     success.value = null;
@@ -646,7 +659,7 @@ function formatDate(dateString: string | undefined) {
             </div>
             <button
               class="flex items-center gap-1 px-3 py-1.5 text-danger-600 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors text-sm font-medium opacity-0 group-hover:opacity-100"
-              @click="handleDeleteCategory(category.id, category.name)"
+              @click="confirmDeleteCategory(category.id, category.name)"
             >
               <TrashIcon class="w-4 h-4" />
               Delete
@@ -655,5 +668,16 @@ function formatDate(dateString: string | undefined) {
         </div>
       </div>
     </div>
+
+    <!-- Delete Category Confirmation Modal -->
+    <UiConfirmModal
+      :show="showDeleteCategoryConfirm"
+      title="Delete Category"
+      :message="`Are you sure you want to delete '${categoryToDelete?.name}'? Expenses with this category will need to be reassigned.`"
+      confirm-text="Delete"
+      :loading="deleteLoading"
+      @confirm="handleDeleteCategory"
+      @cancel="showDeleteCategoryConfirm = false; categoryToDelete = null"
+    />
   </div>
 </template>

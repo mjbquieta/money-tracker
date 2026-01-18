@@ -28,7 +28,7 @@ let IncomeService = class IncomeService {
         if (!budgetPeriod) {
             throw new common_1.NotFoundException('Budget period not found');
         }
-        const income = await this.prisma.income.create({
+        return this.prisma.income.create({
             data: {
                 name: payload.name,
                 description: payload.description,
@@ -36,8 +36,6 @@ let IncomeService = class IncomeService {
                 budgetPeriodId: payload.budgetPeriodId,
             },
         });
-        await this.updateBudgetPeriodIncome(payload.budgetPeriodId);
-        return income;
     }
     async findAllByBudgetPeriod(userId, budgetPeriodId) {
         const budgetPeriod = await this.prisma.budgetPeriod.findFirst({
@@ -78,35 +76,19 @@ let IncomeService = class IncomeService {
         return income;
     }
     async update(userId, incomeId, payload) {
-        const income = await this.findOne(userId, incomeId);
-        const updated = await this.prisma.income.update({
+        await this.findOne(userId, incomeId);
+        return this.prisma.income.update({
             where: { id: incomeId },
             data: payload,
         });
-        await this.updateBudgetPeriodIncome(income.budgetPeriodId);
-        return updated;
     }
     async delete(userId, incomeId) {
-        const income = await this.findOne(userId, incomeId);
+        await this.findOne(userId, incomeId);
         await this.prisma.income.update({
             where: { id: incomeId },
             data: { deletedAt: new Date() },
         });
-        await this.updateBudgetPeriodIncome(income.budgetPeriodId);
         return { success: true };
-    }
-    async updateBudgetPeriodIncome(budgetPeriodId) {
-        const incomes = await this.prisma.income.findMany({
-            where: {
-                budgetPeriodId,
-                deletedAt: null,
-            },
-        });
-        const totalIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
-        await this.prisma.budgetPeriod.update({
-            where: { id: budgetPeriodId },
-            data: { income: totalIncome },
-        });
     }
 };
 exports.IncomeService = IncomeService;

@@ -70,6 +70,10 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
+function getPeriodIncome(period: { incomes?: { amount: number }[] }) {
+  return period.incomes?.reduce((sum, inc) => sum + inc.amount, 0) || 0;
+}
+
 function resetForm() {
   createForm.name = '';
   createForm.startDate = '';
@@ -285,7 +289,7 @@ const metrics = computed(() => budgetStore.overallMetrics);
               <ArrowTrendingUpIcon class="w-4 h-4 text-success-500" />
               Income
             </span>
-            <span class="font-semibold text-success-600">{{ formatCurrency(period.income) }}</span>
+            <span class="font-semibold text-success-600">{{ formatCurrency(getPeriodIncome(period)) }}</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-secondary-500 flex items-center gap-2">
@@ -301,11 +305,11 @@ const metrics = computed(() => budgetStore.overallMetrics);
             <span class="text-sm font-medium text-secondary-600">Remaining</span>
             <span
               class="font-bold text-lg"
-              :class="period.income - period.expenses.reduce((sum, e) => sum + e.amount, 0) >= 0
+              :class="getPeriodIncome(period) - period.expenses.reduce((sum, e) => sum + e.amount, 0) >= 0
                 ? 'text-primary-600'
                 : 'text-danger-600'"
             >
-              {{ formatCurrency(period.income - period.expenses.reduce((sum, e) => sum + e.amount, 0)) }}
+              {{ formatCurrency(getPeriodIncome(period) - period.expenses.reduce((sum, e) => sum + e.amount, 0)) }}
             </span>
           </div>
         </div>

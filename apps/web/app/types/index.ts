@@ -34,7 +34,6 @@ export interface BudgetPeriod {
   name: string | null;
   startDate: string;
   endDate: string;
-  income: number;
   createdAt: string;
   updatedAt: string;
   expenses: Expense[];
@@ -100,7 +99,6 @@ export interface CreateBudgetPeriodPayload {
   name?: string;
   startDate: string;
   endDate: string;
-  income?: number;
   incomes?: IncomeItem[];
 }
 

@@ -21,7 +21,7 @@ export class IncomeService {
       throw new NotFoundException('Budget period not found');
     }
 
-    const income = await this.prisma.income.create({
+    return this.prisma.income.create({
       data: {
         name: payload.name,
         description: payload.description,
@@ -29,11 +29,6 @@ export class IncomeService {
         budgetPeriodId: payload.budgetPeriodId,
       },
     });
-
-    // Update budget period total income
-    await this.updateBudgetPeriodIncome(payload.budgetPeriodId);
-
-    return income;
   }
 
   async findAllByBudgetPeriod(userId: UUID, budgetPeriodId: UUID) {
@@ -82,46 +77,22 @@ export class IncomeService {
   }
 
   async update(userId: UUID, incomeId: UUID, payload: UpdateIncomeDto) {
-    const income = await this.findOne(userId, incomeId);
+    await this.findOne(userId, incomeId);
 
-    const updated = await this.prisma.income.update({
+    return this.prisma.income.update({
       where: { id: incomeId },
       data: payload,
     });
-
-    // Update budget period total income
-    await this.updateBudgetPeriodIncome(income.budgetPeriodId);
-
-    return updated;
   }
 
   async delete(userId: UUID, incomeId: UUID) {
-    const income = await this.findOne(userId, incomeId);
+    await this.findOne(userId, incomeId);
 
     await this.prisma.income.update({
       where: { id: incomeId },
       data: { deletedAt: new Date() },
     });
 
-    // Update budget period total income
-    await this.updateBudgetPeriodIncome(income.budgetPeriodId);
-
     return { success: true };
-  }
-
-  private async updateBudgetPeriodIncome(budgetPeriodId: string) {
-    const incomes = await this.prisma.income.findMany({
-      where: {
-        budgetPeriodId,
-        deletedAt: null,
-      },
-    });
-
-    const totalIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
-
-    await this.prisma.budgetPeriod.update({
-      where: { id: budgetPeriodId },
-      data: { income: totalIncome },
-    });
   }
 }

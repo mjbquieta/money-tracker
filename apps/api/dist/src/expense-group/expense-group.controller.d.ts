@@ -40,7 +40,6 @@ export declare class ExpenseGroupController {
     })[]>;
     findOne(userId: UUID, id: UUID): Promise<{
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -162,7 +161,6 @@ export declare class ExpenseGroupController {
     }>;
     addExpenses(userId: UUID, id: UUID, payload: AddExpensesToGroupDto): Promise<{
         budgetPeriod: {
-            income: number;
             id: string;
             name: string | null;
             createdAt: Date;

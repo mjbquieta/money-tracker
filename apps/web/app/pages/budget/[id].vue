@@ -74,7 +74,6 @@ const editPeriodForm = reactive({
   name: '',
   startDate: '',
   endDate: '',
-  income: 0,
 });
 
 const duplicateForm = reactive({
@@ -95,6 +94,15 @@ const incomeForm = reactive({
   description: '',
   amount: 0,
 });
+
+// Delete confirmation states
+const showDeleteExpenseConfirm = ref(false);
+const showDeleteIncomeConfirm = ref(false);
+const showDeleteGroupConfirm = ref(false);
+const expenseToDelete = ref<Expense | null>(null);
+const incomeToDelete = ref<Income | null>(null);
+const groupToDelete = ref<ExpenseGroup | null>(null);
+const deleteLoading = ref(false);
 
 const bulkExpenses = ref<BulkExpenseItem[]>([
   { name: '', description: '', amount: 0, categoryId: '', expenseGroupId: '' },
@@ -348,10 +356,21 @@ async function handleGroupSubmit() {
   resetGroupForm();
 }
 
-async function handleDeleteGroup(group: ExpenseGroup) {
-  const result = await expenseGroupStore.deleteGroup(group.id);
+function confirmDeleteGroup(group: ExpenseGroup) {
+  groupToDelete.value = group;
+  showDeleteGroupConfirm.value = true;
+}
+
+async function handleDeleteGroup() {
+  if (!groupToDelete.value) return;
+
+  deleteLoading.value = true;
+  const result = await expenseGroupStore.deleteGroup(groupToDelete.value.id);
+  deleteLoading.value = false;
 
   if (result.success) {
+    showDeleteGroupConfirm.value = false;
+    groupToDelete.value = null;
     await Promise.all([
       budgetStore.fetchBudgetPeriod(budgetPeriodId),
       expenseGroupStore.fetchGroups(budgetPeriodId),
@@ -477,12 +496,21 @@ async function handleIncomeSubmit() {
   resetIncomeForm();
 }
 
-async function handleDeleteIncome(income: Income) {
-  const result = await budgetStore.deleteIncome(income.id);
+function confirmDeleteIncome(income: Income) {
+  incomeToDelete.value = income;
+  showDeleteIncomeConfirm.value = true;
+}
 
-  if (result.success && budgetStore.currentSummary && budgetStore.currentPeriod) {
-    budgetStore.currentSummary.income = budgetStore.currentPeriod.income;
-    budgetStore.currentSummary.remaining = budgetStore.currentPeriod.income - budgetStore.currentSummary.totalExpenses;
+async function handleDeleteIncome() {
+  if (!incomeToDelete.value) return;
+
+  deleteLoading.value = true;
+  const result = await budgetStore.deleteIncome(incomeToDelete.value.id);
+  deleteLoading.value = false;
+
+  if (result.success) {
+    showDeleteIncomeConfirm.value = false;
+    incomeToDelete.value = null;
   }
 }
 
@@ -503,9 +531,15 @@ onMounted(async () => {
 const period = computed(() => budgetStore.currentPeriod);
 const summary = computed(() => budgetStore.currentSummary);
 
+// Compute total income from incomes array
+const totalIncome = computed(() => {
+  if (!period.value?.incomes) return 0;
+  return period.value.incomes.reduce((sum, inc) => sum + inc.amount, 0);
+});
+
 const spendingPercentage = computed(() => {
-  if (!summary.value || !period.value || period.value.income === 0) return 0;
-  return Math.min(100, (summary.value.totalExpenses / period.value.income) * 100);
+  if (!summary.value || totalIncome.value === 0) return 0;
+  return Math.min(100, (summary.value.totalExpenses / totalIncome.value) * 100);
 });
 
 const sortedCategories = computed(() => {
@@ -571,7 +605,6 @@ function openEditPeriod() {
     editPeriodForm.name = period.value.name || '';
     editPeriodForm.startDate = period.value.startDate.split('T')[0];
     editPeriodForm.endDate = period.value.endDate.split('T')[0];
-    editPeriodForm.income = period.value.income;
   }
   error.value = null;
   showEditPeriodModal.value = true;
@@ -809,18 +842,12 @@ async function handleEditPeriodSubmit() {
     return;
   }
 
-  if (!editPeriodForm.income || editPeriodForm.income <= 0) {
-    error.value = 'Please enter a valid income amount.';
-    return;
-  }
-
   loading.value = true;
 
   const result = await budgetStore.updateBudgetPeriod(budgetPeriodId, {
     name: editPeriodForm.name || undefined,
     startDate: editPeriodForm.startDate,
     endDate: editPeriodForm.endDate,
-    income: editPeriodForm.income,
   });
 
   loading.value = false;
@@ -830,12 +857,6 @@ async function handleEditPeriodSubmit() {
       ? result.error.message
       : result.error.message[0];
     return;
-  }
-
-  // Update summary - the store already updates currentPeriod
-  if (budgetStore.currentSummary) {
-    budgetStore.currentSummary.income = editPeriodForm.income;
-    budgetStore.currentSummary.remaining = editPeriodForm.income - budgetStore.currentSummary.totalExpenses;
   }
 
   showEditPeriodModal.value = false;
@@ -879,10 +900,23 @@ async function handleDuplicateSubmit() {
   }
 }
 
-async function handleDeleteExpense(expense: Expense) {
+function confirmDeleteExpense(expense: Expense) {
+  expenseToDelete.value = expense;
+  showDeleteExpenseConfirm.value = true;
+}
+
+async function handleDeleteExpense() {
+  if (!expenseToDelete.value) return;
+
+  const expense = expenseToDelete.value;
+  deleteLoading.value = true;
   const result = await expenseStore.deleteExpense(expense.id);
+  deleteLoading.value = false;
 
   if (result.success && budgetStore.currentPeriod) {
+    showDeleteExpenseConfirm.value = false;
+    expenseToDelete.value = null;
+
     // Update local state instead of refetching
     budgetStore.currentPeriod.expenses = budgetStore.currentPeriod.expenses.filter(
       (e) => e.id !== expense.id
@@ -992,18 +1026,15 @@ function getCategoryStyle(categoryName: string) {
       <!-- Summary Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <!-- Income Card -->
-        <div
-          class="bg-white rounded-xl shadow-card border border-secondary-100 p-5 cursor-pointer hover:shadow-card-hover hover:border-primary-200 transition-all group"
-          @click="openEditPeriod"
-        >
+        <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-5">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center group-hover:bg-success-100 transition-colors">
+            <div class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center">
               <ArrowTrendingUpIcon class="w-5 h-5 text-success-600" />
             </div>
             <span class="text-sm font-medium text-secondary-500">Income</span>
           </div>
-          <p class="text-2xl font-bold text-success-600">{{ formatCurrency(period.income) }}</p>
-          <p class="text-xs text-secondary-400 mt-2">Click to edit</p>
+          <p class="text-2xl font-bold text-success-600">{{ formatCurrency(totalIncome) }}</p>
+          <p class="text-xs text-secondary-400 mt-2">{{ period.incomes?.length || 0 }} source{{ (period.incomes?.length || 0) === 1 ? '' : 's' }}</p>
         </div>
 
         <!-- Total Expenses Card -->
@@ -1033,7 +1064,7 @@ function getCategoryStyle(categoryName: string) {
             {{ formatCurrency(summary?.remaining || 0) }}
           </p>
           <p class="text-xs text-secondary-400 mt-2">
-            {{ ((summary?.remaining || 0) / period.income * 100).toFixed(1) }}% of budget
+            {{ totalIncome > 0 ? ((summary?.remaining || 0) / totalIncome * 100).toFixed(1) : 0 }}% of budget
           </p>
         </div>
 
@@ -1104,7 +1135,7 @@ function getCategoryStyle(categoryName: string) {
                 </button>
                 <button
                   class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
-                  @click="handleDeleteIncome(income)"
+                  @click="confirmDeleteIncome(income)"
                 >
                   <TrashIcon class="w-4 h-4" />
                 </button>
@@ -1116,7 +1147,7 @@ function getCategoryStyle(categoryName: string) {
         <!-- Total Income Footer -->
         <div class="mt-4 pt-4 border-t border-success-100 flex justify-between items-center">
           <span class="text-sm font-medium text-secondary-600">Total Income</span>
-          <span class="text-xl font-bold text-success-600">{{ formatCurrency(period.income) }}</span>
+          <span class="text-xl font-bold text-success-600">{{ formatCurrency(totalIncome) }}</span>
         </div>
       </div>
 
@@ -1293,7 +1324,7 @@ function getCategoryStyle(categoryName: string) {
                     </button>
                     <button
                       class="p-1.5 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
-                      @click="handleDeleteGroup(group)"
+                      @click="confirmDeleteGroup(group)"
                     >
                       <TrashIcon class="w-4 h-4" />
                     </button>
@@ -1342,7 +1373,7 @@ function getCategoryStyle(categoryName: string) {
                         </button>
                         <button
                           class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
-                          @click="handleDeleteExpense(expense)"
+                          @click="confirmDeleteExpense(expense)"
                         >
                           <TrashIcon class="w-4 h-4" />
                         </button>
@@ -1395,7 +1426,7 @@ function getCategoryStyle(categoryName: string) {
                   </button>
                   <button
                     class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
-                    @click="handleDeleteExpense(expense)"
+                    @click="confirmDeleteExpense(expense)"
                   >
                     <TrashIcon class="w-4 h-4" />
                   </button>
@@ -1630,13 +1661,12 @@ function getCategoryStyle(categoryName: string) {
               />
             </div>
 
-            <UiBaseInput
-              v-model="editPeriodForm.income"
-              label="Income"
-              type="number"
-              :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
-              required
-            />
+            <!-- Info about managing income -->
+            <div class="bg-secondary-50 rounded-lg p-4">
+              <p class="text-sm text-secondary-600">
+                <span class="font-medium">Note:</span> To manage income sources, use the Income Sources section on this page.
+              </p>
+            </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
               <button
@@ -1710,7 +1740,7 @@ function getCategoryStyle(categoryName: string) {
                 <li class="flex items-center gap-2">
                   <ArrowTrendingUpIcon class="w-4 h-4 text-success-500" />
                   {{ period?.incomes?.length || 0 }} income source{{ (period?.incomes?.length || 0) === 1 ? '' : 's' }}
-                  <span class="text-success-600 font-medium">({{ formatCurrency(period?.income || 0) }})</span>
+                  <span class="text-success-600 font-medium">({{ formatCurrency(totalIncome) }})</span>
                 </li>
                 <li class="flex items-center gap-2">
                   <CreditCardIcon class="w-4 h-4 text-danger-500" />
@@ -1784,6 +1814,40 @@ function getCategoryStyle(categoryName: string) {
         </div>
       </div>
     </Teleport>
+
+    <!-- Delete Expense Confirmation Modal -->
+    <UiConfirmModal
+      :show="showDeleteExpenseConfirm"
+      title="Delete Expense"
+      :message="`Are you sure you want to delete '${expenseToDelete?.name}'? This action cannot be undone.`"
+      confirm-text="Delete"
+      :loading="deleteLoading"
+      @confirm="handleDeleteExpense"
+      @cancel="showDeleteExpenseConfirm = false; expenseToDelete = null"
+    />
+
+    <!-- Delete Income Confirmation Modal -->
+    <UiConfirmModal
+      :show="showDeleteIncomeConfirm"
+      title="Delete Income"
+      :message="`Are you sure you want to delete '${incomeToDelete?.name}'? This action cannot be undone.`"
+      confirm-text="Delete"
+      :loading="deleteLoading"
+      @confirm="handleDeleteIncome"
+      @cancel="showDeleteIncomeConfirm = false; incomeToDelete = null"
+    />
+
+    <!-- Delete Group Confirmation Modal -->
+    <UiConfirmModal
+      :show="showDeleteGroupConfirm"
+      title="Delete Expense Group"
+      :message="`Are you sure you want to delete '${groupToDelete?.name}'? Expenses in this group will be moved to ungrouped.`"
+      confirm-text="Delete"
+      variant="warning"
+      :loading="deleteLoading"
+      @confirm="handleDeleteGroup"
+      @cancel="showDeleteGroupConfirm = false; groupToDelete = null"
+    />
 
     <!-- Bulk Expense Modal -->
     <Teleport to="body">
