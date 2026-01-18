@@ -48,14 +48,13 @@ model Settings {
   // Relations
   userId        String         @unique
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  incomeSources IncomeSource[]
 
   @@map("settings")
 }
 
 model IncomeSource {
   id          String    @id @default(uuid())
-  name        String    @unique
+  name        String
   description String?
   amount      Float     @default(0)
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -65,8 +64,6 @@ model IncomeSource {
   // Relations
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  settingsId String?
-  settings   Settings? @relation(fields: [settingsId], references: [id], onDelete: Cascade)
 
   @@map("income_sources")
 }
