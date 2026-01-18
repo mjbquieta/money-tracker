@@ -116,6 +116,40 @@ let ExpenseService = class ExpenseService {
             data: { deletedAt: new Date() },
         });
     }
+    async createBulk(userId, payload) {
+        const budgetPeriod = await this.prisma.budgetPeriod.findFirst({
+            where: {
+                id: payload.budgetPeriodId,
+                userId,
+                deletedAt: null,
+            },
+        });
+        if (!budgetPeriod) {
+            throw new common_1.NotFoundException('Budget period not found');
+        }
+        const categoryIds = [...new Set(payload.expenses.map((e) => e.categoryId))];
+        const categories = await this.prisma.category.findMany({
+            where: {
+                id: { in: categoryIds },
+                userId,
+                deletedAt: null,
+            },
+        });
+        if (categories.length !== categoryIds.length) {
+            throw new common_1.NotFoundException('One or more categories not found');
+        }
+        const expenses = await this.prisma.$transaction(payload.expenses.map((expense) => this.prisma.expense.create({
+            data: {
+                name: expense.name,
+                description: expense.description,
+                amount: expense.amount,
+                categoryId: expense.categoryId,
+                budgetPeriodId: payload.budgetPeriodId,
+            },
+            include: { category: true },
+        })));
+        return expenses;
+    }
 };
 exports.ExpenseService = ExpenseService;
 exports.ExpenseService = ExpenseService = __decorate([

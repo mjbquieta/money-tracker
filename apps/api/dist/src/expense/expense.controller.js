@@ -32,6 +32,9 @@ let ExpenseController = class ExpenseController {
     create(userId, payload) {
         return this.expenseService.create(userId, payload);
     }
+    createBulk(userId, payload) {
+        return this.expenseService.createBulk(userId, payload);
+    }
     update(userId, id, payload) {
         return this.expenseService.update(userId, id, payload);
     }
@@ -64,6 +67,14 @@ __decorate([
     __metadata("design:paramtypes", [String, expense_dto_1.CreateExpenseDto]),
     __metadata("design:returntype", void 0)
 ], ExpenseController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('bulk'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, expense_dto_1.CreateBulkExpenseDto]),
+    __metadata("design:returntype", void 0)
+], ExpenseController.prototype, "createBulk", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),

@@ -11,4 +11,14 @@ declare class UpdateExpenseDto {
     amount?: number;
     categoryId?: string;
 }
-export { CreateExpenseDto, UpdateExpenseDto };
+declare class BulkExpenseItemDto {
+    name: string;
+    description?: string;
+    amount: number;
+    categoryId: string;
+}
+declare class CreateBulkExpenseDto {
+    budgetPeriodId: string;
+    expenses: BulkExpenseItemDto[];
+}
+export { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto, BulkExpenseItemDto };

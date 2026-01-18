@@ -1,4 +1,7 @@
+import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
+  IsArray,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -6,6 +9,7 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 
 class CreateExpenseDto {
@@ -52,4 +56,34 @@ class UpdateExpenseDto {
   categoryId?: string;
 }
 
-export { CreateExpenseDto, UpdateExpenseDto };
+class BulkExpenseItemDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(100)
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  description?: string;
+
+  @IsNumber()
+  @IsPositive()
+  amount: number;
+
+  @IsUUID()
+  categoryId: string;
+}
+
+class CreateBulkExpenseDto {
+  @IsUUID()
+  budgetPeriodId: string;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => BulkExpenseItemDto)
+  expenses: BulkExpenseItemDto[];
+}
+
+export { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto, BulkExpenseItemDto };

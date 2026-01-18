@@ -13,7 +13,7 @@ import { UUID } from 'crypto';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ExpenseService } from './expense.service';
-import { CreateExpenseDto, UpdateExpenseDto } from './expense.dto';
+import { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto } from './expense.dto';
 
 @Controller('api/v1/expenses')
 @UseGuards(AuthGuard)
@@ -36,6 +36,11 @@ export class ExpenseController {
   @Post()
   create(@CurrentUser('id') userId: UUID, @Body() payload: CreateExpenseDto) {
     return this.expenseService.create(userId, payload);
+  }
+
+  @Post('bulk')
+  createBulk(@CurrentUser('id') userId: UUID, @Body() payload: CreateBulkExpenseDto) {
+    return this.expenseService.createBulk(userId, payload);
   }
 
   @Patch(':id')

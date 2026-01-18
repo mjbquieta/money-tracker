@@ -82,6 +82,18 @@ export interface CreateExpensePayload {
   budgetPeriodId: string;
 }
 
+export interface BulkExpenseItem {
+  name: string;
+  description?: string;
+  amount: number;
+  categoryId: string;
+}
+
+export interface CreateBulkExpensePayload {
+  budgetPeriodId: string;
+  expenses: BulkExpenseItem[];
+}
+
 export interface CreateCategoryPayload {
   name: string;
   description?: string;

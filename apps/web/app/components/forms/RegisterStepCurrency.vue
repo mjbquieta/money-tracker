@@ -10,31 +10,34 @@ const emit = defineEmits<{
   'update:modelValue': [value: Props['modelValue']];
 }>();
 
-const form = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
-});
-
 const currencyOptions = [
   { value: 'PHP', label: 'PHP - Philippine Peso' },
   { value: 'USD', label: 'USD - US Dollar' },
 ];
+
+function updateCurrency(value: string) {
+  emit('update:modelValue', { ...props.modelValue, currency: value });
+}
 </script>
 
 <template>
   <div class="space-y-4">
-    <h3 class="text-lg font-semibold text-gray-900">Currency Settings</h3>
-    <p class="text-sm text-gray-500">Choose your preferred currency for tracking finances.</p>
+    <h3 class="text-lg font-semibold text-secondary-900">Currency Settings</h3>
+    <p class="text-sm text-secondary-500">Choose your preferred currency for tracking finances.</p>
 
     <UiBaseSelect
-      v-model="form.currency"
+      :model-value="modelValue.currency"
       label="Default Currency"
-      :options="currencyOptions"
       required
-    />
+      @update:model-value="updateCurrency"
+    >
+      <option v-for="option in currencyOptions" :key="option.value" :value="option.value">
+        {{ option.label }}
+      </option>
+    </UiBaseSelect>
 
-    <div class="mt-4 p-4 bg-blue-50 rounded-md">
-      <p class="text-sm text-blue-700">
+    <div class="mt-4 p-4 bg-primary-50 rounded-lg">
+      <p class="text-sm text-primary-700">
         You can change this later in your account settings.
       </p>
     </div>

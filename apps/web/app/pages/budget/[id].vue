@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Expense } from '~/types';
+import type { Expense, BulkExpenseItem } from '~/types';
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -15,6 +15,8 @@ import {
   TagIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
+  QueueListIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline';
 
 definePageMeta({
@@ -30,15 +32,18 @@ const expenseStore = useExpenseStore();
 const budgetPeriodId = route.params.id as string;
 
 const showExpenseModal = ref(false);
+const showBulkExpenseModal = ref(false);
 const showDeleteConfirm = ref(false);
 const showEditPeriodModal = ref(false);
 const showDuplicateModal = ref(false);
 const showNewCategoryInput = ref(false);
+const showBulkNewCategoryInput = ref(false);
 const editingExpense = ref<Expense | null>(null);
 const loading = ref(false);
 const categoryLoading = ref(false);
 const error = ref<string | null>(null);
 const newCategoryName = ref('');
+const bulkNewCategoryName = ref('');
 
 const expenseForm = reactive({
   name: '',
@@ -57,6 +62,108 @@ const duplicateForm = reactive({
   startDate: '',
   endDate: '',
   income: 0,
+});
+
+const bulkExpenses = ref<BulkExpenseItem[]>([
+  { name: '', description: '', amount: 0, categoryId: '' },
+]);
+
+function addBulkExpenseRow() {
+  bulkExpenses.value.push({ name: '', description: '', amount: 0, categoryId: '' });
+}
+
+function removeBulkExpenseRow(index: number) {
+  if (bulkExpenses.value.length > 1) {
+    bulkExpenses.value.splice(index, 1);
+  }
+}
+
+function resetBulkExpenseForm() {
+  bulkExpenses.value = [{ name: '', description: '', amount: 0, categoryId: '' }];
+  showBulkNewCategoryInput.value = false;
+  bulkNewCategoryName.value = '';
+  error.value = null;
+}
+
+function openBulkExpenseModal() {
+  resetBulkExpenseForm();
+  showBulkExpenseModal.value = true;
+}
+
+async function handleBulkCreateCategory() {
+  if (!bulkNewCategoryName.value.trim()) {
+    return;
+  }
+
+  categoryLoading.value = true;
+  const result = await expenseStore.createCategory({ name: bulkNewCategoryName.value.trim() });
+  categoryLoading.value = false;
+
+  if (!result.success && result.error) {
+    error.value = typeof result.error.message === 'string'
+      ? result.error.message
+      : result.error.message[0];
+    return;
+  }
+
+  showBulkNewCategoryInput.value = false;
+  bulkNewCategoryName.value = '';
+}
+
+function cancelBulkNewCategory() {
+  showBulkNewCategoryInput.value = false;
+  bulkNewCategoryName.value = '';
+}
+
+async function handleBulkExpenseSubmit() {
+  error.value = null;
+
+  // Validate all expense rows
+  const validExpenses = bulkExpenses.value.filter(
+    (e) => e.name && e.amount > 0 && e.categoryId
+  );
+
+  if (validExpenses.length === 0) {
+    error.value = 'Please add at least one valid expense with name, amount, and category.';
+    return;
+  }
+
+  loading.value = true;
+
+  const result = await expenseStore.createBulkExpenses({
+    budgetPeriodId,
+    expenses: validExpenses.map((e) => ({
+      name: e.name,
+      description: e.description || undefined,
+      amount: e.amount,
+      categoryId: e.categoryId,
+    })),
+  });
+
+  loading.value = false;
+
+  if (!result.success && result.error) {
+    error.value = typeof result.error.message === 'string'
+      ? result.error.message
+      : result.error.message[0];
+    return;
+  }
+
+  showBulkExpenseModal.value = false;
+  resetBulkExpenseForm();
+
+  await Promise.all([
+    budgetStore.fetchBudgetPeriod(budgetPeriodId),
+    budgetStore.fetchBudgetSummary(budgetPeriodId),
+  ]);
+}
+
+const bulkExpensesTotal = computed(() => {
+  return bulkExpenses.value.reduce((sum, e) => sum + (e.amount || 0), 0);
+});
+
+const validBulkExpensesCount = computed(() => {
+  return bulkExpenses.value.filter((e) => e.name && e.amount > 0 && e.categoryId).length;
 });
 
 onMounted(async () => {
@@ -514,13 +621,22 @@ function getCategoryStyle(categoryName: string) {
             <CreditCardIcon class="w-5 h-5 text-primary-500" />
             Expenses
           </h2>
-          <button
-            class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
-            @click="openAddExpense"
-          >
-            <PlusIcon class="w-5 h-5" />
-            Add Expense
-          </button>
+          <div class="flex gap-2">
+            <button
+              class="flex items-center gap-2 px-4 py-2.5 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
+              @click="openBulkExpenseModal"
+            >
+              <QueueListIcon class="w-5 h-5" />
+              <span class="hidden sm:inline">Bulk Add</span>
+            </button>
+            <button
+              class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
+              @click="openAddExpense"
+            >
+              <PlusIcon class="w-5 h-5" />
+              <span class="hidden sm:inline">Add Expense</span>
+            </button>
+          </div>
         </div>
 
         <!-- Empty State -->
@@ -529,13 +645,22 @@ function getCategoryStyle(categoryName: string) {
             <BanknotesIcon class="w-8 h-8 text-secondary-400" />
           </div>
           <p class="text-secondary-500 mb-4">No expenses yet. Add your first expense to start tracking.</p>
-          <button
-            class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium mx-auto"
-            @click="openAddExpense"
-          >
-            <PlusIcon class="w-5 h-5" />
-            Add Expense
-          </button>
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
+              @click="openAddExpense"
+            >
+              <PlusIcon class="w-5 h-5" />
+              Add Expense
+            </button>
+            <button
+              class="flex items-center gap-2 px-5 py-2.5 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
+              @click="openBulkExpenseModal"
+            >
+              <QueueListIcon class="w-5 h-5" />
+              Add Multiple
+            </button>
+          </div>
         </div>
 
         <!-- Expenses Grid -->
@@ -873,6 +998,181 @@ function getCategoryStyle(categoryName: string) {
               Delete
             </button>
           </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Bulk Expense Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showBulkExpenseModal"
+        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showBulkExpenseModal = false"
+      >
+        <div class="bg-white rounded-2xl shadow-elevated max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
+              <QueueListIcon class="w-6 h-6 text-primary-600" />
+            </div>
+            <div class="flex-1">
+              <h2 class="text-xl font-semibold text-secondary-900">Add Multiple Expenses</h2>
+              <p class="text-sm text-secondary-500">Add several expenses at once</p>
+            </div>
+            <button
+              type="button"
+              class="p-2 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 rounded-lg transition-colors"
+              @click="showBulkExpenseModal = false"
+            >
+              <XMarkIcon class="w-5 h-5" />
+            </button>
+          </div>
+
+          <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
+
+          <form @submit.prevent="handleBulkExpenseSubmit" class="space-y-4">
+            <!-- Category Creation -->
+            <div v-if="showBulkNewCategoryInput" class="bg-secondary-50 rounded-xl p-4 mb-4">
+              <label class="text-sm font-medium text-secondary-700 mb-2 block">Create New Category</label>
+              <div class="flex gap-2">
+                <input
+                  v-model="bulkNewCategoryName"
+                  type="text"
+                  placeholder="Category name"
+                  class="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  @keyup.enter="handleBulkCreateCategory"
+                />
+                <button
+                  type="button"
+                  class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50"
+                  :disabled="categoryLoading"
+                  @click="handleBulkCreateCategory"
+                >
+                  <span v-if="categoryLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+                  <span v-else>Add</span>
+                </button>
+                <button
+                  type="button"
+                  class="px-4 py-2 text-secondary-600 hover:bg-secondary-100 border border-secondary-200 rounded-lg transition-colors"
+                  @click="cancelBulkNewCategory"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <button
+              v-if="!showBulkNewCategoryInput"
+              type="button"
+              class="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium mb-4"
+              @click="showBulkNewCategoryInput = true"
+            >
+              <PlusIcon class="w-4 h-4" />
+              Add custom category
+            </button>
+
+            <!-- Expense Rows -->
+            <div class="space-y-3">
+              <div
+                v-for="(expense, index) in bulkExpenses"
+                :key="index"
+                class="bg-secondary-50 rounded-xl p-4"
+              >
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-sm font-medium text-secondary-600">Expense {{ index + 1 }}</span>
+                  <button
+                    v-if="bulkExpenses.length > 1"
+                    type="button"
+                    class="p-1 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                    @click="removeBulkExpenseRow(index)"
+                  >
+                    <XMarkIcon class="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <input
+                    v-model="expense.name"
+                    type="text"
+                    placeholder="Expense name *"
+                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  />
+
+                  <input
+                    v-model="expense.description"
+                    type="text"
+                    placeholder="Description (optional)"
+                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  />
+
+                  <input
+                    v-model.number="expense.amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Amount *"
+                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  />
+
+                  <select
+                    v-model="expense.categoryId"
+                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm bg-white"
+                  >
+                    <option value="" disabled>Category *</option>
+                    <option
+                      v-for="category in expenseStore.categories"
+                      :key="category.id"
+                      :value="category.id"
+                    >
+                      {{ category.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Row Button -->
+            <button
+              type="button"
+              class="flex items-center gap-2 w-full justify-center py-3 border-2 border-dashed border-secondary-300 hover:border-primary-400 text-secondary-500 hover:text-primary-600 rounded-xl transition-colors"
+              @click="addBulkExpenseRow"
+            >
+              <PlusIcon class="w-5 h-5" />
+              Add Another Expense
+            </button>
+
+            <!-- Summary -->
+            <div class="bg-primary-50 rounded-xl p-4 flex justify-between items-center">
+              <div>
+                <p class="text-sm text-secondary-600">
+                  <span class="font-medium">{{ validBulkExpensesCount }}</span> valid expense{{ validBulkExpensesCount === 1 ? '' : 's' }}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-secondary-500">Total</p>
+                <p class="text-xl font-bold text-primary-600">{{ formatCurrency(bulkExpensesTotal) }}</p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+              <button
+                type="button"
+                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                @click="showBulkExpenseModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium disabled:opacity-50"
+                :disabled="loading || validBulkExpensesCount === 0"
+              >
+                <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <CheckCircleIcon v-else class="w-5 h-5" />
+                Add {{ validBulkExpensesCount }} Expense{{ validBulkExpensesCount === 1 ? '' : 's' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </Teleport>

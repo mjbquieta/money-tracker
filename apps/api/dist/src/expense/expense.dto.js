@@ -9,7 +9,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateExpenseDto = exports.CreateExpenseDto = void 0;
+exports.BulkExpenseItemDto = exports.CreateBulkExpenseDto = exports.UpdateExpenseDto = exports.CreateExpenseDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class CreateExpenseDto {
     name;
@@ -75,4 +76,48 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], UpdateExpenseDto.prototype, "categoryId", void 0);
+class BulkExpenseItemDto {
+    name;
+    description;
+    amount;
+    categoryId;
+}
+exports.BulkExpenseItemDto = BulkExpenseItemDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2),
+    (0, class_validator_1.MaxLength)(100),
+    __metadata("design:type", String)
+], BulkExpenseItemDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(500),
+    __metadata("design:type", String)
+], BulkExpenseItemDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], BulkExpenseItemDto.prototype, "amount", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], BulkExpenseItemDto.prototype, "categoryId", void 0);
+class CreateBulkExpenseDto {
+    budgetPeriodId;
+    expenses;
+}
+exports.CreateBulkExpenseDto = CreateBulkExpenseDto;
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateBulkExpenseDto.prototype, "budgetPeriodId", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayMinSize)(1),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => BulkExpenseItemDto),
+    __metadata("design:type", Array)
+], CreateBulkExpenseDto.prototype, "expenses", void 0);
 //# sourceMappingURL=expense.dto.js.map

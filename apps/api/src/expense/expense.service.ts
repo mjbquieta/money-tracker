@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateExpenseDto, UpdateExpenseDto } from './expense.dto';
+import { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto } from './expense.dto';
 
 @Injectable()
 export class ExpenseService {
@@ -127,5 +127,54 @@ export class ExpenseService {
       where: { id: expenseId },
       data: { deletedAt: new Date() },
     });
+  }
+
+  async createBulk(userId: UUID, payload: CreateBulkExpenseDto) {
+    // Verify the budget period belongs to the user
+    const budgetPeriod = await this.prisma.budgetPeriod.findFirst({
+      where: {
+        id: payload.budgetPeriodId,
+        userId,
+        deletedAt: null,
+      },
+    });
+
+    if (!budgetPeriod) {
+      throw new NotFoundException('Budget period not found');
+    }
+
+    // Get all unique category IDs from the expenses
+    const categoryIds = [...new Set(payload.expenses.map((e) => e.categoryId))];
+
+    // Verify all categories belong to the user
+    const categories = await this.prisma.category.findMany({
+      where: {
+        id: { in: categoryIds },
+        userId,
+        deletedAt: null,
+      },
+    });
+
+    if (categories.length !== categoryIds.length) {
+      throw new NotFoundException('One or more categories not found');
+    }
+
+    // Create all expenses in a transaction
+    const expenses = await this.prisma.$transaction(
+      payload.expenses.map((expense) =>
+        this.prisma.expense.create({
+          data: {
+            name: expense.name,
+            description: expense.description,
+            amount: expense.amount,
+            categoryId: expense.categoryId,
+            budgetPeriodId: payload.budgetPeriodId,
+          },
+          include: { category: true },
+        }),
+      ),
+    );
+
+    return expenses;
   }
 }

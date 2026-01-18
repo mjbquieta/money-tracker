@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Expense, CreateExpensePayload, Category, CreateCategoryPayload } from '~/types';
+import type { Expense, CreateExpensePayload, CreateBulkExpensePayload, Category, CreateCategoryPayload } from '~/types';
 
 export const useExpenseStore = defineStore('expense', () => {
   const categories = ref<Category[]>([]);
@@ -34,6 +34,16 @@ export const useExpenseStore = defineStore('expense', () => {
 
   async function createExpense(payload: CreateExpensePayload) {
     const { data, error } = await api.post<Expense>('/api/v1/expenses', payload);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    return { success: true, error: null, data };
+  }
+
+  async function createBulkExpenses(payload: CreateBulkExpensePayload) {
+    const { data, error } = await api.post<Expense[]>('/api/v1/expenses/bulk', payload);
 
     if (error) {
       return { success: false, error };
@@ -80,6 +90,7 @@ export const useExpenseStore = defineStore('expense', () => {
     createCategory,
     deleteCategory,
     createExpense,
+    createBulkExpenses,
     updateExpense,
     deleteExpense,
   };
