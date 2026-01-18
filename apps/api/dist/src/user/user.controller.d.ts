@@ -12,15 +12,16 @@ export declare class UserController {
             currency: string;
             userId: string;
         } | null;
-        incomeSources: {
+        categories: {
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            description: string | null;
-            amount: number;
             userId: string;
+            description: string | null;
+            isDefault: boolean;
+            defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
     } & {
         id: string;

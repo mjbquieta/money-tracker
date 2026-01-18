@@ -1,26 +1,31 @@
+import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './auth.dto';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 export declare class AuthService {
     private readonly userService;
-    constructor(userService: UserService);
-    login(payload: LoginDto): Promise<import("lodash").Omit<{
-        settings: {
+    private readonly jwtService;
+    constructor(userService: UserService, jwtService: JwtService);
+    login(payload: LoginDto): Promise<{
+        user: import("lodash").Omit<{
+            settings: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                currency: string;
+                userId: string;
+            } | null;
+        } & {
             id: string;
+            email: string;
+            username: string;
+            name: string | null;
+            status: import("@prisma/client").$Enums.UserStatus;
+            password: string;
             createdAt: Date;
-            updatedAt: Date | null;
+            updatedAt: Date;
             deletedAt: Date | null;
-            currency: string;
-            userId: string;
-        } | null;
-    } & {
-        id: string;
-        email: string;
-        username: string;
-        name: string | null;
-        status: import("@prisma/client").$Enums.UserStatus;
-        password: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-    }, "password">>;
+        }, "password">;
+        accessToken: string;
+    }>;
 }

@@ -15,7 +15,9 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const core_1 = require("@nestjs/core");
 const throttler_1 = require("@nestjs/throttler");
 const settings_module_1 = require("./settings/settings.module");
-const income_source_module_1 = require("./income-source/income-source.module");
+const category_module_1 = require("./category/category.module");
+const budget_period_module_1 = require("./budget-period/budget-period.module");
+const expense_module_1 = require("./expense/expense.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -30,7 +32,9 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             prisma_module_1.PrismaModule,
             settings_module_1.SettingsModule,
-            income_source_module_1.IncomeSourceModule,
+            category_module_1.CategoryModule,
+            budget_period_module_1.BudgetPeriodModule,
+            expense_module_1.ExpenseModule,
         ],
         providers: [{
                 provide: core_1.APP_GUARD,

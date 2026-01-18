@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { omit } from 'lodash';
 import { SettingsService } from 'src/settings/settings.service';
 import { UUID } from 'crypto';
-import { IncomeSourceService } from 'src/income-source/income-source.service';
+import { CategoryService } from 'src/category/category.service';
 
 @Injectable()
 export class UserService {
@@ -16,13 +16,13 @@ export class UserService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly settingsService: SettingsService,
-    private readonly incomeService: IncomeSourceService,
+    private readonly categoryService: CategoryService,
   ) {
     this.saltRounds = Number(this.configService.get('SALT_ROUNDS'));
   }
 
   async createUser(payload: CreateUserWithSettingsDto) {
-    const data = omit(payload, ['password', 'settings', 'incomeSource']);
+    const data = omit(payload, ['password', 'settings']);
     const hashedPassword = await bcrypt.hash(payload.password, this.saltRounds);
 
     return this.prisma.$transaction(async (tx) => {
@@ -34,16 +34,12 @@ export class UserService {
       });
 
       await this.settingsService.create(user.id as UUID, payload.settings, tx);
-      await this.incomeService.create(
-        user.id as UUID,
-        payload.incomeSource,
-        tx,
-      );
+      await this.categoryService.createDefaultCategories(user.id as UUID, tx);
 
       return tx.user.findUnique({
         where: { id: user.id },
         omit: { password: true },
-        include: { settings: true, incomeSources: true },
+        include: { settings: true, categories: true },
       });
     });
   }
@@ -78,7 +74,7 @@ export class UserService {
   async findOne(userId: UUID) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { settings: true, incomeSources: true },
+      include: { settings: true, categories: true },
     });
     return omit(user, ['password']);
   }

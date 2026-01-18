@@ -3,6 +3,7 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// url      = env("DATABASE_URL")
 
 generator client {
   provider = "prisma-client-js"
@@ -20,20 +21,27 @@ enum UserStatus {
   DELETED
 }
 
+enum DefaultCategory {
+  BILLS
+  FOOD
+  TRANSPORT
+  SAVINGS
+  ENTERTAINMENT
+}
+
 model User {
-  id                String            @id @default(uuid())
-  email             String            @unique
-  name              String?
-  username          String            @unique
-  status            UserStatus        @default(ACTIVE)
-  password          String
-  createdAt         DateTime          @default(now()) @map("created_at")
-  updatedAt         DateTime          @updatedAt @map("updated_at")
-  deletedAt         DateTime?         @map("deleted_at")
-  settings          Settings?
-  incomeSources     IncomeSource[]
-  expenses          Expense[]
-  expenseCategories ExpenseCategory[]
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String?
+  username      String         @unique
+  status        UserStatus     @default(ACTIVE)
+  password      String
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  deletedAt     DateTime?      @map("deleted_at")
+  settings      Settings?
+  budgetPeriods BudgetPeriod[]
+  categories    Category[]
 
   @@map("users")
 }
@@ -46,42 +54,48 @@ model Settings {
   deletedAt DateTime? @map("deleted_at")
 
   // Relations
-  userId        String         @unique
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("settings")
 }
 
-model IncomeSource {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  amount      Float     @default(0)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  // Relations
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("income_sources")
-}
-
-model ExpenseCategory {
-  id          String    @id @default(uuid())
-  name        String    @unique // Savings | Payables | Taxes | etc.
-  description String?
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+model BudgetPeriod {
+  id        String    @id @default(uuid())
+  name      String? // Optional name like "January 2026" or "First Half Jan"
+  startDate DateTime  @map("start_date")
+  endDate   DateTime  @map("end_date")
+  income    Float     @default(0) // Total income for this period
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   // Relations
   userId   String
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenses Expense[]
 
-  @@map("expense_categories")
+  @@map("budget_periods")
+}
+
+model Category {
+  id              String           @id @default(uuid())
+  name            String
+  description     String?
+  isDefault       Boolean          @default(false) @map("is_default")
+  defaultCategory DefaultCategory? @map("default_category") // Only set for system defaults
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime?        @updatedAt @map("updated_at")
+  deletedAt       DateTime?        @map("deleted_at")
+
+  // Relations
+  userId   String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+
+  // Each user can have only one category with the same name
+  @@unique([userId, name])
+  @@map("categories")
 }
 
 model Expense {
@@ -94,10 +108,10 @@ model Expense {
   deletedAt   DateTime? @map("deleted_at")
 
   // Relations
-  expenseCategoryId String
-  expenseCategory   ExpenseCategory @relation(fields: [expenseCategoryId], references: [id], onDelete: Cascade)
-  userId            String
-  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId     String
+  category       Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  budgetPeriodId String       @map("budget_period_id")
+  budgetPeriod   BudgetPeriod @relation(fields: [budgetPeriodId], references: [id], onDelete: Cascade)
 
   @@map("expenses")
 }

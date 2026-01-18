@@ -3,14 +3,14 @@ import { CreateUserWithSettingsDto } from './user.dto';
 import { ConfigService } from '@nestjs/config';
 import { SettingsService } from 'src/settings/settings.service';
 import { UUID } from 'crypto';
-import { IncomeSourceService } from 'src/income-source/income-source.service';
+import { CategoryService } from 'src/category/category.service';
 export declare class UserService {
     private readonly prisma;
     private readonly configService;
     private readonly settingsService;
-    private readonly incomeService;
+    private readonly categoryService;
     private saltRounds;
-    constructor(prisma: PrismaService, configService: ConfigService, settingsService: SettingsService, incomeService: IncomeSourceService);
+    constructor(prisma: PrismaService, configService: ConfigService, settingsService: SettingsService, categoryService: CategoryService);
     createUser(payload: CreateUserWithSettingsDto): Promise<({
         settings: {
             id: string;
@@ -20,15 +20,16 @@ export declare class UserService {
             currency: string;
             userId: string;
         } | null;
-        incomeSources: {
+        categories: {
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            description: string | null;
-            amount: number;
             userId: string;
+            description: string | null;
+            isDefault: boolean;
+            defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
     } & {
         id: string;
@@ -69,15 +70,16 @@ export declare class UserService {
             currency: string;
             userId: string;
         } | null;
-        incomeSources: {
+        categories: {
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            description: string | null;
-            amount: number;
             userId: string;
+            description: string | null;
+            isDefault: boolean;
+            defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
     } & {
         id: string;

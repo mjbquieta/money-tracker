@@ -6,7 +6,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { SettingsModule } from './settings/settings.module';
-import { IncomeSourceModule } from './income-source/income-source.module';
+import { CategoryModule } from './category/category.module';
+import { BudgetPeriodModule } from './budget-period/budget-period.module';
+import { ExpenseModule } from './expense/expense.module';
 
 @Module({
   imports: [
@@ -18,7 +20,9 @@ import { IncomeSourceModule } from './income-source/income-source.module';
     AuthModule,
     PrismaModule,
     SettingsModule,
-    IncomeSourceModule,
+    CategoryModule,
+    BudgetPeriodModule,
+    ExpenseModule,
   ],
   providers: [{
     provide: APP_GUARD,

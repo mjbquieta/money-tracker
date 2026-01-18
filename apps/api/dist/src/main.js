@@ -8,6 +8,11 @@ const class_validator_1 = require("class-validator");
 async function bootstrap() {
     const configService = new config_1.ConfigService();
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.enableCors({
+        origin: true,
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true,
+    });
     app.useGlobalPipes(new common_1.ValidationPipe());
     (0, class_validator_1.useContainer)(app.select(app_module_1.AppModule), { fallbackOnErrors: true });
     await app.listen(configService.get('PORT') ?? 3000);

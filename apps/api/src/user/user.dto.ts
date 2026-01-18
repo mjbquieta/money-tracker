@@ -11,7 +11,6 @@ import {
 import { IsEmailExist } from './validators/is-email.validator';
 import { IsUsernameExist } from './validators/is-username.validator';
 import { SettingsDto } from 'src/settings/settings.dto';
-import { IncomeSourceDto } from 'src/income-source/income-source.dto';
 
 class BaseUserDto {
   @IsEmail()
@@ -41,11 +40,6 @@ class CreateUserWithSettingsDto extends BaseUserDto {
   @ValidateNested()
   @Type(() => SettingsDto)
   settings: SettingsDto;
-
-  @IsDefined()
-  @ValidateNested()
-  @Type(() => IncomeSourceDto)
-  incomeSource: IncomeSourceDto;
 }
 
 class UserPartialDto extends PartialType(BaseUserDto) {}

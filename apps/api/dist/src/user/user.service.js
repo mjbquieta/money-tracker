@@ -49,22 +49,22 @@ const bcrypt = __importStar(require("bcrypt"));
 const config_1 = require("@nestjs/config");
 const lodash_1 = require("lodash");
 const settings_service_1 = require("../settings/settings.service");
-const income_source_service_1 = require("../income-source/income-source.service");
+const category_service_1 = require("../category/category.service");
 let UserService = class UserService {
     prisma;
     configService;
     settingsService;
-    incomeService;
+    categoryService;
     saltRounds;
-    constructor(prisma, configService, settingsService, incomeService) {
+    constructor(prisma, configService, settingsService, categoryService) {
         this.prisma = prisma;
         this.configService = configService;
         this.settingsService = settingsService;
-        this.incomeService = incomeService;
+        this.categoryService = categoryService;
         this.saltRounds = Number(this.configService.get('SALT_ROUNDS'));
     }
     async createUser(payload) {
-        const data = (0, lodash_1.omit)(payload, ['password', 'settings', 'incomeSource']);
+        const data = (0, lodash_1.omit)(payload, ['password', 'settings']);
         const hashedPassword = await bcrypt.hash(payload.password, this.saltRounds);
         return this.prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
@@ -74,11 +74,11 @@ let UserService = class UserService {
                 },
             });
             await this.settingsService.create(user.id, payload.settings, tx);
-            await this.incomeService.create(user.id, payload.incomeSource, tx);
+            await this.categoryService.createDefaultCategories(user.id, tx);
             return tx.user.findUnique({
                 where: { id: user.id },
                 omit: { password: true },
-                include: { settings: true, incomeSources: true },
+                include: { settings: true, categories: true },
             });
         });
     }
@@ -100,7 +100,7 @@ let UserService = class UserService {
     async findOne(userId) {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
-            include: { settings: true, incomeSources: true },
+            include: { settings: true, categories: true },
         });
         return (0, lodash_1.omit)(user, ['password']);
     }
@@ -111,6 +111,6 @@ exports.UserService = UserService = __decorate([
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         config_1.ConfigService,
         settings_service_1.SettingsService,
-        income_source_service_1.IncomeSourceService])
+        category_service_1.CategoryService])
 ], UserService);
 //# sourceMappingURL=user.service.js.map

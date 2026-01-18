@@ -16,7 +16,6 @@ const class_validator_1 = require("class-validator");
 const is_email_validator_1 = require("./validators/is-email.validator");
 const is_username_validator_1 = require("./validators/is-username.validator");
 const settings_dto_1 = require("../settings/settings.dto");
-const income_source_dto_1 = require("../income-source/income-source.dto");
 class BaseUserDto {
     email;
     name;
@@ -51,7 +50,6 @@ __decorate([
 ], BaseUserDto.prototype, "password", void 0);
 class CreateUserWithSettingsDto extends BaseUserDto {
     settings;
-    incomeSource;
 }
 exports.CreateUserWithSettingsDto = CreateUserWithSettingsDto;
 __decorate([
@@ -60,12 +58,6 @@ __decorate([
     (0, class_transformer_1.Type)(() => settings_dto_1.SettingsDto),
     __metadata("design:type", settings_dto_1.SettingsDto)
 ], CreateUserWithSettingsDto.prototype, "settings", void 0);
-__decorate([
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.ValidateNested)(),
-    (0, class_transformer_1.Type)(() => income_source_dto_1.IncomeSourceDto),
-    __metadata("design:type", income_source_dto_1.IncomeSourceDto)
-], CreateUserWithSettingsDto.prototype, "incomeSource", void 0);
 class UserPartialDto extends (0, mapped_types_1.PartialType)(BaseUserDto) {
 }
 exports.UserPartialDto = UserPartialDto;

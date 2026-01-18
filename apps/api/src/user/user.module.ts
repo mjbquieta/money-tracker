@@ -5,10 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import { IsEmailExistConstraint } from './validators/is-email.validator';
 import { IsUsernameExistConstraint } from './validators/is-username.validator';
 import { SettingsModule } from 'src/settings/settings.module';
-import { IncomeSourceModule } from 'src/income-source/income-source.module';
+import { CategoryModule } from 'src/category/category.module';
 
 @Module({
-  imports: [ConfigModule, SettingsModule, IncomeSourceModule],
+  imports: [ConfigModule, SettingsModule, CategoryModule],
   controllers: [UserController],
   providers: [UserService, IsEmailExistConstraint, IsUsernameExistConstraint],
   exports: [UserService],

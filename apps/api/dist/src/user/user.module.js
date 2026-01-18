@@ -14,13 +14,13 @@ const config_1 = require("@nestjs/config");
 const is_email_validator_1 = require("./validators/is-email.validator");
 const is_username_validator_1 = require("./validators/is-username.validator");
 const settings_module_1 = require("../settings/settings.module");
-const income_source_module_1 = require("../income-source/income-source.module");
+const category_module_1 = require("../category/category.module");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
 exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
-        imports: [config_1.ConfigModule, settings_module_1.SettingsModule, income_source_module_1.IncomeSourceModule],
+        imports: [config_1.ConfigModule, settings_module_1.SettingsModule, category_module_1.CategoryModule],
         controllers: [user_controller_1.UserController],
         providers: [user_service_1.UserService, is_email_validator_1.IsEmailExistConstraint, is_username_validator_1.IsUsernameExistConstraint],
         exports: [user_service_1.UserService],
