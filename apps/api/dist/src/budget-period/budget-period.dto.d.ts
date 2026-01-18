@@ -16,4 +16,4 @@ declare class DuplicateBudgetPeriodDto {
     endDate: Date;
     income?: number;
 }
-export { CreateBudgetPeriodDto, UpdateBudgetPeriodDto, DuplicateBudgetPeriodDto };
+export { CreateBudgetPeriodDto, UpdateBudgetPeriodDto, DuplicateBudgetPeriodDto, };

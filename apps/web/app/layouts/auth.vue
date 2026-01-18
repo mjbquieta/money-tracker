@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BanknotesIcon, HomeIcon } from '@heroicons/vue/24/outline';
+import { HomeIcon } from '@heroicons/vue/24/outline';
 </script>
 
 <template>
@@ -22,12 +22,7 @@ import { BanknotesIcon, HomeIcon } from '@heroicons/vue/24/outline';
     <!-- Logo -->
     <div class="relative mx-auto w-full max-w-md px-4 sm:px-0">
       <NuxtLink to="/" class="flex items-center justify-center gap-2 sm:gap-3 group">
-        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-card group-hover:shadow-card-hover transition-shadow">
-          <BanknotesIcon class="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-        </div>
-        <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-          Money Tracker
-        </h1>
+        <img src="/prospera-logo.png" alt="Prospera" class="h-10 sm:h-12 group-hover:scale-105 transition-transform" />
       </NuxtLink>
     </div>
 

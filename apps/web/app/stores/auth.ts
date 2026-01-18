@@ -18,10 +18,13 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
   const token = ref<string | null>(null);
   const isAuthenticated = computed(() => !!user.value && !!token.value);
+  const isHydrated = ref(false);
   const api = useApi();
 
-  // Initialize from localStorage on client
-  if (import.meta.client) {
+  // Hydrate auth state from localStorage - called explicitly on client
+  function hydrateFromStorage() {
+    if (!import.meta.client) return;
+
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     if (savedToken) token.value = savedToken;
@@ -32,6 +35,12 @@ export const useAuthStore = defineStore('auth', () => {
         // Invalid JSON, ignore
       }
     }
+    isHydrated.value = true;
+  }
+
+  // Run hydration immediately on client to handle initial page loads
+  if (import.meta.client) {
+    hydrateFromStorage();
   }
 
   function setAuth(userData: User, accessToken: string) {
@@ -141,6 +150,8 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     token,
     isAuthenticated,
+    isHydrated,
+    hydrateFromStorage,
     login,
     register,
     logout,

@@ -6,7 +6,6 @@ import {
   IsPositive,
   IsString,
   MaxLength,
-  ValidateIf,
 } from 'class-validator';
 
 class CreateBudgetPeriodDto {
@@ -70,4 +69,8 @@ class DuplicateBudgetPeriodDto {
   income?: number;
 }
 
-export { CreateBudgetPeriodDto, UpdateBudgetPeriodDto, DuplicateBudgetPeriodDto };
+export {
+  CreateBudgetPeriodDto,
+  UpdateBudgetPeriodDto,
+  DuplicateBudgetPeriodDto,
+};

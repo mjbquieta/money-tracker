@@ -5,11 +5,10 @@ import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
-  BanknotesIcon,
   Bars3Icon,
   XMarkIcon,
   ChevronDownIcon,
-} from '@heroicons/vue/24/outline';
+} from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
 const mounted = ref(false);
@@ -18,26 +17,31 @@ const accountMenuOpen = ref(false);
 
 // Close menus on route change
 const route = useRoute();
-watch(() => route.path, () => {
-  mobileMenuOpen.value = false;
-  accountMenuOpen.value = false;
-});
+watch(
+  () => route.path,
+  () => {
+    mobileMenuOpen.value = false;
+    accountMenuOpen.value = false;
+  },
+);
 
 // Close account menu when clicking outside
 function handleClickOutside(event: MouseEvent) {
   const target = event.target as HTMLElement;
-  if (!target.closest('.account-menu-container')) {
+  if (!target.closest(".account-menu-container")) {
     accountMenuOpen.value = false;
   }
 }
 
 onMounted(() => {
+  // Ensure auth state is hydrated from localStorage before showing nav
+  authStore.hydrateFromStorage();
   mounted.value = true;
-  document.addEventListener('click', handleClickOutside);
+  document.addEventListener("click", handleClickOutside);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
@@ -48,11 +52,15 @@ onUnmounted(() => {
         <div class="flex justify-between h-14 sm:h-16 items-center">
           <!-- Logo -->
           <NuxtLink to="/" class="flex items-center gap-2 group flex-shrink-0">
-            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg sm:rounded-xl flex items-center justify-center shadow-card group-hover:shadow-card-hover transition-shadow">
-              <BanknotesIcon class="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <span class="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent hidden xs:inline">
-              Money Tracker
+            <img
+              src="/prospera-icon.png"
+              alt="Prospera"
+              class="w-8 h-8 sm:w-10 sm:h-10 group-hover:scale-105 transition-transform"
+            />
+            <span
+              class="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent hidden xs:inline"
+            >
+              Prospera
             </span>
           </NuxtLink>
 
@@ -84,7 +92,9 @@ onUnmounted(() => {
                   @click.stop="accountMenuOpen = !accountMenuOpen"
                 >
                   <UserCircleIcon class="w-5 h-5" />
-                  <span class="text-sm font-medium">{{ authStore.user?.name }}</span>
+                  <span class="text-sm font-medium">{{
+                    authStore.user?.name
+                  }}</span>
                   <ChevronDownIcon
                     class="w-4 h-4 transition-transform"
                     :class="{ 'rotate-180': accountMenuOpen }"
@@ -106,8 +116,12 @@ onUnmounted(() => {
                   >
                     <!-- User Info -->
                     <div class="px-4 py-3 border-b border-secondary-100">
-                      <p class="font-medium text-secondary-900">{{ authStore.user?.name }}</p>
-                      <p class="text-sm text-secondary-500">{{ authStore.user?.email }}</p>
+                      <p class="font-medium text-secondary-900">
+                        {{ authStore.user?.name }}
+                      </p>
+                      <p class="text-sm text-secondary-500">
+                        {{ authStore.user?.email }}
+                      </p>
                     </div>
 
                     <!-- Menu Items -->
@@ -138,12 +152,16 @@ onUnmounted(() => {
 
             <template v-else>
               <NuxtLink to="/auth/login">
-                <button class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors font-medium">
+                <button
+                  class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors font-medium"
+                >
                   Login
                 </button>
               </NuxtLink>
               <NuxtLink to="/auth/register">
-                <button class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium">
+                <button
+                  class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
+                >
                   Get Started
                 </button>
               </NuxtLink>
@@ -154,12 +172,16 @@ onUnmounted(() => {
           <div v-if="mounted" class="flex md:hidden items-center gap-2">
             <template v-if="!authStore.isAuthenticated">
               <NuxtLink to="/auth/login">
-                <button class="px-3 py-1.5 text-sm text-secondary-600 hover:text-primary-600 font-medium">
+                <button
+                  class="px-3 py-1.5 text-sm text-secondary-600 hover:text-primary-600 font-medium"
+                >
                   Login
                 </button>
               </NuxtLink>
               <NuxtLink to="/auth/register">
-                <button class="px-3 py-1.5 text-sm bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-medium">
+                <button
+                  class="px-3 py-1.5 text-sm bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-medium"
+                >
                   Sign Up
                 </button>
               </NuxtLink>
@@ -192,11 +214,17 @@ onUnmounted(() => {
         >
           <div class="px-4 py-3 space-y-1">
             <!-- User Info -->
-            <div class="flex items-center gap-3 px-3 py-3 mb-2 bg-secondary-50 rounded-xl">
+            <div
+              class="flex items-center gap-3 px-3 py-3 mb-2 bg-secondary-50 rounded-xl"
+            >
               <UserCircleIcon class="w-10 h-10 text-secondary-400" />
               <div>
-                <p class="font-medium text-secondary-900">{{ authStore.user?.name }}</p>
-                <p class="text-sm text-secondary-500">{{ authStore.user?.email }}</p>
+                <p class="font-medium text-secondary-900">
+                  {{ authStore.user?.name }}
+                </p>
+                <p class="text-sm text-secondary-500">
+                  {{ authStore.user?.email }}
+                </p>
               </div>
             </div>
 
@@ -247,13 +275,19 @@ onUnmounted(() => {
 
     <footer class="bg-white border-t border-secondary-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4">
+        <div
+          class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4"
+        >
           <div class="flex items-center gap-2 text-secondary-500">
-            <BanknotesIcon class="w-4 h-4 sm:w-5 sm:h-5" />
-            <span class="text-xs sm:text-sm">Money Tracker</span>
+            <img
+              src="/prospera-icon.png"
+              alt="Prospera"
+              class="w-4 h-4 sm:w-5 sm:h-5"
+            />
+            <span class="text-xs sm:text-sm">Prospera</span>
           </div>
           <p class="text-xs sm:text-sm text-secondary-400">
-            Track your finances, achieve your goals.
+            Build a healthier relationship with money.
           </p>
         </div>
       </div>

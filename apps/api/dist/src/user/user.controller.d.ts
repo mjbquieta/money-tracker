@@ -14,8 +14,8 @@ export declare class UserController {
             userId: string;
         } | null;
         categories: {
-            name: string;
             id: string;
+            name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
@@ -25,10 +25,10 @@ export declare class UserController {
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
     } & {
-        name: string | null;
         id: string;
         email: string;
         username: string;
+        name: string | null;
         status: import("@prisma/client").$Enums.UserStatus;
         createdAt: Date;
         updatedAt: Date;
@@ -44,8 +44,8 @@ export declare class UserController {
             userId: string;
         } | null;
         categories: {
-            name: string;
             id: string;
+            name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
@@ -55,10 +55,10 @@ export declare class UserController {
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
     } & {
-        name: string | null;
         id: string;
         email: string;
         username: string;
+        name: string | null;
         status: import("@prisma/client").$Enums.UserStatus;
         password: string;
         createdAt: Date;
