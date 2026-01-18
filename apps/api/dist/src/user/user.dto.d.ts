@@ -11,4 +11,12 @@ declare class CreateUserWithSettingsDto extends BaseUserDto {
 declare const UserPartialDto_base: import("@nestjs/mapped-types").MappedType<Partial<BaseUserDto>>;
 declare class UserPartialDto extends UserPartialDto_base {
 }
-export { CreateUserWithSettingsDto, BaseUserDto, UserPartialDto };
+declare class UpdateProfileDto {
+    name?: string;
+    username?: string;
+}
+declare class ChangePasswordDto {
+    currentPassword: string;
+    newPassword: string;
+}
+export { CreateUserWithSettingsDto, BaseUserDto, UserPartialDto, UpdateProfileDto, ChangePasswordDto, };

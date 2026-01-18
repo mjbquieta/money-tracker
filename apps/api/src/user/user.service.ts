@@ -1,6 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserWithSettingsDto } from './user.dto';
+import {
+  CreateUserWithSettingsDto,
+  UpdateProfileDto,
+  ChangePasswordDto,
+} from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { omit } from 'lodash';
@@ -77,5 +85,45 @@ export class UserService {
       include: { settings: true, categories: true },
     });
     return omit(user, ['password']);
+  }
+
+  async updateProfile(userId: UUID, payload: UpdateProfileDto) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: payload,
+      include: { settings: true, categories: true },
+    });
+    return omit(user, ['password']);
+  }
+
+  async changePassword(userId: UUID, payload: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const isCurrentPasswordValid = await bcrypt.compare(
+      payload.currentPassword,
+      user.password,
+    );
+
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(
+      payload.newPassword,
+      this.saltRounds,
+    );
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedNewPassword },
+    });
+
+    return { message: 'Password changed successfully' };
   }
 }

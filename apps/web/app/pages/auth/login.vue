@@ -1,14 +1,20 @@
 <script setup lang="ts">
+import {
+  ArrowRightIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
+} from "@heroicons/vue/24/outline";
+
 definePageMeta({
-  layout: 'auth',
+  layout: "auth",
 });
 
 const authStore = useAuthStore();
 const router = useRouter();
 
 const form = reactive({
-  email: '',
-  password: '',
+  email: "",
+  password: "",
 });
 
 const loading = ref(false);
@@ -27,45 +33,90 @@ async function handleSubmit() {
     return;
   }
 
-  router.push('/dashboard');
+  router.push("/dashboard");
 }
 </script>
 
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-900 text-center mb-8">
-      Sign in to your account
-    </h2>
+    <div class="text-center mb-8">
+      <h2 class="text-2xl font-bold text-secondary-900">Welcome back</h2>
+      <p class="text-secondary-500 mt-2">
+        Sign in to continue tracking your finances
+      </p>
+    </div>
 
     <UiBaseAlert v-if="error" type="error" :message="error" class="mb-6" />
 
-    <form class="space-y-6" @submit.prevent="handleSubmit">
-      <UiBaseInput
-        v-model="form.email"
-        label="Email address"
-        type="email"
-        placeholder="you@example.com"
-        required
-      />
+    <form class="space-y-5" @submit.prevent="handleSubmit">
+      <div>
+        <label class="block text-sm font-medium text-secondary-700 mb-2"
+          >Email address</label
+        >
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+          >
+            <EnvelopeIcon class="w-5 h-5 text-secondary-400" />
+          </div>
+          <input
+            v-model="form.email"
+            type="text"
+            placeholder="you@example.com"
+            required
+            class="w-full pl-11 pr-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+          />
+        </div>
+      </div>
 
-      <UiBaseInput
-        v-model="form.password"
-        label="Password"
-        type="password"
-        placeholder="Enter your password"
-        required
-      />
+      <div>
+        <label class="block text-sm font-medium text-secondary-700 mb-2"
+          >Password</label
+        >
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+          >
+            <LockClosedIcon class="w-5 h-5 text-secondary-400" />
+          </div>
+          <input
+            v-model="form.password"
+            type="password"
+            placeholder="Enter your password"
+            required
+            class="w-full pl-11 pr-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+          />
+        </div>
+      </div>
 
-      <UiBaseButton type="submit" class="w-full" :loading="loading">
-        Sign in
-      </UiBaseButton>
+      <button
+        type="submit"
+        class="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl transition-all shadow-card hover:shadow-card-hover font-semibold text-lg disabled:opacity-50 group"
+        :disabled="loading"
+      >
+        <span
+          v-if="loading"
+          class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+        ></span>
+        <template v-else>
+          Sign in
+          <ArrowRightIcon
+            class="w-5 h-5 group-hover:translate-x-1 transition-transform"
+          />
+        </template>
+      </button>
     </form>
 
-    <p class="mt-6 text-center text-sm text-gray-500">
-      Don't have an account?
-      <NuxtLink to="/auth/register" class="text-blue-600 hover:underline font-medium">
-        Register here
-      </NuxtLink>
-    </p>
+    <div class="mt-8 pt-6 border-t border-secondary-100">
+      <p class="text-center text-sm text-secondary-500">
+        Don't have an account?
+        <NuxtLink
+          to="/auth/register"
+          class="text-primary-600 hover:text-primary-700 font-semibold ml-1"
+        >
+          Create one for free
+        </NuxtLink>
+      </p>
+    </div>
   </div>
 </template>

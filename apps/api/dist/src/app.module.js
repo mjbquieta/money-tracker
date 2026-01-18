@@ -26,7 +26,7 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot(),
             throttler_1.ThrottlerModule.forRoot({
-                throttlers: [{ ttl: 60000, limit: 10 }],
+                throttlers: [{ ttl: 60000, limit: 100 }],
             }),
             user_module_1.UserModule,
             auth_module_1.AuthModule,
@@ -36,10 +36,12 @@ exports.AppModule = AppModule = __decorate([
             budget_period_module_1.BudgetPeriodModule,
             expense_module_1.ExpenseModule,
         ],
-        providers: [{
+        providers: [
+            {
                 provide: core_1.APP_GUARD,
                 useClass: throttler_1.ThrottlerGuard,
-            }],
+            },
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

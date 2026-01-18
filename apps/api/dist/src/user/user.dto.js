@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserPartialDto = exports.BaseUserDto = exports.CreateUserWithSettingsDto = void 0;
+exports.ChangePasswordDto = exports.UpdateProfileDto = exports.UserPartialDto = exports.BaseUserDto = exports.CreateUserWithSettingsDto = void 0;
 const mapped_types_1 = require("@nestjs/mapped-types");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
@@ -61,4 +61,40 @@ __decorate([
 class UserPartialDto extends (0, mapped_types_1.PartialType)(BaseUserDto) {
 }
 exports.UserPartialDto = UserPartialDto;
+class UpdateProfileDto {
+    name;
+    username;
+}
+exports.UpdateProfileDto = UpdateProfileDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(40),
+    __metadata("design:type", String)
+], UpdateProfileDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, is_username_validator_1.IsUsernameExist)({ message: 'Username is taken' }),
+    __metadata("design:type", String)
+], UpdateProfileDto.prototype, "username", void 0);
+class ChangePasswordDto {
+    currentPassword;
+    newPassword;
+}
+exports.ChangePasswordDto = ChangePasswordDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ChangePasswordDto.prototype, "currentPassword", void 0);
+__decorate([
+    (0, class_validator_1.IsStrongPassword)({
+        minLength: 4,
+        minNumbers: 1,
+        minSymbols: 1,
+        minLowercase: 1,
+        minUppercase: 1,
+    }),
+    __metadata("design:type", String)
+], ChangePasswordDto.prototype, "newPassword", void 0);
 //# sourceMappingURL=user.dto.js.map

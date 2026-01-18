@@ -31,13 +31,13 @@ export declare class BudgetPeriodService {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }>;
     findAll(userId: UUID): Promise<({
         expenses: ({
@@ -66,13 +66,13 @@ export declare class BudgetPeriodService {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     })[]>;
     findOne(userId: UUID, budgetPeriodId: UUID): Promise<{
         expenses: ({
@@ -101,13 +101,13 @@ export declare class BudgetPeriodService {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }>;
     update(userId: UUID, budgetPeriodId: UUID, payload: UpdateBudgetPeriodDto): Promise<{
         expenses: ({
@@ -136,24 +136,24 @@ export declare class BudgetPeriodService {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }>;
     delete(userId: UUID, budgetPeriodId: UUID): Promise<{
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }>;
     duplicate(userId: UUID, budgetPeriodId: UUID, payload: DuplicateBudgetPeriodDto): Promise<({
         expenses: ({
@@ -182,13 +182,13 @@ export declare class BudgetPeriodService {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }) | null>;
     getSummary(userId: UUID, budgetPeriodId: UUID): Promise<{
         income: number;

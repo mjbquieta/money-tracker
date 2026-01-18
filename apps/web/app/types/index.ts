@@ -87,6 +87,20 @@ export interface CreateCategoryPayload {
   description?: string;
 }
 
+export interface UpdateSettingsPayload {
+  currency?: string;
+}
+
+export interface UpdateProfilePayload {
+  name?: string;
+  username?: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface BudgetSummary {
   income: number;
   totalExpenses: number;

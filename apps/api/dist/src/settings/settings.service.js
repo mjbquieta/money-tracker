@@ -26,6 +26,27 @@ let SettingsService = class SettingsService {
             },
         });
     }
+    async findByUserId(userId) {
+        const settings = await this.prisma.settings.findUnique({
+            where: { userId },
+        });
+        if (!settings) {
+            throw new common_1.NotFoundException('Settings not found');
+        }
+        return settings;
+    }
+    async update(userId, payload) {
+        const settings = await this.prisma.settings.findUnique({
+            where: { userId },
+        });
+        if (!settings) {
+            throw new common_1.NotFoundException('Settings not found');
+        }
+        return this.prisma.settings.update({
+            where: { userId },
+            data: payload,
+        });
+    }
 };
 exports.SettingsService = SettingsService;
 exports.SettingsService = SettingsService = __decorate([

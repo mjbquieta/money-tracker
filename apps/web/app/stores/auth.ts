@@ -1,5 +1,13 @@
 import { defineStore } from 'pinia';
-import type { User, LoginPayload, RegisterPayload } from '~/types';
+import type {
+  User,
+  LoginPayload,
+  RegisterPayload,
+  Settings,
+  UpdateSettingsPayload,
+  UpdateProfilePayload,
+  ChangePasswordPayload,
+} from '~/types';
 
 interface LoginResponse {
   user: User;
@@ -80,6 +88,55 @@ export const useAuthStore = defineStore('auth', () => {
     navigateTo('/');
   }
 
+  async function updateSettings(payload: UpdateSettingsPayload) {
+    const { data, error } = await api.patch<Settings>('/api/v1/settings', payload);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    // Update the user's settings in local state
+    if (data && user.value) {
+      user.value = {
+        ...user.value,
+        settings: data,
+      };
+      if (import.meta.client) {
+        localStorage.setItem('user', JSON.stringify(user.value));
+      }
+    }
+
+    return { success: true, error: null };
+  }
+
+  async function updateProfile(payload: UpdateProfilePayload) {
+    const { data, error } = await api.patch<User>('/api/v1/users/profile', payload);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    // Update the user in local state
+    if (data) {
+      user.value = data;
+      if (import.meta.client) {
+        localStorage.setItem('user', JSON.stringify(data));
+      }
+    }
+
+    return { success: true, error: null };
+  }
+
+  async function changePassword(payload: ChangePasswordPayload) {
+    const { error } = await api.patch<{ message: string }>('/api/v1/users/password', payload);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    return { success: true, error: null };
+  }
+
   return {
     user,
     token,
@@ -87,5 +144,8 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
+    updateSettings,
+    updateProfile,
+    changePassword,
   };
 });

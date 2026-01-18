@@ -9,12 +9,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Currency = exports.SettingsDto = void 0;
+exports.Currency = exports.UpdateSettingsDto = exports.SettingsDto = void 0;
 const class_validator_1 = require("class-validator");
 var Currency;
 (function (Currency) {
     Currency["PHP"] = "PHP";
     Currency["USD"] = "USD";
+    Currency["EUR"] = "EUR";
+    Currency["GBP"] = "GBP";
+    Currency["JPY"] = "JPY";
+    Currency["AUD"] = "AUD";
+    Currency["CAD"] = "CAD";
+    Currency["SGD"] = "SGD";
 })(Currency || (exports.Currency = Currency = {}));
 class SettingsDto {
     currency;
@@ -24,4 +30,13 @@ __decorate([
     (0, class_validator_1.IsEnum)(Currency),
     __metadata("design:type", String)
 ], SettingsDto.prototype, "currency", void 0);
+class UpdateSettingsDto {
+    currency;
+}
+exports.UpdateSettingsDto = UpdateSettingsDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(Currency),
+    __metadata("design:type", String)
+], UpdateSettingsDto.prototype, "currency", void 0);
 //# sourceMappingURL=settings.dto.js.map

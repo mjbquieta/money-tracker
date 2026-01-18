@@ -104,6 +104,32 @@ let UserService = class UserService {
         });
         return (0, lodash_1.omit)(user, ['password']);
     }
+    async updateProfile(userId, payload) {
+        const user = await this.prisma.user.update({
+            where: { id: userId },
+            data: payload,
+            include: { settings: true, categories: true },
+        });
+        return (0, lodash_1.omit)(user, ['password']);
+    }
+    async changePassword(userId, payload) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('User not found');
+        }
+        const isCurrentPasswordValid = await bcrypt.compare(payload.currentPassword, user.password);
+        if (!isCurrentPasswordValid) {
+            throw new common_1.BadRequestException('Current password is incorrect');
+        }
+        const hashedNewPassword = await bcrypt.hash(payload.newPassword, this.saltRounds);
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: { password: hashedNewPassword },
+        });
+        return { message: 'Password changed successfully' };
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([

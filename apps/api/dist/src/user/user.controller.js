@@ -16,6 +16,8 @@ exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
 const user_dto_1 = require("./user.dto");
+const auth_guard_1 = require("../auth/auth.guard");
+const current_user_decorator_1 = require("../auth/current-user.decorator");
 let UserController = class UserController {
     userService;
     constructor(userService) {
@@ -23,6 +25,12 @@ let UserController = class UserController {
     }
     async create(body) {
         return this.userService.createUser(body);
+    }
+    async updateProfile(userId, body) {
+        return this.userService.updateProfile(userId, body);
+    }
+    async changePassword(userId, body) {
+        return this.userService.changePassword(userId, body);
     }
 };
 exports.UserController = UserController;
@@ -33,6 +41,24 @@ __decorate([
     __metadata("design:paramtypes", [user_dto_1.CreateUserWithSettingsDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "create", null);
+__decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.Patch)('profile'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Body)(new common_1.ValidationPipe({ transform: true, whitelist: true }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.UpdateProfileDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateProfile", null);
+__decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.Patch)('password'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Body)(new common_1.ValidationPipe({ transform: true, whitelist: true }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.ChangePasswordDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "changePassword", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('api/v1/users'),
     __metadata("design:paramtypes", [user_service_1.UserService])

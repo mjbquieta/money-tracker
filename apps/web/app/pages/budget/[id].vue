@@ -1,5 +1,21 @@
 <script setup lang="ts">
 import type { Expense } from '~/types';
+import {
+  ArrowLeftIcon,
+  PencilIcon,
+  DocumentDuplicateIcon,
+  TrashIcon,
+  PlusIcon,
+  BanknotesIcon,
+  CreditCardIcon,
+  WalletIcon,
+  ChartPieIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  TagIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+} from '@heroicons/vue/24/outline';
 
 definePageMeta({
   middleware: 'auth',
@@ -44,12 +60,6 @@ const duplicateForm = reactive({
 });
 
 onMounted(async () => {
-  // Double-check auth on mount
-  if (!authStore.isAuthenticated) {
-    navigateTo('/auth/login', { replace: true });
-    return;
-  }
-
   await Promise.all([
     budgetStore.fetchBudgetPeriod(budgetPeriodId),
     budgetStore.fetchBudgetSummary(budgetPeriodId),
@@ -83,10 +93,6 @@ function formatDate(dateString: string) {
     month: 'short',
     day: 'numeric',
   });
-}
-
-function formatDateForInput(dateString: string) {
-  return new Date(dateString).toISOString().split('T')[0];
 }
 
 function formatCurrency(amount: number) {
@@ -311,94 +317,146 @@ async function handleDeleteBudgetPeriod() {
   }
 }
 
-function getCategoryColor(categoryName: string): string {
-  const colors: Record<string, string> = {
-    Bills: 'bg-red-100 text-red-800',
-    Food: 'bg-orange-100 text-orange-800',
-    Transport: 'bg-blue-100 text-blue-800',
-    Savings: 'bg-green-100 text-green-800',
-    Entertainment: 'bg-purple-100 text-purple-800',
-  };
-  return colors[categoryName] || 'bg-gray-100 text-gray-800';
+const categoryColors: Record<string, { bg: string; text: string; bar: string }> = {
+  Bills: { bg: 'bg-danger-50', text: 'text-danger-700', bar: 'bg-danger-500' },
+  Food: { bg: 'bg-warning-50', text: 'text-warning-700', bar: 'bg-warning-500' },
+  Transport: { bg: 'bg-primary-50', text: 'text-primary-700', bar: 'bg-primary-500' },
+  Savings: { bg: 'bg-success-50', text: 'text-success-700', bar: 'bg-success-500' },
+  Entertainment: { bg: 'bg-accent-50', text: 'text-accent-700', bar: 'bg-accent-500' },
+};
+
+function getCategoryStyle(categoryName: string) {
+  return categoryColors[categoryName] || { bg: 'bg-secondary-100', text: 'text-secondary-700', bar: 'bg-secondary-500' };
 }
 </script>
 
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div v-if="budgetStore.loading" class="text-center py-12">
-      <p class="text-gray-500">Loading...</p>
+    <!-- Loading State -->
+    <div v-if="budgetStore.loading" class="text-center py-16">
+      <div class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+      <p class="text-secondary-500">Loading budget period...</p>
     </div>
 
     <div v-else-if="period">
       <!-- Header -->
       <div class="mb-8">
         <button
-          class="text-blue-600 hover:text-blue-800 text-sm mb-4 flex items-center gap-1"
+          class="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm mb-4 group"
           @click="router.push('/dashboard')"
         >
-          &larr; Back to Dashboard
+          <ArrowLeftIcon class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Dashboard
         </button>
 
-        <div class="flex justify-between items-start">
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">
+            <h1 class="text-2xl font-bold text-secondary-900">
               {{ period.name || `${formatDate(period.startDate)} - ${formatDate(period.endDate)}` }}
             </h1>
-            <p v-if="period.name" class="text-gray-500">
+            <p v-if="period.name" class="text-secondary-500 mt-1">
               {{ formatDate(period.startDate) }} - {{ formatDate(period.endDate) }}
             </p>
           </div>
 
           <div class="flex gap-2">
-            <UiBaseButton variant="outline" @click="openEditPeriod">
-              Edit
-            </UiBaseButton>
-            <UiBaseButton variant="outline" @click="openDuplicateModal">
-              Duplicate
-            </UiBaseButton>
-            <UiBaseButton variant="outline" class="text-red-600 border-red-300 hover:bg-red-50" @click="showDeleteConfirm = true">
-              Delete
-            </UiBaseButton>
+            <button
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 border border-secondary-200 rounded-lg transition-colors"
+              @click="openEditPeriod"
+            >
+              <PencilIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Edit</span>
+            </button>
+            <button
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 border border-secondary-200 rounded-lg transition-colors"
+              @click="openDuplicateModal"
+            >
+              <DocumentDuplicateIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Duplicate</span>
+            </button>
+            <button
+              class="flex items-center gap-2 px-4 py-2 text-danger-600 hover:text-danger-700 hover:bg-danger-50 border border-danger-200 rounded-lg transition-colors"
+              @click="showDeleteConfirm = true"
+            >
+              <TrashIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Delete</span>
+            </button>
           </div>
         </div>
       </div>
 
       <!-- Summary Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white shadow rounded-lg p-6 cursor-pointer hover:shadow-md transition-shadow" @click="openEditPeriod">
-          <p class="text-sm text-gray-500 mb-1">Income</p>
-          <p class="text-2xl font-bold text-green-600">{{ formatCurrency(period.income) }}</p>
-          <p class="text-xs text-gray-400 mt-1">Click to edit</p>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Income Card -->
+        <div
+          class="bg-white rounded-xl shadow-card border border-secondary-100 p-5 cursor-pointer hover:shadow-card-hover hover:border-primary-200 transition-all group"
+          @click="openEditPeriod"
+        >
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center group-hover:bg-success-100 transition-colors">
+              <ArrowTrendingUpIcon class="w-5 h-5 text-success-600" />
+            </div>
+            <span class="text-sm font-medium text-secondary-500">Income</span>
+          </div>
+          <p class="text-2xl font-bold text-success-600">{{ formatCurrency(period.income) }}</p>
+          <p class="text-xs text-secondary-400 mt-2">Click to edit</p>
         </div>
-        <div class="bg-white shadow rounded-lg p-6">
-          <p class="text-sm text-gray-500 mb-1">Total Expenses</p>
-          <p class="text-2xl font-bold text-red-600">{{ formatCurrency(summary?.totalExpenses || 0) }}</p>
-          <p class="text-xs text-gray-500 mt-1">{{ period.expenses.length }} expense{{ period.expenses.length === 1 ? '' : 's' }}</p>
+
+        <!-- Total Expenses Card -->
+        <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-danger-50 rounded-lg flex items-center justify-center">
+              <CreditCardIcon class="w-5 h-5 text-danger-600" />
+            </div>
+            <span class="text-sm font-medium text-secondary-500">Expenses</span>
+          </div>
+          <p class="text-2xl font-bold text-danger-600">{{ formatCurrency(summary?.totalExpenses || 0) }}</p>
+          <p class="text-xs text-secondary-400 mt-2">{{ period.expenses.length }} expense{{ period.expenses.length === 1 ? '' : 's' }}</p>
         </div>
-        <div class="bg-white shadow rounded-lg p-6">
-          <p class="text-sm text-gray-500 mb-1">Remaining</p>
+
+        <!-- Remaining Card -->
+        <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+              <WalletIcon class="w-5 h-5 text-primary-600" />
+            </div>
+            <span class="text-sm font-medium text-secondary-500">Remaining</span>
+          </div>
           <p
             class="text-2xl font-bold"
-            :class="(summary?.remaining || 0) >= 0 ? 'text-green-600' : 'text-red-600'"
+            :class="(summary?.remaining || 0) >= 0 ? 'text-primary-600' : 'text-danger-600'"
           >
             {{ formatCurrency(summary?.remaining || 0) }}
           </p>
-          <p class="text-xs text-gray-500 mt-1">
+          <p class="text-xs text-secondary-400 mt-2">
             {{ ((summary?.remaining || 0) / period.income * 100).toFixed(1) }}% of budget
           </p>
         </div>
-        <div class="bg-white shadow rounded-lg p-6">
-          <p class="text-sm text-gray-500 mb-1">Budget Used</p>
+
+        <!-- Budget Used Card -->
+        <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div
+              class="w-10 h-10 rounded-lg flex items-center justify-center"
+              :class="spendingPercentage > 100 ? 'bg-danger-50' : spendingPercentage > 80 ? 'bg-warning-50' : 'bg-success-50'"
+            >
+              <ChartPieIcon
+                class="w-5 h-5"
+                :class="spendingPercentage > 100 ? 'text-danger-600' : spendingPercentage > 80 ? 'text-warning-600' : 'text-success-600'"
+              />
+            </div>
+            <span class="text-sm font-medium text-secondary-500">Budget Used</span>
+          </div>
           <p
             class="text-2xl font-bold"
-            :class="spendingPercentage > 100 ? 'text-red-600' : spendingPercentage > 80 ? 'text-yellow-600' : 'text-green-600'"
+            :class="spendingPercentage > 100 ? 'text-danger-600' : spendingPercentage > 80 ? 'text-warning-600' : 'text-success-600'"
           >
             {{ spendingPercentage.toFixed(1) }}%
           </p>
-          <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div class="mt-3 h-2 bg-secondary-100 rounded-full overflow-hidden">
             <div
-              class="h-full transition-all duration-300"
-              :class="spendingPercentage > 100 ? 'bg-red-500' : spendingPercentage > 80 ? 'bg-yellow-500' : 'bg-green-500'"
+              class="h-full transition-all duration-500"
+              :class="spendingPercentage > 100 ? 'bg-danger-500' : spendingPercentage > 80 ? 'bg-warning-500' : 'bg-primary-500'"
               :style="{ width: `${Math.min(100, spendingPercentage)}%` }"
             />
           </div>
@@ -406,37 +464,42 @@ function getCategoryColor(categoryName: string): string {
       </div>
 
       <!-- Expenses by Category -->
-      <div v-if="sortedCategories.length > 0" class="bg-white shadow rounded-lg p-6 mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Expenses by Category</h2>
-          <p v-if="topCategory" class="text-sm text-gray-500">
-            Top: <span class="font-medium">{{ topCategory.name }}</span> ({{ ((topCategory.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)
+      <div v-if="sortedCategories.length > 0" class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-8">
+        <div class="flex justify-between items-center mb-5">
+          <h2 class="text-lg font-semibold text-secondary-800 flex items-center gap-2">
+            <TagIcon class="w-5 h-5 text-primary-500" />
+            Expenses by Category
+          </h2>
+          <p v-if="topCategory" class="text-sm text-secondary-500">
+            Top: <span class="font-medium text-secondary-700">{{ topCategory.name }}</span>
+            <span class="text-primary-600 ml-1">({{ ((topCategory.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)</span>
           </p>
         </div>
         <div class="space-y-4">
           <div
             v-for="category in sortedCategories"
             :key="category.name"
-            class="space-y-1"
+            class="space-y-2"
           >
             <div class="flex justify-between items-center">
               <div class="flex items-center gap-3">
                 <span
-                  class="px-2 py-1 rounded-full text-xs font-medium"
-                  :class="getCategoryColor(category.name)"
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                  :class="[getCategoryStyle(category.name).bg, getCategoryStyle(category.name).text]"
                 >
                   {{ category.name }}
                 </span>
-                <span class="text-sm text-gray-500">{{ category.count }} expense{{ category.count === 1 ? '' : 's' }}</span>
+                <span class="text-sm text-secondary-500">{{ category.count }} expense{{ category.count === 1 ? '' : 's' }}</span>
               </div>
               <div class="text-right">
-                <span class="font-medium text-gray-900">{{ formatCurrency(category.total) }}</span>
-                <span class="text-xs text-gray-500 ml-2">({{ ((category.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)</span>
+                <span class="font-semibold text-secondary-900">{{ formatCurrency(category.total) }}</span>
+                <span class="text-xs text-secondary-400 ml-2">({{ ((category.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)</span>
               </div>
             </div>
-            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-2 bg-secondary-100 rounded-full overflow-hidden">
               <div
-                class="h-full bg-blue-500 transition-all duration-300"
+                class="h-full transition-all duration-500"
+                :class="getCategoryStyle(category.name).bar"
                 :style="{ width: `${(category.total / (summary?.totalExpenses || 1)) * 100}%` }"
               />
             </div>
@@ -445,53 +508,69 @@ function getCategoryColor(categoryName: string): string {
       </div>
 
       <!-- Expenses List -->
-      <div class="bg-white shadow rounded-lg p-6">
+      <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-6">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-lg font-semibold text-gray-900">Expenses</h2>
-          <UiBaseButton @click="openAddExpense">
-            + Add Expense
-          </UiBaseButton>
-        </div>
-
-        <div v-if="period.expenses.length === 0" class="text-center py-8">
-          <p class="text-gray-500 mb-4">No expenses yet. Add your first expense to start tracking.</p>
-          <UiBaseButton @click="openAddExpense">
+          <h2 class="text-lg font-semibold text-secondary-800 flex items-center gap-2">
+            <CreditCardIcon class="w-5 h-5 text-primary-500" />
+            Expenses
+          </h2>
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
+            @click="openAddExpense"
+          >
+            <PlusIcon class="w-5 h-5" />
             Add Expense
-          </UiBaseButton>
+          </button>
         </div>
 
+        <!-- Empty State -->
+        <div v-if="period.expenses.length === 0" class="text-center py-12">
+          <div class="w-16 h-16 bg-secondary-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <BanknotesIcon class="w-8 h-8 text-secondary-400" />
+          </div>
+          <p class="text-secondary-500 mb-4">No expenses yet. Add your first expense to start tracking.</p>
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium mx-auto"
+            @click="openAddExpense"
+          >
+            <PlusIcon class="w-5 h-5" />
+            Add Expense
+          </button>
+        </div>
+
+        <!-- Expenses Grid -->
         <div v-else class="space-y-3">
           <div
             v-for="expense in period.expenses"
             :key="expense.id"
-            class="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            class="flex justify-between items-center p-4 bg-secondary-50 rounded-xl hover:bg-secondary-100 transition-colors group"
           >
             <div class="flex-1">
-              <div class="flex items-center gap-2">
-                <p class="font-medium text-gray-900">{{ expense.name }}</p>
+              <div class="flex items-center gap-3">
+                <p class="font-medium text-secondary-900">{{ expense.name }}</p>
                 <span
-                  class="px-2 py-0.5 rounded-full text-xs font-medium"
-                  :class="getCategoryColor(expense.category.name)"
+                  class="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  :class="[getCategoryStyle(expense.category.name).bg, getCategoryStyle(expense.category.name).text]"
                 >
                   {{ expense.category.name }}
                 </span>
               </div>
-              <p v-if="expense.description" class="text-sm text-gray-500 mt-1">{{ expense.description }}</p>
+              <p v-if="expense.description" class="text-sm text-secondary-500 mt-1">{{ expense.description }}</p>
             </div>
             <div class="flex items-center gap-4">
-              <p class="font-semibold text-red-600">{{ formatCurrency(expense.amount) }}</p>
-              <div class="flex gap-2">
+              <p class="font-bold text-danger-600 text-lg">{{ formatCurrency(expense.amount) }}</p>
+              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  class="text-blue-600 hover:text-blue-800 text-sm"
+                  class="p-2 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                   @click="openEditExpense(expense)"
                 >
-                  Edit
+                  <PencilIcon class="w-4 h-4" />
                 </button>
                 <button
-                  class="text-red-600 hover:text-red-800 text-sm"
+                  class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
                   @click="handleDeleteExpense(expense)"
                 >
-                  Delete
+                  <TrashIcon class="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -501,241 +580,301 @@ function getCategoryColor(categoryName: string): string {
     </div>
 
     <!-- Add/Edit Expense Modal -->
-    <div
-      v-if="showExpenseModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      @click.self="showExpenseModal = false"
-    >
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">
-          {{ editingExpense ? 'Edit Expense' : 'Add Expense' }}
-        </h2>
+    <Teleport to="body">
+      <div
+        v-if="showExpenseModal"
+        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showExpenseModal = false"
+      >
+        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
+              <CreditCardIcon class="w-6 h-6 text-primary-600" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900">
+                {{ editingExpense ? 'Edit Expense' : 'Add Expense' }}
+              </h2>
+              <p class="text-sm text-secondary-500">{{ editingExpense ? 'Update expense details' : 'Track a new expense' }}</p>
+            </div>
+          </div>
 
-        <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
+          <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
 
-        <form @submit.prevent="handleExpenseSubmit" class="space-y-4">
-          <UiBaseInput
-            v-model="expenseForm.name"
-            label="Name"
-            placeholder="e.g., Electricity Bill"
-            required
-          />
-
-          <UiBaseInput
-            v-model="expenseForm.description"
-            label="Description (Optional)"
-            placeholder="Additional details"
-          />
-
-          <UiBaseInput
-            v-model="expenseForm.amount"
-            label="Amount"
-            type="number"
-            :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
-            required
-          />
-
-          <div class="space-y-2">
-            <UiBaseSelect
-              v-if="!showNewCategoryInput"
-              v-model="expenseForm.categoryId"
-              label="Category"
+          <form @submit.prevent="handleExpenseSubmit" class="space-y-5">
+            <UiBaseInput
+              v-model="expenseForm.name"
+              label="Name"
+              placeholder="e.g., Electricity Bill"
               required
-            >
-              <option value="" disabled>Select a category</option>
-              <option
-                v-for="category in expenseStore.categories"
-                :key="category.id"
-                :value="category.id"
-              >
-                {{ category.name }}{{ category.isDefault ? '' : ' (Custom)' }}
-              </option>
-            </UiBaseSelect>
+            />
 
-            <div v-if="showNewCategoryInput" class="space-y-2">
-              <label class="text-sm font-medium text-gray-700">New Category</label>
-              <div class="flex gap-2">
-                <input
-                  v-model="newCategoryName"
-                  type="text"
-                  placeholder="Category name"
-                  class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  @keyup.enter="handleCreateCategory"
-                />
-                <UiBaseButton
-                  type="button"
-                  :loading="categoryLoading"
-                  @click="handleCreateCategory"
+            <UiBaseInput
+              v-model="expenseForm.description"
+              label="Description (Optional)"
+              placeholder="Additional details"
+            />
+
+            <UiBaseInput
+              v-model="expenseForm.amount"
+              label="Amount"
+              type="number"
+              :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
+              required
+            />
+
+            <div class="space-y-2">
+              <UiBaseSelect
+                v-if="!showNewCategoryInput"
+                v-model="expenseForm.categoryId"
+                label="Category"
+                required
+              >
+                <option value="" disabled>Select a category</option>
+                <option
+                  v-for="category in expenseStore.categories"
+                  :key="category.id"
+                  :value="category.id"
                 >
-                  Add
-                </UiBaseButton>
-                <UiBaseButton
-                  type="button"
-                  variant="outline"
-                  @click="cancelNewCategory"
-                >
-                  Cancel
-                </UiBaseButton>
+                  {{ category.name }}{{ category.isDefault ? '' : ' (Custom)' }}
+                </option>
+              </UiBaseSelect>
+
+              <div v-if="showNewCategoryInput" class="space-y-2">
+                <label class="text-sm font-medium text-secondary-700">New Category</label>
+                <div class="flex gap-2">
+                  <input
+                    v-model="newCategoryName"
+                    type="text"
+                    placeholder="Category name"
+                    class="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    @keyup.enter="handleCreateCategory"
+                  />
+                  <button
+                    type="button"
+                    class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50"
+                    :disabled="categoryLoading"
+                    @click="handleCreateCategory"
+                  >
+                    <span v-if="categoryLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+                    <span v-else>Add</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="px-4 py-2 text-secondary-600 hover:bg-secondary-50 border border-secondary-200 rounded-lg transition-colors"
+                    @click="cancelNewCategory"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
+
+              <button
+                v-if="!showNewCategoryInput"
+                type="button"
+                class="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                @click="showNewCategoryInput = true"
+              >
+                <PlusIcon class="w-4 h-4" />
+                Add custom category
+              </button>
             </div>
 
-            <button
-              v-if="!showNewCategoryInput"
-              type="button"
-              class="text-sm text-blue-600 hover:text-blue-800"
-              @click="showNewCategoryInput = true"
-            >
-              + Add custom category
-            </button>
-          </div>
-
-          <div class="flex justify-end gap-3 mt-6">
-            <UiBaseButton
-              type="button"
-              variant="outline"
-              @click="showExpenseModal = false"
-            >
-              Cancel
-            </UiBaseButton>
-            <UiBaseButton type="submit" :loading="loading">
-              {{ editingExpense ? 'Update' : 'Add' }}
-            </UiBaseButton>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Edit Budget Period Modal -->
-    <div
-      v-if="showEditPeriodModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      @click.self="showEditPeriodModal = false"
-    >
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">Edit Budget Period</h2>
-
-        <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
-
-        <form @submit.prevent="handleEditPeriodSubmit" class="space-y-4">
-          <UiBaseInput
-            v-model="editPeriodForm.name"
-            label="Name (Optional)"
-            placeholder="e.g., January 2026"
-          />
-
-          <UiBaseInput
-            v-model="editPeriodForm.income"
-            label="Income"
-            type="number"
-            :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
-            required
-          />
-
-          <div class="flex justify-end gap-3 mt-6">
-            <UiBaseButton
-              type="button"
-              variant="outline"
-              @click="showEditPeriodModal = false"
-            >
-              Cancel
-            </UiBaseButton>
-            <UiBaseButton type="submit" :loading="loading">
-              Save
-            </UiBaseButton>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Duplicate Budget Period Modal -->
-    <div
-      v-if="showDuplicateModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      @click.self="showDuplicateModal = false"
-    >
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">Duplicate Budget Period</h2>
-        <p class="text-sm text-gray-500 mb-4">
-          This will create a new budget period with the same expenses as the current one.
-        </p>
-
-        <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
-
-        <form @submit.prevent="handleDuplicateSubmit" class="space-y-4">
-          <UiBaseInput
-            v-model="duplicateForm.name"
-            label="Name (Optional)"
-            placeholder="e.g., February 2026"
-          />
-
-          <div class="grid grid-cols-2 gap-4">
-            <UiBaseInput
-              v-model="duplicateForm.startDate"
-              label="Start Date"
-              type="date"
-              required
-            />
-            <UiBaseInput
-              v-model="duplicateForm.endDate"
-              label="End Date"
-              type="date"
-              required
-            />
-          </div>
-
-          <UiBaseInput
-            v-model="duplicateForm.income"
-            label="Income"
-            type="number"
-            :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
-            required
-          />
-
-          <div class="flex justify-end gap-3 mt-6">
-            <UiBaseButton
-              type="button"
-              variant="outline"
-              @click="showDuplicateModal = false"
-            >
-              Cancel
-            </UiBaseButton>
-            <UiBaseButton type="submit" :loading="loading">
-              Duplicate
-            </UiBaseButton>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div
-      v-if="showDeleteConfirm"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      @click.self="showDeleteConfirm = false"
-    >
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Delete Budget Period</h2>
-        <p class="text-gray-600 mb-6">
-          Are you sure you want to delete this budget period? This will also delete all associated expenses.
-          This action cannot be undone.
-        </p>
-        <div class="flex justify-end gap-3">
-          <UiBaseButton
-            type="button"
-            variant="outline"
-            @click="showDeleteConfirm = false"
-          >
-            Cancel
-          </UiBaseButton>
-          <UiBaseButton
-            type="button"
-            class="bg-red-600 hover:bg-red-700"
-            @click="handleDeleteBudgetPeriod"
-          >
-            Delete
-          </UiBaseButton>
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+              <button
+                type="button"
+                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                @click="showExpenseModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium disabled:opacity-50"
+                :disabled="loading"
+              >
+                <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <CheckCircleIcon v-else class="w-5 h-5" />
+                {{ editingExpense ? 'Update' : 'Add Expense' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
+    </Teleport>
+
+    <!-- Edit Budget Period Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showEditPeriodModal"
+        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showEditPeriodModal = false"
+      >
+        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
+              <PencilIcon class="w-6 h-6 text-primary-600" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900">Edit Budget Period</h2>
+              <p class="text-sm text-secondary-500">Update period details</p>
+            </div>
+          </div>
+
+          <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
+
+          <form @submit.prevent="handleEditPeriodSubmit" class="space-y-5">
+            <UiBaseInput
+              v-model="editPeriodForm.name"
+              label="Name (Optional)"
+              placeholder="e.g., January 2026"
+            />
+
+            <UiBaseInput
+              v-model="editPeriodForm.income"
+              label="Income"
+              type="number"
+              :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
+              required
+            />
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+              <button
+                type="button"
+                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                @click="showEditPeriodModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium disabled:opacity-50"
+                :disabled="loading"
+              >
+                <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <CheckCircleIcon v-else class="w-5 h-5" />
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Duplicate Budget Period Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showDuplicateModal"
+        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showDuplicateModal = false"
+      >
+        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
+              <DocumentDuplicateIcon class="w-6 h-6 text-primary-600" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900">Duplicate Budget Period</h2>
+              <p class="text-sm text-secondary-500">Create a copy with the same expenses</p>
+            </div>
+          </div>
+
+          <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
+
+          <form @submit.prevent="handleDuplicateSubmit" class="space-y-5">
+            <UiBaseInput
+              v-model="duplicateForm.name"
+              label="Name (Optional)"
+              placeholder="e.g., February 2026"
+            />
+
+            <div class="grid grid-cols-2 gap-4">
+              <UiBaseInput
+                v-model="duplicateForm.startDate"
+                label="Start Date"
+                type="date"
+                required
+              />
+              <UiBaseInput
+                v-model="duplicateForm.endDate"
+                label="End Date"
+                type="date"
+                required
+              />
+            </div>
+
+            <UiBaseInput
+              v-model="duplicateForm.income"
+              label="Income"
+              type="number"
+              :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
+              required
+            />
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+              <button
+                type="button"
+                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                @click="showDuplicateModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium disabled:opacity-50"
+                :disabled="loading"
+              >
+                <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <DocumentDuplicateIcon v-else class="w-5 h-5" />
+                Duplicate
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Delete Confirmation Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showDeleteConfirm"
+        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showDeleteConfirm = false"
+      >
+        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-danger-50 rounded-xl flex items-center justify-center">
+              <ExclamationTriangleIcon class="w-6 h-6 text-danger-600" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900">Delete Budget Period</h2>
+              <p class="text-sm text-secondary-500">This action cannot be undone</p>
+            </div>
+          </div>
+
+          <p class="text-secondary-600 mb-6">
+            Are you sure you want to delete this budget period? This will also delete all associated expenses.
+          </p>
+
+          <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <button
+              type="button"
+              class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+              @click="showDeleteConfirm = false"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="flex items-center gap-2 px-5 py-2.5 bg-danger-600 hover:bg-danger-700 text-white rounded-lg transition-colors font-medium"
+              @click="handleDeleteBudgetPeriod"
+            >
+              <TrashIcon class="w-5 h-5" />
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

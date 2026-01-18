@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsDefined,
   IsEmail,
+  IsOptional,
   IsString,
   IsStrongPassword,
   MaxLength,
@@ -44,4 +45,36 @@ class CreateUserWithSettingsDto extends BaseUserDto {
 
 class UserPartialDto extends PartialType(BaseUserDto) {}
 
-export { CreateUserWithSettingsDto, BaseUserDto, UserPartialDto };
+class UpdateProfileDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUsernameExist({ message: 'Username is taken' })
+  username?: string;
+}
+
+class ChangePasswordDto {
+  @IsString()
+  currentPassword: string;
+
+  @IsStrongPassword({
+    minLength: 4,
+    minNumbers: 1,
+    minSymbols: 1,
+    minLowercase: 1,
+    minUppercase: 1,
+  })
+  newPassword: string;
+}
+
+export {
+  CreateUserWithSettingsDto,
+  BaseUserDto,
+  UserPartialDto,
+  UpdateProfileDto,
+  ChangePasswordDto,
+};

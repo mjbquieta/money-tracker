@@ -62,11 +62,23 @@ export const useExpenseStore = defineStore('expense', () => {
     return { success: true, error: null };
   }
 
+  async function deleteCategory(id: string) {
+    const { error } = await api.del(`/api/v1/categories/${id}`);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    categories.value = categories.value.filter((c) => c.id !== id);
+    return { success: true, error: null };
+  }
+
   return {
     categories,
     loading,
     fetchCategories,
     createCategory,
+    deleteCategory,
     createExpense,
     updateExpense,
     deleteExpense,

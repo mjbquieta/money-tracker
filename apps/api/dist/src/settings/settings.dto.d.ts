@@ -1,8 +1,17 @@
 declare enum Currency {
     PHP = "PHP",
-    USD = "USD"
+    USD = "USD",
+    EUR = "EUR",
+    GBP = "GBP",
+    JPY = "JPY",
+    AUD = "AUD",
+    CAD = "CAD",
+    SGD = "SGD"
 }
 declare class SettingsDto {
     currency: Currency;
 }
-export { SettingsDto, Currency };
+declare class UpdateSettingsDto {
+    currency?: Currency;
+}
+export { SettingsDto, UpdateSettingsDto, Currency };

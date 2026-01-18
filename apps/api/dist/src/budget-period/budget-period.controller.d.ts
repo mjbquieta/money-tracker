@@ -31,13 +31,13 @@ export declare class BudgetPeriodController {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     })[]>;
     findOne(userId: UUID, id: UUID): Promise<{
         expenses: ({
@@ -66,13 +66,13 @@ export declare class BudgetPeriodController {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }>;
     getYearlyMetrics(userId: UUID, year?: string): Promise<{
         year: number;
@@ -127,13 +127,13 @@ export declare class BudgetPeriodController {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }>;
     duplicate(userId: UUID, id: UUID, payload: DuplicateBudgetPeriodDto): Promise<({
         expenses: ({
@@ -162,13 +162,13 @@ export declare class BudgetPeriodController {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }) | null>;
     update(userId: UUID, id: UUID, payload: UpdateBudgetPeriodDto): Promise<{
         expenses: ({
@@ -197,23 +197,23 @@ export declare class BudgetPeriodController {
     } & {
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }>;
     delete(userId: UUID, id: UUID): Promise<{
         id: string;
         name: string | null;
-        startDate: Date;
-        endDate: Date;
-        income: number;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        startDate: Date;
+        endDate: Date;
+        income: number;
     }>;
 }

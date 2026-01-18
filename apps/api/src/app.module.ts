@@ -14,7 +14,7 @@ import { ExpenseModule } from './expense/expense.module';
   imports: [
     ConfigModule.forRoot(),
     ThrottlerModule.forRoot({
-      throttlers: [{ ttl: 60000, limit: 10 }],
+      throttlers: [{ ttl: 60000, limit: 100 }],
     }),
     UserModule,
     AuthModule,
@@ -24,9 +24,11 @@ import { ExpenseModule } from './expense/expense.module';
     BudgetPeriodModule,
     ExpenseModule,
   ],
-  providers: [{
-    provide: APP_GUARD,
-    useClass: ThrottlerGuard,
-  }],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
