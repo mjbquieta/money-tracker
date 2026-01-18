@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
@@ -31,6 +32,15 @@ export class BudgetPeriodController {
   @Get(':id')
   findOne(@CurrentUser('id') userId: UUID, @Param('id') id: UUID) {
     return this.budgetPeriodService.findOne(userId, id);
+  }
+
+  @Get('metrics/yearly')
+  getYearlyMetrics(
+    @CurrentUser('id') userId: UUID,
+    @Query('year') year?: string,
+  ) {
+    const targetYear = year ? parseInt(year, 10) : new Date().getFullYear();
+    return this.budgetPeriodService.getYearlyMetrics(userId, targetYear);
   }
 
   @Get(':id/summary')

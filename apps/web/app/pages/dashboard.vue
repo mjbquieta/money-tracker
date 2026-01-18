@@ -1,11 +1,11 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: 'auth',
+});
+
 const authStore = useAuthStore();
 const budgetStore = useBudgetStore();
 const router = useRouter();
-
-if (!authStore.isAuthenticated) {
-  navigateTo('/auth/login');
-}
 
 const showCreateModal = ref(false);
 const loading = ref(false);
@@ -19,7 +19,16 @@ const createForm = reactive({
 });
 
 onMounted(async () => {
-  await budgetStore.fetchBudgetPeriods();
+  // Double-check auth on mount
+  if (!authStore.isAuthenticated) {
+    navigateTo('/auth/login', { replace: true });
+    return;
+  }
+
+  await Promise.all([
+    budgetStore.fetchBudgetPeriods(),
+    budgetStore.fetchYearlyMetrics(),
+  ]);
 });
 
 function formatDate(dateString: string) {
@@ -83,13 +92,54 @@ async function handleCreate() {
 function viewBudgetPeriod(id: string) {
   router.push(`/budget/${id}`);
 }
+
+const metrics = computed(() => budgetStore.yearlyMetrics);
 </script>
 
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Quick Stats with Link to Metrics -->
+    <div v-if="metrics" class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-900">{{ new Date().getFullYear() }} Overview</h2>
+        <NuxtLink to="/metrics" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+          View Detailed Metrics &rarr;
+        </NuxtLink>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white shadow rounded-lg p-4">
+          <p class="text-sm text-gray-500">Total Income</p>
+          <p class="text-xl font-bold text-green-600">{{ formatCurrency(metrics.totalIncome) }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <p class="text-sm text-gray-500">Total Expenses</p>
+          <p class="text-xl font-bold text-red-600">{{ formatCurrency(metrics.totalExpenses) }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <p class="text-sm text-gray-500">Net Savings</p>
+          <p
+            class="text-xl font-bold"
+            :class="metrics.savings >= 0 ? 'text-green-600' : 'text-red-600'"
+          >
+            {{ formatCurrency(metrics.savings) }}
+          </p>
+        </div>
+        <NuxtLink
+          to="/metrics"
+          class="bg-gradient-to-r from-blue-500 to-blue-600 shadow rounded-lg p-4 text-white hover:from-blue-600 hover:to-blue-700 transition-all cursor-pointer"
+        >
+          <p class="text-sm text-blue-100">Savings Rate</p>
+          <p class="text-xl font-bold">{{ metrics.savingsRate.toFixed(1) }}%</p>
+          <p class="text-xs text-blue-200 mt-1">Click for charts &rarr;</p>
+        </NuxtLink>
+      </div>
+    </div>
+
+    <!-- Budget Periods Section -->
     <div class="flex justify-between items-center mb-8">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Budget Periods</h1>
+        <h2 class="text-xl font-bold text-gray-900">Budget Periods</h2>
         <p class="text-gray-500 mt-1">Manage your budget periods and track expenses</p>
       </div>
       <UiBaseButton @click="showCreateModal = true">

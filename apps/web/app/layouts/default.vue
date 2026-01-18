@@ -1,5 +1,10 @@
 <script setup lang="ts">
 const authStore = useAuthStore();
+const mounted = ref(false);
+
+onMounted(() => {
+  mounted.value = true;
+});
 </script>
 
 <template>
@@ -10,8 +15,14 @@ const authStore = useAuthStore();
           <NuxtLink to="/" class="text-xl font-bold text-blue-600">
             Money Tracker
           </NuxtLink>
-          <div class="flex items-center gap-4">
+          <div v-if="mounted" class="flex items-center gap-4">
             <template v-if="authStore.isAuthenticated">
+              <NuxtLink to="/dashboard" class="text-gray-600 hover:text-gray-900">
+                Dashboard
+              </NuxtLink>
+              <NuxtLink to="/metrics" class="text-gray-600 hover:text-gray-900">
+                Metrics
+              </NuxtLink>
               <span class="text-gray-600">{{ authStore.user?.name }}</span>
               <UiBaseButton variant="outline" @click="authStore.logout">
                 Logout

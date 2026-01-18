@@ -199,4 +199,21 @@ export declare class BudgetPeriodService {
             count: number;
         }>;
     }>;
+    getYearlyMetrics(userId: UUID, year: number): Promise<{
+        year: number;
+        totalIncome: number;
+        totalExpenses: number;
+        savings: number;
+        savingsRate: number;
+        expensesByCategory: Record<string, {
+            total: number;
+            count: number;
+        }>;
+        monthlyBreakdown: {
+            month: number;
+            income: number;
+            expenses: number;
+        }[];
+        budgetPeriodsCount: number;
+    }>;
 }

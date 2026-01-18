@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { Expense } from '~/types';
 
+definePageMeta({
+  middleware: 'auth',
+});
+
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
-
-if (!authStore.isAuthenticated) {
-  navigateTo('/auth/login');
-}
 
 const budgetPeriodId = route.params.id as string;
 
@@ -17,9 +17,12 @@ const showExpenseModal = ref(false);
 const showDeleteConfirm = ref(false);
 const showEditPeriodModal = ref(false);
 const showDuplicateModal = ref(false);
+const showNewCategoryInput = ref(false);
 const editingExpense = ref<Expense | null>(null);
 const loading = ref(false);
+const categoryLoading = ref(false);
 const error = ref<string | null>(null);
+const newCategoryName = ref('');
 
 const expenseForm = reactive({
   name: '',
@@ -41,6 +44,12 @@ const duplicateForm = reactive({
 });
 
 onMounted(async () => {
+  // Double-check auth on mount
+  if (!authStore.isAuthenticated) {
+    navigateTo('/auth/login', { replace: true });
+    return;
+  }
+
   await Promise.all([
     budgetStore.fetchBudgetPeriod(budgetPeriodId),
     budgetStore.fetchBudgetSummary(budgetPeriodId),
@@ -50,6 +59,23 @@ onMounted(async () => {
 
 const period = computed(() => budgetStore.currentPeriod);
 const summary = computed(() => budgetStore.currentSummary);
+
+const spendingPercentage = computed(() => {
+  if (!summary.value || !period.value || period.value.income === 0) return 0;
+  return Math.min(100, (summary.value.totalExpenses / period.value.income) * 100);
+});
+
+const sortedCategories = computed(() => {
+  if (!summary.value?.expensesByCategory) return [];
+  return Object.entries(summary.value.expensesByCategory)
+    .map(([name, data]) => ({ name, ...data }))
+    .sort((a, b) => b.total - a.total);
+});
+
+const topCategory = computed(() => {
+  if (sortedCategories.value.length === 0) return null;
+  return sortedCategories.value[0];
+});
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -75,6 +101,8 @@ function resetExpenseForm() {
   expenseForm.name = '';
   expenseForm.description = '';
   expenseForm.amount = 0;
+  showNewCategoryInput.value = false;
+  newCategoryName.value = '';
   expenseForm.categoryId = '';
   editingExpense.value = null;
 }
@@ -111,6 +139,37 @@ function openDuplicateModal() {
   }
   error.value = null;
   showDuplicateModal.value = true;
+}
+
+async function handleCreateCategory() {
+  if (!newCategoryName.value.trim()) {
+    return;
+  }
+
+  categoryLoading.value = true;
+  const result = await expenseStore.createCategory({ name: newCategoryName.value.trim() });
+  categoryLoading.value = false;
+
+  if (!result.success && result.error) {
+    error.value = typeof result.error.message === 'string'
+      ? result.error.message
+      : result.error.message[0];
+    return;
+  }
+
+  // Select the newly created category
+  if (result.data) {
+    expenseForm.categoryId = result.data.id;
+  }
+
+  // Reset the new category input
+  showNewCategoryInput.value = false;
+  newCategoryName.value = '';
+}
+
+function cancelNewCategory() {
+  showNewCategoryInput.value = false;
+  newCategoryName.value = '';
 }
 
 async function handleExpenseSubmit() {
@@ -305,7 +364,7 @@ function getCategoryColor(categoryName: string): string {
       </div>
 
       <!-- Summary Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-white shadow rounded-lg p-6 cursor-pointer hover:shadow-md transition-shadow" @click="openEditPeriod">
           <p class="text-sm text-gray-500 mb-1">Income</p>
           <p class="text-2xl font-bold text-green-600">{{ formatCurrency(period.income) }}</p>
@@ -314,6 +373,7 @@ function getCategoryColor(categoryName: string): string {
         <div class="bg-white shadow rounded-lg p-6">
           <p class="text-sm text-gray-500 mb-1">Total Expenses</p>
           <p class="text-2xl font-bold text-red-600">{{ formatCurrency(summary?.totalExpenses || 0) }}</p>
+          <p class="text-xs text-gray-500 mt-1">{{ period.expenses.length }} expense{{ period.expenses.length === 1 ? '' : 's' }}</p>
         </div>
         <div class="bg-white shadow rounded-lg p-6">
           <p class="text-sm text-gray-500 mb-1">Remaining</p>
@@ -323,28 +383,63 @@ function getCategoryColor(categoryName: string): string {
           >
             {{ formatCurrency(summary?.remaining || 0) }}
           </p>
+          <p class="text-xs text-gray-500 mt-1">
+            {{ ((summary?.remaining || 0) / period.income * 100).toFixed(1) }}% of budget
+          </p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+          <p class="text-sm text-gray-500 mb-1">Budget Used</p>
+          <p
+            class="text-2xl font-bold"
+            :class="spendingPercentage > 100 ? 'text-red-600' : spendingPercentage > 80 ? 'text-yellow-600' : 'text-green-600'"
+          >
+            {{ spendingPercentage.toFixed(1) }}%
+          </p>
+          <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              class="h-full transition-all duration-300"
+              :class="spendingPercentage > 100 ? 'bg-red-500' : spendingPercentage > 80 ? 'bg-yellow-500' : 'bg-green-500'"
+              :style="{ width: `${Math.min(100, spendingPercentage)}%` }"
+            />
+          </div>
         </div>
       </div>
 
       <!-- Expenses by Category -->
-      <div v-if="summary?.expensesByCategory && Object.keys(summary.expensesByCategory).length > 0" class="bg-white shadow rounded-lg p-6 mb-8">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Expenses by Category</h2>
-        <div class="space-y-3">
+      <div v-if="sortedCategories.length > 0" class="bg-white shadow rounded-lg p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Expenses by Category</h2>
+          <p v-if="topCategory" class="text-sm text-gray-500">
+            Top: <span class="font-medium">{{ topCategory.name }}</span> ({{ ((topCategory.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)
+          </p>
+        </div>
+        <div class="space-y-4">
           <div
-            v-for="(data, categoryName) in summary.expensesByCategory"
-            :key="categoryName"
-            class="flex justify-between items-center"
+            v-for="category in sortedCategories"
+            :key="category.name"
+            class="space-y-1"
           >
-            <div class="flex items-center gap-3">
-              <span
-                class="px-2 py-1 rounded-full text-xs font-medium"
-                :class="getCategoryColor(categoryName as string)"
-              >
-                {{ categoryName }}
-              </span>
-              <span class="text-sm text-gray-500">{{ data.count }} expense{{ data.count === 1 ? '' : 's' }}</span>
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                <span
+                  class="px-2 py-1 rounded-full text-xs font-medium"
+                  :class="getCategoryColor(category.name)"
+                >
+                  {{ category.name }}
+                </span>
+                <span class="text-sm text-gray-500">{{ category.count }} expense{{ category.count === 1 ? '' : 's' }}</span>
+              </div>
+              <div class="text-right">
+                <span class="font-medium text-gray-900">{{ formatCurrency(category.total) }}</span>
+                <span class="text-xs text-gray-500 ml-2">({{ ((category.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)</span>
+              </div>
             </div>
-            <span class="font-medium text-gray-900">{{ formatCurrency(data.total) }}</span>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-blue-500 transition-all duration-300"
+                :style="{ width: `${(category.total / (summary?.totalExpenses || 1)) * 100}%` }"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -440,20 +535,59 @@ function getCategoryColor(categoryName: string): string {
             required
           />
 
-          <UiBaseSelect
-            v-model="expenseForm.categoryId"
-            label="Category"
-            required
-          >
-            <option value="" disabled>Select a category</option>
-            <option
-              v-for="category in expenseStore.categories"
-              :key="category.id"
-              :value="category.id"
+          <div class="space-y-2">
+            <UiBaseSelect
+              v-if="!showNewCategoryInput"
+              v-model="expenseForm.categoryId"
+              label="Category"
+              required
             >
-              {{ category.name }}
-            </option>
-          </UiBaseSelect>
+              <option value="" disabled>Select a category</option>
+              <option
+                v-for="category in expenseStore.categories"
+                :key="category.id"
+                :value="category.id"
+              >
+                {{ category.name }}{{ category.isDefault ? '' : ' (Custom)' }}
+              </option>
+            </UiBaseSelect>
+
+            <div v-if="showNewCategoryInput" class="space-y-2">
+              <label class="text-sm font-medium text-gray-700">New Category</label>
+              <div class="flex gap-2">
+                <input
+                  v-model="newCategoryName"
+                  type="text"
+                  placeholder="Category name"
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  @keyup.enter="handleCreateCategory"
+                />
+                <UiBaseButton
+                  type="button"
+                  :loading="categoryLoading"
+                  @click="handleCreateCategory"
+                >
+                  Add
+                </UiBaseButton>
+                <UiBaseButton
+                  type="button"
+                  variant="outline"
+                  @click="cancelNewCategory"
+                >
+                  Cancel
+                </UiBaseButton>
+              </div>
+            </div>
+
+            <button
+              v-if="!showNewCategoryInput"
+              type="button"
+              class="text-sm text-blue-600 hover:text-blue-800"
+              @click="showNewCategoryInput = true"
+            >
+              + Add custom category
+            </button>
+          </div>
 
           <div class="flex justify-end gap-3 mt-6">
             <UiBaseButton

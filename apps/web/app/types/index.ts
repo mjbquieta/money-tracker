@@ -94,6 +94,23 @@ export interface BudgetSummary {
   expensesByCategory: Record<string, { total: number; count: number }>;
 }
 
+export interface MonthlyBreakdown {
+  month: number;
+  income: number;
+  expenses: number;
+}
+
+export interface YearlyMetrics {
+  year: number;
+  totalIncome: number;
+  totalExpenses: number;
+  savings: number;
+  savingsRate: number;
+  expensesByCategory: Record<string, { total: number; count: number }>;
+  monthlyBreakdown: MonthlyBreakdown[];
+  budgetPeriodsCount: number;
+}
+
 export interface ApiError {
   statusCode: number;
   message: string | string[];

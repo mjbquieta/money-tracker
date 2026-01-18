@@ -159,6 +159,88 @@ let BudgetPeriodService = class BudgetPeriodService {
             expensesByCategory,
         };
     }
+    async getYearlyMetrics(userId, year) {
+        const startOfYear = new Date(year, 0, 1);
+        const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
+        const budgetPeriods = await this.prisma.budgetPeriod.findMany({
+            where: {
+                userId,
+                deletedAt: null,
+                OR: [
+                    {
+                        startDate: { gte: startOfYear, lte: endOfYear },
+                    },
+                    {
+                        endDate: { gte: startOfYear, lte: endOfYear },
+                    },
+                    {
+                        AND: [
+                            { startDate: { lte: startOfYear } },
+                            { endDate: { gte: endOfYear } },
+                        ],
+                    },
+                ],
+            },
+            include: {
+                expenses: {
+                    where: { deletedAt: null },
+                    include: { category: true },
+                },
+            },
+            orderBy: { startDate: 'asc' },
+        });
+        const totalIncome = budgetPeriods.reduce((sum, bp) => sum + bp.income, 0);
+        const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
+        const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const expensesByCategory = allExpenses.reduce((acc, expense) => {
+            const categoryName = expense.category.name;
+            if (!acc[categoryName]) {
+                acc[categoryName] = { total: 0, count: 0 };
+            }
+            acc[categoryName].total += expense.amount;
+            acc[categoryName].count += 1;
+            return acc;
+        }, {});
+        const monthlyBreakdown = Array.from({ length: 12 }, (_, i) => ({
+            month: i + 1,
+            income: 0,
+            expenses: 0,
+        }));
+        for (const bp of budgetPeriods) {
+            const bpStart = bp.startDate;
+            const bpEnd = bp.endDate;
+            const bpMonths = [];
+            for (let m = 0; m < 12; m++) {
+                const monthStart = new Date(year, m, 1);
+                const monthEnd = new Date(year, m + 1, 0, 23, 59, 59, 999);
+                if (bpStart <= monthEnd && bpEnd >= monthStart) {
+                    bpMonths.push(m);
+                }
+            }
+            if (bpMonths.length > 0) {
+                const incomePerMonth = bp.income / bpMonths.length;
+                for (const m of bpMonths) {
+                    monthlyBreakdown[m].income += incomePerMonth;
+                }
+            }
+            for (const expense of bp.expenses) {
+                const expMonth = bp.startDate.getMonth();
+                if (bp.startDate.getFullYear() === year) {
+                    monthlyBreakdown[expMonth].expenses += expense.amount;
+                }
+            }
+        }
+        return {
+            year,
+            totalIncome,
+            totalExpenses,
+            savings: totalIncome - totalExpenses,
+            savingsRate: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0,
+            expensesByCategory,
+            monthlyBreakdown,
+            budgetPeriodsCount: budgetPeriods.length,
+        };
+    }
 };
 exports.BudgetPeriodService = BudgetPeriodService;
 exports.BudgetPeriodService = BudgetPeriodService = __decorate([

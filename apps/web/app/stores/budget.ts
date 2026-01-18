@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
-import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary } from '~/types';
+import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics } from '~/types';
 
 export const useBudgetStore = defineStore('budget', () => {
   const budgetPeriods = ref<BudgetPeriod[]>([]);
   const currentPeriod = ref<BudgetPeriod | null>(null);
   const currentSummary = ref<BudgetSummary | null>(null);
+  const yearlyMetrics = ref<YearlyMetrics | null>(null);
   const loading = ref(false);
   const api = useApi();
 
@@ -107,10 +108,23 @@ export const useBudgetStore = defineStore('budget', () => {
     return { success: true, error: null, data };
   }
 
+  async function fetchYearlyMetrics(year?: number) {
+    const targetYear = year ?? new Date().getFullYear();
+    const { data, error } = await api.get<YearlyMetrics>(`/api/v1/budget-periods/metrics/yearly?year=${targetYear}`);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    yearlyMetrics.value = data;
+    return { success: true, error: null };
+  }
+
   return {
     budgetPeriods,
     currentPeriod,
     currentSummary,
+    yearlyMetrics,
     loading,
     fetchBudgetPeriods,
     fetchBudgetPeriod,
@@ -119,5 +133,6 @@ export const useBudgetStore = defineStore('budget', () => {
     updateBudgetPeriod,
     deleteBudgetPeriod,
     duplicateBudgetPeriod,
+    fetchYearlyMetrics,
   };
 });

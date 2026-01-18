@@ -74,6 +74,23 @@ export declare class BudgetPeriodController {
         deletedAt: Date | null;
         userId: string;
     }>;
+    getYearlyMetrics(userId: UUID, year?: string): Promise<{
+        year: number;
+        totalIncome: number;
+        totalExpenses: number;
+        savings: number;
+        savingsRate: number;
+        expensesByCategory: Record<string, {
+            total: number;
+            count: number;
+        }>;
+        monthlyBreakdown: {
+            month: number;
+            income: number;
+            expenses: number;
+        }[];
+        budgetPeriodsCount: number;
+    }>;
     getSummary(userId: UUID, id: UUID): Promise<{
         income: number;
         totalExpenses: number;
