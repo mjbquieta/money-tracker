@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Expense, BulkExpenseItem, ExpenseGroup } from '~/types';
+import type { Expense, BulkExpenseItem, ExpenseGroup, Income, IncomeItem } from '~/types';
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -81,12 +81,19 @@ const duplicateForm = reactive({
   name: '',
   startDate: '',
   endDate: '',
-  income: 0,
 });
 
 const groupForm = reactive({
   name: '',
   description: '',
+});
+
+const showIncomeModal = ref(false);
+const editingIncome = ref<Income | null>(null);
+const incomeForm = reactive({
+  name: '',
+  description: '',
+  amount: 0,
 });
 
 const bulkExpenses = ref<BulkExpenseItem[]>([
@@ -395,6 +402,90 @@ function getGroupTotal(group: ExpenseGroup) {
   return group.expenses.reduce((sum, e) => sum + e.amount, 0);
 }
 
+// Income management functions
+function resetIncomeForm() {
+  incomeForm.name = '';
+  incomeForm.description = '';
+  incomeForm.amount = 0;
+  editingIncome.value = null;
+  error.value = null;
+}
+
+function openAddIncome() {
+  resetIncomeForm();
+  showIncomeModal.value = true;
+}
+
+function openEditIncome(income: Income) {
+  editingIncome.value = income;
+  incomeForm.name = income.name;
+  incomeForm.description = income.description || '';
+  incomeForm.amount = income.amount;
+  error.value = null;
+  showIncomeModal.value = true;
+}
+
+async function handleIncomeSubmit() {
+  error.value = null;
+
+  if (!incomeForm.name.trim() || !incomeForm.amount || incomeForm.amount <= 0) {
+    error.value = 'Please enter a name and valid amount.';
+    return;
+  }
+
+  loading.value = true;
+
+  if (editingIncome.value) {
+    const result = await budgetStore.updateIncome(editingIncome.value.id, {
+      name: incomeForm.name,
+      description: incomeForm.description || undefined,
+      amount: incomeForm.amount,
+    });
+
+    if (!result.success && result.error) {
+      error.value = typeof result.error.message === 'string'
+        ? result.error.message
+        : result.error.message[0];
+      loading.value = false;
+      return;
+    }
+  } else {
+    const result = await budgetStore.createIncome({
+      name: incomeForm.name,
+      description: incomeForm.description || undefined,
+      amount: incomeForm.amount,
+      budgetPeriodId,
+    });
+
+    if (!result.success && result.error) {
+      error.value = typeof result.error.message === 'string'
+        ? result.error.message
+        : result.error.message[0];
+      loading.value = false;
+      return;
+    }
+  }
+
+  // Update summary
+  if (budgetStore.currentSummary && budgetStore.currentPeriod) {
+    budgetStore.currentSummary.income = budgetStore.currentPeriod.income;
+    budgetStore.currentSummary.remaining = budgetStore.currentPeriod.income - budgetStore.currentSummary.totalExpenses;
+  }
+
+  loading.value = false;
+  showIncomeModal.value = false;
+  resetIncomeForm();
+}
+
+async function handleDeleteIncome(income: Income) {
+  const result = await budgetStore.deleteIncome(income.id);
+
+  if (result.success && budgetStore.currentSummary && budgetStore.currentPeriod) {
+    budgetStore.currentSummary.income = budgetStore.currentPeriod.income;
+    budgetStore.currentSummary.remaining = budgetStore.currentPeriod.income - budgetStore.currentSummary.totalExpenses;
+  }
+}
+
 const ungroupedExpenses = computed(() => {
   if (!period.value) return [];
   return period.value.expenses.filter((e) => !e.expenseGroupId);
@@ -487,12 +578,9 @@ function openEditPeriod() {
 }
 
 function openDuplicateModal() {
-  if (period.value) {
-    duplicateForm.name = '';
-    duplicateForm.startDate = '';
-    duplicateForm.endDate = '';
-    duplicateForm.income = period.value.income;
-  }
+  duplicateForm.name = '';
+  duplicateForm.startDate = '';
+  duplicateForm.endDate = '';
   error.value = null;
   showDuplicateModal.value = true;
 }
@@ -756,7 +844,7 @@ async function handleEditPeriodSubmit() {
 async function handleDuplicateSubmit() {
   error.value = null;
 
-  if (!duplicateForm.startDate || !duplicateForm.endDate || !duplicateForm.income) {
+  if (!duplicateForm.startDate || !duplicateForm.endDate) {
     error.value = 'Please fill in all required fields.';
     return;
   }
@@ -772,7 +860,6 @@ async function handleDuplicateSubmit() {
     name: duplicateForm.name || undefined,
     startDate: duplicateForm.startDate,
     endDate: duplicateForm.endDate,
-    income: duplicateForm.income,
   });
 
   loading.value = false;
@@ -977,6 +1064,81 @@ function getCategoryStyle(categoryName: string) {
               :style="{ width: `${Math.min(100, spendingPercentage)}%` }"
             />
           </div>
+        </div>
+      </div>
+
+      <!-- Income Sources Section -->
+      <div v-if="period.incomes && period.incomes.length > 0" class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-8">
+        <div class="flex justify-between items-center mb-5">
+          <h2 class="text-lg font-semibold text-secondary-800 flex items-center gap-2">
+            <ArrowTrendingUpIcon class="w-5 h-5 text-success-500" />
+            Income Sources
+          </h2>
+          <button
+            class="flex items-center gap-2 px-3 py-2 text-success-600 hover:text-success-700 hover:bg-success-50 border border-success-200 rounded-lg transition-colors font-medium"
+            @click="openAddIncome"
+          >
+            <PlusIcon class="w-4 h-4" />
+            Add Income
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div
+            v-for="income in period.incomes"
+            :key="income.id"
+            class="flex justify-between items-center p-4 bg-success-50/50 rounded-xl hover:bg-success-50 transition-colors group"
+          >
+            <div class="flex-1">
+              <p class="font-medium text-secondary-900">{{ income.name }}</p>
+              <p v-if="income.description" class="text-sm text-secondary-500 mt-1">{{ income.description }}</p>
+            </div>
+            <div class="flex items-center gap-4">
+              <p class="font-bold text-success-600 text-lg">{{ formatCurrency(income.amount) }}</p>
+              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  class="p-2 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                  @click="openEditIncome(income)"
+                >
+                  <PencilIcon class="w-4 h-4" />
+                </button>
+                <button
+                  class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                  @click="handleDeleteIncome(income)"
+                >
+                  <TrashIcon class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Income Footer -->
+        <div class="mt-4 pt-4 border-t border-success-100 flex justify-between items-center">
+          <span class="text-sm font-medium text-secondary-600">Total Income</span>
+          <span class="text-xl font-bold text-success-600">{{ formatCurrency(period.income) }}</span>
+        </div>
+      </div>
+
+      <!-- Add Income Button when no incomes exist -->
+      <div v-else class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-8">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center">
+              <ArrowTrendingUpIcon class="w-5 h-5 text-success-600" />
+            </div>
+            <div>
+              <h3 class="font-semibold text-secondary-900">Income Sources</h3>
+              <p class="text-sm text-secondary-500">Track your income sources</p>
+            </div>
+          </div>
+          <button
+            class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
+            @click="openAddIncome"
+          >
+            <PlusIcon class="w-5 h-5" />
+            Add Income
+          </button>
         </div>
       </div>
 
@@ -1513,7 +1675,7 @@ function getCategoryStyle(categoryName: string) {
             </div>
             <div>
               <h2 class="text-xl font-semibold text-secondary-900">Duplicate Budget Period</h2>
-              <p class="text-sm text-secondary-500">Create a copy with the same expenses</p>
+              <p class="text-sm text-secondary-500">Create a copy with the same expenses and incomes</p>
             </div>
           </div>
 
@@ -1541,13 +1703,21 @@ function getCategoryStyle(categoryName: string) {
               />
             </div>
 
-            <UiBaseInput
-              v-model="duplicateForm.income"
-              label="Income"
-              type="number"
-              :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
-              required
-            />
+            <!-- What will be duplicated info -->
+            <div class="bg-secondary-50 rounded-lg p-4 space-y-2">
+              <p class="text-sm font-medium text-secondary-700">What will be copied:</p>
+              <ul class="text-sm text-secondary-600 space-y-1">
+                <li class="flex items-center gap-2">
+                  <ArrowTrendingUpIcon class="w-4 h-4 text-success-500" />
+                  {{ period?.incomes?.length || 0 }} income source{{ (period?.incomes?.length || 0) === 1 ? '' : 's' }}
+                  <span class="text-success-600 font-medium">({{ formatCurrency(period?.income || 0) }})</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <CreditCardIcon class="w-4 h-4 text-danger-500" />
+                  {{ period?.expenses?.length || 0 }} expense{{ (period?.expenses?.length || 0) === 1 ? '' : 's' }}
+                </li>
+              </ul>
+            </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
               <button
@@ -1975,6 +2145,73 @@ function getCategoryStyle(categoryName: string) {
               Cancel
             </button>
           </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Add/Edit Income Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showIncomeModal"
+        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showIncomeModal = false"
+      >
+        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-success-50 rounded-xl flex items-center justify-center">
+              <ArrowTrendingUpIcon class="w-6 h-6 text-success-600" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900">
+                {{ editingIncome ? 'Edit Income' : 'Add Income Source' }}
+              </h2>
+              <p class="text-sm text-secondary-500">{{ editingIncome ? 'Update income details' : 'Track a new income source' }}</p>
+            </div>
+          </div>
+
+          <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
+
+          <form @submit.prevent="handleIncomeSubmit" class="space-y-5">
+            <UiBaseInput
+              v-model="incomeForm.name"
+              label="Name"
+              placeholder="e.g., Main Job, Side Business"
+              required
+            />
+
+            <UiBaseInput
+              v-model="incomeForm.description"
+              label="Description (Optional)"
+              placeholder="Additional details"
+            />
+
+            <UiBaseInput
+              v-model="incomeForm.amount"
+              label="Amount"
+              type="number"
+              :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
+              required
+            />
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+              <button
+                type="button"
+                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                @click="showIncomeModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium disabled:opacity-50"
+                :disabled="loading"
+              >
+                <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <CheckCircleIcon v-else class="w-5 h-5" />
+                {{ editingIncome ? 'Update' : 'Add Income' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </Teleport>

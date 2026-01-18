@@ -65,7 +65,7 @@ model BudgetPeriod {
   name      String? // Optional name like "January 2026" or "First Half Jan"
   startDate DateTime  @map("start_date")
   endDate   DateTime  @map("end_date")
-  income    Float     @default(0) // Total income for this period
+  income    Float     @default(0) // Total income for this period (computed from incomes)
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
@@ -75,8 +75,25 @@ model BudgetPeriod {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenses      Expense[]
   expenseGroups ExpenseGroup[]
+  incomes       Income[]
 
   @@map("budget_periods")
+}
+
+model Income {
+  id          String    @id @default(uuid())
+  name        String // e.g., "Main Job", "Side Business", "Freelance"
+  description String?
+  amount      Float     @default(0)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  budgetPeriodId String       @map("budget_period_id")
+  budgetPeriod   BudgetPeriod @relation(fields: [budgetPeriodId], references: [id], onDelete: Cascade)
+
+  @@map("incomes")
 }
 
 model ExpenseGroup {

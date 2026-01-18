@@ -10,7 +10,9 @@ import {
   ArrowTrendingDownIcon,
   SparklesIcon,
   ClockIcon,
+  TrashIcon,
 } from '@heroicons/vue/24/outline';
+import type { IncomeItem } from '~/types';
 
 definePageMeta({
   middleware: 'auth',
@@ -28,8 +30,22 @@ const createForm = reactive({
   name: '',
   startDate: '',
   endDate: '',
-  income: 0,
+  incomes: [{ name: '', description: '', amount: 0 }] as IncomeItem[],
 });
+
+const totalIncome = computed(() =>
+  createForm.incomes.reduce((sum, inc) => sum + (inc.amount || 0), 0)
+);
+
+function addIncomeSource() {
+  createForm.incomes.push({ name: '', description: '', amount: 0 });
+}
+
+function removeIncomeSource(index: number) {
+  if (createForm.incomes.length > 1) {
+    createForm.incomes.splice(index, 1);
+  }
+}
 
 onMounted(async () => {
   await Promise.all([
@@ -58,14 +74,25 @@ function resetForm() {
   createForm.name = '';
   createForm.startDate = '';
   createForm.endDate = '';
-  createForm.income = 0;
+  createForm.incomes = [{ name: '', description: '', amount: 0 }];
 }
 
 async function handleCreate() {
   error.value = null;
 
-  if (!createForm.startDate || !createForm.endDate || !createForm.income) {
+  // Validate required fields
+  if (!createForm.startDate || !createForm.endDate) {
     error.value = 'Please fill in all required fields.';
+    return;
+  }
+
+  // Filter out empty income sources and validate
+  const validIncomes = createForm.incomes.filter(
+    (inc) => inc.name.trim() && inc.amount > 0
+  );
+
+  if (validIncomes.length === 0) {
+    error.value = 'Please add at least one income source with a name and amount.';
     return;
   }
 
@@ -80,7 +107,7 @@ async function handleCreate() {
     name: createForm.name || undefined,
     startDate: createForm.startDate,
     endDate: createForm.endDate,
-    income: createForm.income,
+    incomes: validIncomes,
   });
 
   loading.value = false;
@@ -336,13 +363,63 @@ const metrics = computed(() => budgetStore.overallMetrics);
               />
             </div>
 
-            <UiBaseInput
-              v-model="createForm.income"
-              label="Income"
-              type="number"
-              :placeholder="`Amount in ${authStore.user?.settings?.currency || 'USD'}`"
-              required
-            />
+            <!-- Income Sources -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="block text-sm font-medium text-secondary-700">Income Sources</label>
+                <button
+                  type="button"
+                  class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                  @click="addIncomeSource"
+                >
+                  <PlusIcon class="w-4 h-4" />
+                  Add Source
+                </button>
+              </div>
+
+              <div
+                v-for="(income, index) in createForm.incomes"
+                :key="index"
+                class="p-4 bg-secondary-50 rounded-lg space-y-3"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium text-secondary-600">Income #{{ index + 1 }}</span>
+                  <button
+                    v-if="createForm.incomes.length > 1"
+                    type="button"
+                    class="text-danger-500 hover:text-danger-600 p-1"
+                    @click="removeIncomeSource(index)"
+                  >
+                    <TrashIcon class="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <UiBaseInput
+                    v-model="income.name"
+                    placeholder="e.g., Main Job"
+                    required
+                  />
+                  <UiBaseInput
+                    v-model="income.amount"
+                    type="number"
+                    :placeholder="`Amount`"
+                    required
+                  />
+                </div>
+
+                <UiBaseInput
+                  v-model="income.description"
+                  placeholder="Description (optional)"
+                />
+              </div>
+
+              <!-- Total Income Display -->
+              <div class="flex items-center justify-between p-3 bg-primary-50 rounded-lg">
+                <span class="text-sm font-medium text-primary-700">Total Income</span>
+                <span class="text-lg font-bold text-primary-700">{{ formatCurrency(totalIncome) }}</span>
+              </div>
+            </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
               <button

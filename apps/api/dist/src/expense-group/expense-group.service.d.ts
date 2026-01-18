@@ -24,8 +24,8 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            budgetPeriodId: string;
             amount: number;
+            budgetPeriodId: string;
             categoryId: string;
             expenseGroupId: string | null;
         })[];
@@ -58,8 +58,8 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            budgetPeriodId: string;
             amount: number;
+            budgetPeriodId: string;
             categoryId: string;
             expenseGroupId: string | null;
         })[];
@@ -74,6 +74,7 @@ export declare class ExpenseGroupService {
     })[]>;
     findOne(userId: UUID, groupId: UUID): Promise<{
         budgetPeriod: {
+            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -82,7 +83,6 @@ export declare class ExpenseGroupService {
             userId: string;
             startDate: Date;
             endDate: Date;
-            income: number;
         };
         expenses: ({
             category: {
@@ -103,8 +103,8 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            budgetPeriodId: string;
             amount: number;
+            budgetPeriodId: string;
             categoryId: string;
             expenseGroupId: string | null;
         })[];
@@ -137,8 +137,8 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            budgetPeriodId: string;
             amount: number;
+            budgetPeriodId: string;
             categoryId: string;
             expenseGroupId: string | null;
         })[];
@@ -162,6 +162,7 @@ export declare class ExpenseGroupService {
     }>;
     addExpenses(userId: UUID, groupId: UUID, payload: AddExpensesToGroupDto): Promise<{
         budgetPeriod: {
+            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -170,7 +171,6 @@ export declare class ExpenseGroupService {
             userId: string;
             startDate: Date;
             endDate: Date;
-            income: number;
         };
         expenses: ({
             category: {
@@ -191,8 +191,8 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            budgetPeriodId: string;
             amount: number;
+            budgetPeriodId: string;
             categoryId: string;
             expenseGroupId: string | null;
         })[];
@@ -228,8 +228,8 @@ export declare class ExpenseGroupService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;

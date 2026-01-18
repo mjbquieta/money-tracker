@@ -10,6 +10,7 @@ import { CategoryModule } from './category/category.module';
 import { BudgetPeriodModule } from './budget-period/budget-period.module';
 import { ExpenseModule } from './expense/expense.module';
 import { ExpenseGroupModule } from './expense-group/expense-group.module';
+import { IncomeModule } from './income/income.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ExpenseGroupModule } from './expense-group/expense-group.module';
     BudgetPeriodModule,
     ExpenseModule,
     ExpenseGroupModule,
+    IncomeModule,
   ],
   providers: [
     {

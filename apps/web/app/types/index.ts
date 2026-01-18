@@ -38,6 +38,7 @@ export interface BudgetPeriod {
   createdAt: string;
   updatedAt: string;
   expenses: Expense[];
+  incomes: Income[];
 }
 
 export interface Expense {
@@ -64,6 +65,16 @@ export interface ExpenseGroup {
   updatedAt: string;
 }
 
+export interface Income {
+  id: string;
+  name: string;
+  description: string | null;
+  amount: number;
+  budgetPeriodId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface LoginPayload {
   email: string;
   password: string;
@@ -79,11 +90,31 @@ export interface RegisterPayload {
   };
 }
 
+export interface IncomeItem {
+  name: string;
+  description?: string;
+  amount: number;
+}
+
 export interface CreateBudgetPeriodPayload {
   name?: string;
   startDate: string;
   endDate: string;
-  income: number;
+  income?: number;
+  incomes?: IncomeItem[];
+}
+
+export interface CreateIncomePayload {
+  name: string;
+  description?: string;
+  amount: number;
+  budgetPeriodId: string;
+}
+
+export interface UpdateIncomePayload {
+  name?: string;
+  description?: string;
+  amount?: number;
 }
 
 export interface CreateExpensePayload {

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics, OverallMetrics, YearRangeMetrics } from '~/types';
+import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics, OverallMetrics, YearRangeMetrics, Income, CreateIncomePayload, UpdateIncomePayload } from '~/types';
 
 export const useBudgetStore = defineStore('budget', () => {
   const budgetPeriods = ref<BudgetPeriod[]>([]);
@@ -147,6 +147,55 @@ export const useBudgetStore = defineStore('budget', () => {
     return { success: true, error: null };
   }
 
+  async function createIncome(payload: CreateIncomePayload) {
+    const { data, error } = await api.post<Income>('/api/v1/incomes', payload);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    if (data && currentPeriod.value?.id === payload.budgetPeriodId) {
+      currentPeriod.value.incomes.push(data);
+      currentPeriod.value.income += data.amount;
+    }
+    return { success: true, error: null, data };
+  }
+
+  async function updateIncome(id: string, payload: UpdateIncomePayload) {
+    const { data, error } = await api.patch<Income>(`/api/v1/incomes/${id}`, payload);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    if (data && currentPeriod.value) {
+      const index = currentPeriod.value.incomes.findIndex((i) => i.id === id);
+      if (index !== -1) {
+        const oldAmount = currentPeriod.value.incomes[index].amount;
+        currentPeriod.value.incomes[index] = data;
+        currentPeriod.value.income = currentPeriod.value.income - oldAmount + data.amount;
+      }
+    }
+    return { success: true, error: null, data };
+  }
+
+  async function deleteIncome(id: string) {
+    const { error } = await api.del(`/api/v1/incomes/${id}`);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    if (currentPeriod.value) {
+      const income = currentPeriod.value.incomes.find((i) => i.id === id);
+      if (income) {
+        currentPeriod.value.income -= income.amount;
+        currentPeriod.value.incomes = currentPeriod.value.incomes.filter((i) => i.id !== id);
+      }
+    }
+    return { success: true, error: null };
+  }
+
   return {
     budgetPeriods,
     currentPeriod,
@@ -165,5 +214,8 @@ export const useBudgetStore = defineStore('budget', () => {
     fetchYearlyMetrics,
     fetchOverallMetrics,
     fetchYearRangeMetrics,
+    createIncome,
+    updateIncome,
+    deleteIncome,
   };
 });

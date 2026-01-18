@@ -1,8 +1,14 @@
+declare class IncomeItemDto {
+    name: string;
+    description?: string;
+    amount: number;
+}
 declare class CreateBudgetPeriodDto {
     name?: string;
     startDate: Date;
     endDate: Date;
-    income: number;
+    income?: number;
+    incomes?: IncomeItemDto[];
 }
 declare class UpdateBudgetPeriodDto {
     name?: string;
@@ -16,4 +22,4 @@ declare class DuplicateBudgetPeriodDto {
     endDate: Date;
     income?: number;
 }
-export { CreateBudgetPeriodDto, UpdateBudgetPeriodDto, DuplicateBudgetPeriodDto, };
+export { IncomeItemDto, CreateBudgetPeriodDto, UpdateBudgetPeriodDto, DuplicateBudgetPeriodDto, };

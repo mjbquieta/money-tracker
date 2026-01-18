@@ -23,13 +23,14 @@ export declare class ExpenseService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;
     findAll(userId: UUID, budgetPeriodId?: UUID): Promise<({
         budgetPeriod: {
+            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -38,7 +39,6 @@ export declare class ExpenseService {
             userId: string;
             startDate: Date;
             endDate: Date;
-            income: number;
         };
         category: {
             id: string;
@@ -58,13 +58,14 @@ export declare class ExpenseService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     })[]>;
     findOne(userId: UUID, expenseId: UUID): Promise<{
         budgetPeriod: {
+            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -73,7 +74,6 @@ export declare class ExpenseService {
             userId: string;
             startDate: Date;
             endDate: Date;
-            income: number;
         };
         category: {
             id: string;
@@ -93,8 +93,8 @@ export declare class ExpenseService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;
@@ -117,8 +117,8 @@ export declare class ExpenseService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;
@@ -129,8 +129,8 @@ export declare class ExpenseService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;
@@ -153,8 +153,8 @@ export declare class ExpenseService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     })[]>;

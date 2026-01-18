@@ -6,7 +6,8 @@
       "Bash(pnpm approve-builds:*)",
       "Bash(pnpm add:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx nest build:*)"
+      "Bash(npx nest build:*)",
+      "Bash(grep:*)"
     ]
   }
 }

@@ -1,12 +1,30 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
+  IsArray,
   IsDate,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   MaxLength,
+  ValidateNested,
 } from 'class-validator';
+
+class IncomeItemDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsNumber()
+  @IsPositive()
+  amount: number;
+}
 
 class CreateBudgetPeriodDto {
   @IsOptional()
@@ -22,9 +40,17 @@ class CreateBudgetPeriodDto {
   @Type(() => Date)
   endDate: Date;
 
+  @IsOptional()
   @IsNumber()
   @IsPositive()
-  income: number;
+  income?: number; // Kept for backwards compatibility
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => IncomeItemDto)
+  incomes?: IncomeItemDto[];
 }
 
 class UpdateBudgetPeriodDto {
@@ -70,6 +96,7 @@ class DuplicateBudgetPeriodDto {
 }
 
 export {
+  IncomeItemDto,
   CreateBudgetPeriodDto,
   UpdateBudgetPeriodDto,
   DuplicateBudgetPeriodDto,

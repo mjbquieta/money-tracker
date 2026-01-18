@@ -23,19 +23,46 @@ export class BudgetPeriodService {
       throw new BadRequestException('Start date must be before end date');
     }
 
-    return this.prisma.budgetPeriod.create({
-      data: {
-        userId,
-        name: payload.name,
-        startDate,
-        endDate,
-        income: payload.income,
-      },
-      include: {
-        expenses: {
-          include: { category: true },
+    // Calculate total income from incomes array or use legacy income field
+    let totalIncome = payload.income ?? 0;
+    if (payload.incomes && payload.incomes.length > 0) {
+      totalIncome = payload.incomes.reduce((sum, inc) => sum + inc.amount, 0);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const budgetPeriod = await tx.budgetPeriod.create({
+        data: {
+          userId,
+          name: payload.name,
+          startDate,
+          endDate,
+          income: totalIncome,
         },
-      },
+      });
+
+      // Create income records if provided
+      if (payload.incomes && payload.incomes.length > 0) {
+        await tx.income.createMany({
+          data: payload.incomes.map((inc) => ({
+            name: inc.name,
+            description: inc.description,
+            amount: inc.amount,
+            budgetPeriodId: budgetPeriod.id,
+          })),
+        });
+      }
+
+      return tx.budgetPeriod.findUnique({
+        where: { id: budgetPeriod.id },
+        include: {
+          expenses: {
+            include: { category: true },
+          },
+          incomes: {
+            where: { deletedAt: null },
+          },
+        },
+      });
     });
   }
 
@@ -49,6 +76,9 @@ export class BudgetPeriodService {
         expenses: {
           where: { deletedAt: null },
           include: { category: true },
+        },
+        incomes: {
+          where: { deletedAt: null },
         },
       },
       orderBy: { startDate: 'desc' },
@@ -66,6 +96,10 @@ export class BudgetPeriodService {
         expenses: {
           where: { deletedAt: null },
           include: { category: true },
+          orderBy: { createdAt: 'desc' },
+        },
+        incomes: {
+          where: { deletedAt: null },
           orderBy: { createdAt: 'desc' },
         },
       },
@@ -100,6 +134,9 @@ export class BudgetPeriodService {
           where: { deletedAt: null },
           include: { category: true },
         },
+        incomes: {
+          where: { deletedAt: null },
+        },
       },
     });
   }
@@ -132,13 +169,30 @@ export class BudgetPeriodService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      // Calculate income from duplicated incomes if not explicitly provided
+      // original is returned from findOne which includes incomes
+      const originalWithIncomes = original as typeof original & {
+        incomes: { name: string; description: string | null; amount: number }[];
+      };
+      let totalIncome = payload.income ?? original.income;
+      if (
+        !payload.income &&
+        originalWithIncomes.incomes &&
+        originalWithIncomes.incomes.length > 0
+      ) {
+        totalIncome = originalWithIncomes.incomes.reduce(
+          (sum, inc) => sum + inc.amount,
+          0,
+        );
+      }
+
       const newBudgetPeriod = await tx.budgetPeriod.create({
         data: {
           userId,
           name: payload.name ?? original.name,
           startDate,
           endDate,
-          income: payload.income ?? original.income,
+          income: totalIncome,
         },
       });
 
@@ -173,11 +227,26 @@ export class BudgetPeriodService {
         });
       }
 
+      // Duplicate incomes
+      if (originalWithIncomes.incomes && originalWithIncomes.incomes.length > 0) {
+        await tx.income.createMany({
+          data: originalWithIncomes.incomes.map((income) => ({
+            name: income.name,
+            description: income.description,
+            amount: income.amount,
+            budgetPeriodId: newBudgetPeriod.id,
+          })),
+        });
+      }
+
       return tx.budgetPeriod.findUnique({
         where: { id: newBudgetPeriod.id },
         include: {
           expenses: {
             include: { category: true },
+          },
+          incomes: {
+            where: { deletedAt: null },
           },
         },
       });

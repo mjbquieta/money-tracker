@@ -6,6 +6,7 @@ export declare class ExpenseController {
     constructor(expenseService: ExpenseService);
     findAll(userId: UUID, budgetPeriodId?: UUID): Promise<({
         budgetPeriod: {
+            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -14,7 +15,6 @@ export declare class ExpenseController {
             userId: string;
             startDate: Date;
             endDate: Date;
-            income: number;
         };
         category: {
             id: string;
@@ -34,13 +34,14 @@ export declare class ExpenseController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     })[]>;
     findOne(userId: UUID, id: UUID): Promise<{
         budgetPeriod: {
+            income: number;
             id: string;
             name: string | null;
             createdAt: Date;
@@ -49,7 +50,6 @@ export declare class ExpenseController {
             userId: string;
             startDate: Date;
             endDate: Date;
-            income: number;
         };
         category: {
             id: string;
@@ -69,8 +69,8 @@ export declare class ExpenseController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;
@@ -93,8 +93,8 @@ export declare class ExpenseController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;
@@ -117,8 +117,8 @@ export declare class ExpenseController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     })[]>;
@@ -141,8 +141,8 @@ export declare class ExpenseController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;
@@ -153,8 +153,8 @@ export declare class ExpenseController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        budgetPeriodId: string;
         amount: number;
+        budgetPeriodId: string;
         categoryId: string;
         expenseGroupId: string | null;
     }>;

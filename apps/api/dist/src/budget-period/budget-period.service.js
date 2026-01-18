@@ -23,19 +23,41 @@ let BudgetPeriodService = class BudgetPeriodService {
         if (startDate >= endDate) {
             throw new common_1.BadRequestException('Start date must be before end date');
         }
-        return this.prisma.budgetPeriod.create({
-            data: {
-                userId,
-                name: payload.name,
-                startDate,
-                endDate,
-                income: payload.income,
-            },
-            include: {
-                expenses: {
-                    include: { category: true },
+        let totalIncome = payload.income ?? 0;
+        if (payload.incomes && payload.incomes.length > 0) {
+            totalIncome = payload.incomes.reduce((sum, inc) => sum + inc.amount, 0);
+        }
+        return this.prisma.$transaction(async (tx) => {
+            const budgetPeriod = await tx.budgetPeriod.create({
+                data: {
+                    userId,
+                    name: payload.name,
+                    startDate,
+                    endDate,
+                    income: totalIncome,
                 },
-            },
+            });
+            if (payload.incomes && payload.incomes.length > 0) {
+                await tx.income.createMany({
+                    data: payload.incomes.map((inc) => ({
+                        name: inc.name,
+                        description: inc.description,
+                        amount: inc.amount,
+                        budgetPeriodId: budgetPeriod.id,
+                    })),
+                });
+            }
+            return tx.budgetPeriod.findUnique({
+                where: { id: budgetPeriod.id },
+                include: {
+                    expenses: {
+                        include: { category: true },
+                    },
+                    incomes: {
+                        where: { deletedAt: null },
+                    },
+                },
+            });
         });
     }
     async findAll(userId) {
@@ -48,6 +70,9 @@ let BudgetPeriodService = class BudgetPeriodService {
                 expenses: {
                     where: { deletedAt: null },
                     include: { category: true },
+                },
+                incomes: {
+                    where: { deletedAt: null },
                 },
             },
             orderBy: { startDate: 'desc' },
@@ -64,6 +89,10 @@ let BudgetPeriodService = class BudgetPeriodService {
                 expenses: {
                     where: { deletedAt: null },
                     include: { category: true },
+                    orderBy: { createdAt: 'desc' },
+                },
+                incomes: {
+                    where: { deletedAt: null },
                     orderBy: { createdAt: 'desc' },
                 },
             },
@@ -92,6 +121,9 @@ let BudgetPeriodService = class BudgetPeriodService {
                     where: { deletedAt: null },
                     include: { category: true },
                 },
+                incomes: {
+                    where: { deletedAt: null },
+                },
             },
         });
     }
@@ -116,13 +148,20 @@ let BudgetPeriodService = class BudgetPeriodService {
             throw new common_1.BadRequestException('Start date must be before end date');
         }
         return this.prisma.$transaction(async (tx) => {
+            const originalWithIncomes = original;
+            let totalIncome = payload.income ?? original.income;
+            if (!payload.income &&
+                originalWithIncomes.incomes &&
+                originalWithIncomes.incomes.length > 0) {
+                totalIncome = originalWithIncomes.incomes.reduce((sum, inc) => sum + inc.amount, 0);
+            }
             const newBudgetPeriod = await tx.budgetPeriod.create({
                 data: {
                     userId,
                     name: payload.name ?? original.name,
                     startDate,
                     endDate,
-                    income: payload.income ?? original.income,
+                    income: totalIncome,
                 },
             });
             const groupIdMapping = {};
@@ -150,11 +189,24 @@ let BudgetPeriodService = class BudgetPeriodService {
                     })),
                 });
             }
+            if (originalWithIncomes.incomes && originalWithIncomes.incomes.length > 0) {
+                await tx.income.createMany({
+                    data: originalWithIncomes.incomes.map((income) => ({
+                        name: income.name,
+                        description: income.description,
+                        amount: income.amount,
+                        budgetPeriodId: newBudgetPeriod.id,
+                    })),
+                });
+            }
             return tx.budgetPeriod.findUnique({
                 where: { id: newBudgetPeriod.id },
                 include: {
                     expenses: {
                         include: { category: true },
+                    },
+                    incomes: {
+                        where: { deletedAt: null },
                     },
                 },
             });
