@@ -36,6 +36,12 @@ let BudgetPeriodController = class BudgetPeriodController {
     getOverallMetrics(userId) {
         return this.budgetPeriodService.getOverallMetrics(userId);
     }
+    getYearRangeMetrics(userId, startYear, endYear) {
+        const currentYear = new Date().getFullYear();
+        const start = startYear ? parseInt(startYear, 10) : currentYear - 1;
+        const end = endYear ? parseInt(endYear, 10) : currentYear;
+        return this.budgetPeriodService.getYearRangeMetrics(userId, start, end);
+    }
     getSummary(userId, id) {
         return this.budgetPeriodService.getSummary(userId, id);
     }
@@ -83,6 +89,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], BudgetPeriodController.prototype, "getOverallMetrics", null);
+__decorate([
+    (0, common_1.Get)('metrics/year-range'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Query)('startYear')),
+    __param(2, (0, common_1.Query)('endYear')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", void 0)
+], BudgetPeriodController.prototype, "getYearRangeMetrics", null);
 __decorate([
     (0, common_1.Get)(':id/summary'),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),

@@ -11,12 +11,17 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import type { MonthlyBreakdown } from '~/types';
+interface MonthlyDataItem {
+  month: number;
+  income: number;
+  expenses: number;
+  label?: string;
+}
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const props = defineProps<{
-  data: MonthlyBreakdown[];
+  data: MonthlyDataItem[];
   currency?: string;
 }>();
 
@@ -31,7 +36,7 @@ const chartData = computed(() => {
   });
 
   return {
-    labels: monthNames,
+    labels: props.data.map((m) => m.label || monthNames[m.month - 1]),
     datasets: [
       {
         label: 'Monthly Net',

@@ -9,19 +9,24 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import type { MonthlyBreakdown } from '~/types';
+interface MonthlyDataItem {
+  month: number;
+  income: number;
+  expenses: number;
+  label?: string;
+}
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const props = defineProps<{
-  data: MonthlyBreakdown[];
+  data: MonthlyDataItem[];
   currency?: string;
 }>();
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const chartData = computed(() => ({
-  labels: monthNames,
+  labels: props.data.map((m) => m.label || monthNames[m.month - 1]),
   datasets: [
     {
       label: 'Income',

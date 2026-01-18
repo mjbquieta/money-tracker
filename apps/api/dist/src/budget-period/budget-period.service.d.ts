@@ -232,4 +232,28 @@ export declare class BudgetPeriodService {
         }>;
         budgetPeriodsCount: number;
     }>;
+    getYearRangeMetrics(userId: UUID, startYear: number, endYear: number): Promise<{
+        startYear: number;
+        endYear: number;
+        totalIncome: number;
+        totalExpenses: number;
+        savings: number;
+        savingsRate: number;
+        expensesByCategory: Record<string, {
+            total: number;
+            count: number;
+        }>;
+        yearlyBreakdown: {
+            year: number;
+            totalIncome: number;
+            totalExpenses: number;
+            savings: number;
+            monthlyBreakdown: Array<{
+                month: number;
+                income: number;
+                expenses: number;
+            }>;
+        }[];
+        budgetPeriodsCount: number;
+    }>;
 }

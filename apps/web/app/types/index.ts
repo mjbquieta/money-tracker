@@ -188,6 +188,26 @@ export interface OverallMetrics {
   budgetPeriodsCount: number;
 }
 
+export interface YearlyBreakdownItem {
+  year: number;
+  totalIncome: number;
+  totalExpenses: number;
+  savings: number;
+  monthlyBreakdown: MonthlyBreakdown[];
+}
+
+export interface YearRangeMetrics {
+  startYear: number;
+  endYear: number;
+  totalIncome: number;
+  totalExpenses: number;
+  savings: number;
+  savingsRate: number;
+  expensesByCategory: Record<string, { total: number; count: number }>;
+  yearlyBreakdown: YearlyBreakdownItem[];
+  budgetPeriodsCount: number;
+}
+
 export interface ApiError {
   statusCode: number;
   message: string | string[];

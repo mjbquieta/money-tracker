@@ -17,7 +17,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  await app.listen(configService.get('PORT') ?? 3000);
+  await app.listen(configService.get('PORT') ?? 3000, '0.0.0.0');
   console.log(`Server is running on port ${configService.get('PORT')}`);
 }
 bootstrap();

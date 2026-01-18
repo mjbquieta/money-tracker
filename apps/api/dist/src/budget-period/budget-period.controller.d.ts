@@ -104,6 +104,30 @@ export declare class BudgetPeriodController {
         }>;
         budgetPeriodsCount: number;
     }>;
+    getYearRangeMetrics(userId: UUID, startYear?: string, endYear?: string): Promise<{
+        startYear: number;
+        endYear: number;
+        totalIncome: number;
+        totalExpenses: number;
+        savings: number;
+        savingsRate: number;
+        expensesByCategory: Record<string, {
+            total: number;
+            count: number;
+        }>;
+        yearlyBreakdown: {
+            year: number;
+            totalIncome: number;
+            totalExpenses: number;
+            savings: number;
+            monthlyBreakdown: {
+                month: number;
+                income: number;
+                expenses: number;
+            }[];
+        }[];
+        budgetPeriodsCount: number;
+    }>;
     getSummary(userId: UUID, id: UUID): Promise<{
         income: number;
         totalExpenses: number;

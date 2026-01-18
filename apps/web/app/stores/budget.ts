@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics, OverallMetrics } from '~/types';
+import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics, OverallMetrics, YearRangeMetrics } from '~/types';
 
 export const useBudgetStore = defineStore('budget', () => {
   const budgetPeriods = ref<BudgetPeriod[]>([]);
@@ -7,6 +7,7 @@ export const useBudgetStore = defineStore('budget', () => {
   const currentSummary = ref<BudgetSummary | null>(null);
   const yearlyMetrics = ref<YearlyMetrics | null>(null);
   const overallMetrics = ref<OverallMetrics | null>(null);
+  const yearRangeMetrics = ref<YearRangeMetrics | null>(null);
   const loading = ref(false);
   const api = useApi();
 
@@ -132,12 +133,27 @@ export const useBudgetStore = defineStore('budget', () => {
     return { success: true, error: null };
   }
 
+  async function fetchYearRangeMetrics(startYear?: number, endYear?: number) {
+    const currentYear = new Date().getFullYear();
+    const start = startYear ?? currentYear - 1;
+    const end = endYear ?? currentYear;
+    const { data, error } = await api.get<YearRangeMetrics>(`/api/v1/budget-periods/metrics/year-range?startYear=${start}&endYear=${end}`);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    yearRangeMetrics.value = data;
+    return { success: true, error: null };
+  }
+
   return {
     budgetPeriods,
     currentPeriod,
     currentSummary,
     yearlyMetrics,
     overallMetrics,
+    yearRangeMetrics,
     loading,
     fetchBudgetPeriods,
     fetchBudgetPeriod,
@@ -148,5 +164,6 @@ export const useBudgetStore = defineStore('budget', () => {
     duplicateBudgetPeriod,
     fetchYearlyMetrics,
     fetchOverallMetrics,
+    fetchYearRangeMetrics,
   };
 });

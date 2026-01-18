@@ -48,6 +48,18 @@ export class BudgetPeriodController {
     return this.budgetPeriodService.getOverallMetrics(userId);
   }
 
+  @Get('metrics/year-range')
+  getYearRangeMetrics(
+    @CurrentUser('id') userId: UUID,
+    @Query('startYear') startYear?: string,
+    @Query('endYear') endYear?: string,
+  ) {
+    const currentYear = new Date().getFullYear();
+    const start = startYear ? parseInt(startYear, 10) : currentYear - 1;
+    const end = endYear ? parseInt(endYear, 10) : currentYear;
+    return this.budgetPeriodService.getYearRangeMetrics(userId, start, end);
+  }
+
   @Get(':id/summary')
   getSummary(@CurrentUser('id') userId: UUID, @Param('id') id: UUID) {
     return this.budgetPeriodService.getSummary(userId, id);

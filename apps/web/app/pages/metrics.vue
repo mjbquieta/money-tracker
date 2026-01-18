@@ -19,29 +19,38 @@ definePageMeta({
 const authStore = useAuthStore();
 const budgetStore = useBudgetStore();
 
-const selectedYear = ref(new Date().getFullYear());
+const currentYear = new Date().getFullYear();
+const startYear = ref(currentYear - 1);
+const endYear = ref(currentYear);
 const loading = ref(true);
 
 const availableYears = computed(() => {
-  const currentYear = new Date().getFullYear();
   const years: number[] = [];
-  for (let y = currentYear; y >= currentYear - 5; y--) {
+  for (let y = currentYear; y >= currentYear - 10; y--) {
     years.push(y);
   }
   return years;
+});
+
+const availableEndYears = computed(() => {
+  return availableYears.value.filter((y) => y >= startYear.value);
 });
 
 const currency = computed(() => authStore.user?.settings?.currency || "USD");
 
 onMounted(async () => {
   loading.value = true;
-  await budgetStore.fetchYearlyMetrics(selectedYear.value);
+  await budgetStore.fetchYearRangeMetrics(startYear.value, endYear.value);
   loading.value = false;
 });
 
-watch(selectedYear, async (newYear) => {
+watch([startYear, endYear], async ([newStart, newEnd]) => {
+  if (newEnd < newStart) {
+    endYear.value = newStart;
+    return;
+  }
   loading.value = true;
-  await budgetStore.fetchYearlyMetrics(newYear);
+  await budgetStore.fetchYearRangeMetrics(newStart, newEnd);
   loading.value = false;
 });
 
@@ -52,11 +61,41 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-const metrics = computed(() => budgetStore.yearlyMetrics);
+const metrics = computed(() => budgetStore.yearRangeMetrics);
 
 const hasData = computed(() => {
   if (!metrics.value) return false;
   return metrics.value.totalIncome > 0 || metrics.value.totalExpenses > 0;
+});
+
+const yearRangeLabel = computed(() => {
+  if (startYear.value === endYear.value) {
+    return String(startYear.value);
+  }
+  return `${startYear.value} - ${endYear.value}`;
+});
+
+const allMonthlyData = computed(() => {
+  if (!metrics.value?.yearlyBreakdown) return [];
+  const data: Array<{ year: number; month: number; income: number; expenses: number; label: string }> = [];
+  for (const yearData of metrics.value.yearlyBreakdown) {
+    for (const month of yearData.monthlyBreakdown) {
+      data.push({
+        year: yearData.year,
+        month: month.month,
+        income: month.income,
+        expenses: month.expenses,
+        label: `${monthNames[month.month - 1]} ${yearData.year}`,
+      });
+    }
+  }
+  return data;
+});
+
+const nonZeroMonthlyData = computed(() => {
+  return allMonthlyData.value.filter(
+    (m) => m.income > 0 || m.expenses > 0
+  );
 });
 
 const monthNames = [
@@ -118,10 +157,19 @@ function getCategoryBarColor(category: string) {
         <div class="flex items-center gap-2">
           <CalendarIcon class="w-5 h-5 text-secondary-400" />
           <select
-            v-model="selectedYear"
-            class="px-4 py-2.5 bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-lg font-medium text-secondary-700 shadow-card"
+            v-model="startYear"
+            class="px-3 py-2.5 bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-medium text-secondary-700 shadow-card"
           >
             <option v-for="year in availableYears" :key="year" :value="year">
+              {{ year }}
+            </option>
+          </select>
+          <span class="text-secondary-400">to</span>
+          <select
+            v-model="endYear"
+            class="px-3 py-2.5 bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-medium text-secondary-700 shadow-card"
+          >
+            <option v-for="year in availableEndYears" :key="year" :value="year">
               {{ year }}
             </option>
           </select>
@@ -148,7 +196,7 @@ function getCategoryBarColor(category: string) {
           <ChartBarIcon class="w-8 h-8 text-secondary-400" />
         </div>
         <h3 class="text-xl font-semibold text-secondary-900 mb-2">
-          No data for {{ selectedYear }}
+          No data for {{ yearRangeLabel }}
         </h3>
         <p class="text-secondary-500 mb-6">
           Create budget periods to see your financial metrics.
@@ -305,7 +353,7 @@ function getCategoryBarColor(category: string) {
         </h2>
         <ClientOnly>
           <ChartsMonthlyBarChart
-            :data="metrics.monthlyBreakdown"
+            :data="nonZeroMonthlyData"
             :currency="currency"
           />
           <template #fallback>
@@ -333,7 +381,7 @@ function getCategoryBarColor(category: string) {
           </h2>
           <ClientOnly>
             <ChartsSavingsLineChart
-              :data="metrics.monthlyBreakdown"
+              :data="nonZeroMonthlyData"
               :currency="currency"
             />
             <template #fallback>
@@ -467,12 +515,12 @@ function getCategoryBarColor(category: string) {
             </thead>
             <tbody>
               <tr
-                v-for="(month, index) in metrics.monthlyBreakdown"
+                v-for="(month, index) in nonZeroMonthlyData"
                 :key="index"
                 class="border-t border-secondary-100 hover:bg-secondary-50 transition-colors"
               >
                 <td class="py-4 px-5 text-sm font-medium text-secondary-900">
-                  {{ monthNames[index] }}
+                  {{ month.label }}
                 </td>
                 <td
                   class="py-4 px-5 text-sm text-right text-success-600 font-medium"
