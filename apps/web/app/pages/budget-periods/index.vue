@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import {
   PlusIcon,
-  ClipboardDocumentListIcon,
+  CalendarDaysIcon,
   BanknotesIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ClockIcon,
   TrashIcon,
-  DocumentTextIcon,
+  CreditCardIcon,
 } from "@heroicons/vue/24/outline";
-import type { PersonalBudgetItemInput } from "~/types";
+import type { IncomeItem } from "~/types";
 
 definePageMeta({
   middleware: "auth",
 });
 
 const authStore = useAuthStore();
-const personalBudgetStore = usePersonalBudgetStore();
+const budgetStore = useBudgetStore();
 const router = useRouter();
 
 const showCreateModal = ref(false);
@@ -22,35 +25,28 @@ const error = ref<string | null>(null);
 
 const createForm = reactive({
   name: "",
-  description: "",
-  items: [{ name: "", description: "", amount: 0 }] as PersonalBudgetItemInput[],
+  startDate: "",
+  endDate: "",
+  incomes: [{ name: "", description: "", amount: 0 }] as IncomeItem[],
 });
 
-const totalAmount = computed(() =>
-  createForm.items.reduce((sum, item) => sum + (item.amount || 0), 0),
+const totalIncome = computed(() =>
+  createForm.incomes.reduce((sum, inc) => sum + (inc.amount || 0), 0),
 );
 
-function addItem() {
-  createForm.items.push({ name: "", description: "", amount: 0 });
+function addIncomeSource() {
+  createForm.incomes.push({ name: "", description: "", amount: 0 });
 }
 
-function removeItem(index: number) {
-  if (createForm.items.length > 1) {
-    createForm.items.splice(index, 1);
+function removeIncomeSource(index: number) {
+  if (createForm.incomes.length > 1) {
+    createForm.incomes.splice(index, 1);
   }
 }
 
 onMounted(async () => {
-  await personalBudgetStore.fetchPersonalBudgets();
+  await budgetStore.fetchBudgetPeriods();
 });
-
-function formatCurrency(amount: number) {
-  const currency = authStore.user?.settings?.currency || "USD";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-  }).format(amount);
-}
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-US", {
@@ -60,34 +56,55 @@ function formatDate(dateString: string) {
   });
 }
 
-function getBudgetTotal(budget: { items: { amount: number }[] }) {
-  return budget.items.reduce((sum, item) => sum + item.amount, 0);
+function formatCurrency(amount: number) {
+  const currency = authStore.user?.settings?.currency || "USD";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+  }).format(amount);
+}
+
+function getPeriodIncome(period: { incomes?: { amount: number }[] }) {
+  return period.incomes?.reduce((sum, inc) => sum + inc.amount, 0) || 0;
 }
 
 function resetForm() {
   createForm.name = "";
-  createForm.description = "";
-  createForm.items = [{ name: "", description: "", amount: 0 }];
+  createForm.startDate = "";
+  createForm.endDate = "";
+  createForm.incomes = [{ name: "", description: "", amount: 0 }];
 }
 
 async function handleCreate() {
   error.value = null;
 
-  if (!createForm.name.trim()) {
-    error.value = "Please enter a name for your budget.";
+  if (!createForm.startDate || !createForm.endDate) {
+    error.value = "Please fill in all required fields.";
     return;
   }
 
-  const validItems = createForm.items.filter(
-    (item) => item.name.trim() && item.amount > 0,
+  const validIncomes = createForm.incomes.filter(
+    (inc) => inc.name.trim() && inc.amount > 0,
   );
+
+  if (validIncomes.length === 0) {
+    error.value =
+      "Please add at least one income source with a name and amount.";
+    return;
+  }
+
+  if (new Date(createForm.startDate) >= new Date(createForm.endDate)) {
+    error.value = "Start date must be before end date.";
+    return;
+  }
 
   loading.value = true;
 
-  const result = await personalBudgetStore.createPersonalBudget({
-    name: createForm.name,
-    description: createForm.description || undefined,
-    items: validItems.length > 0 ? validItems : undefined,
+  const result = await budgetStore.createBudgetPeriod({
+    name: createForm.name || undefined,
+    startDate: createForm.startDate,
+    endDate: createForm.endDate,
+    incomes: validIncomes,
   });
 
   loading.value = false;
@@ -104,8 +121,8 @@ async function handleCreate() {
   resetForm();
 }
 
-function viewPersonalBudget(id: string) {
-  router.push(`/personal-budgets/${id}`);
+function viewBudgetPeriod(id: string) {
+  router.push(`/budget-periods/${id}`);
 }
 </script>
 
@@ -113,17 +130,17 @@ function viewPersonalBudget(id: string) {
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
     <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
     >
       <div>
         <h1
           class="text-2xl font-bold text-secondary-900 flex items-center gap-2"
         >
-          <ClipboardDocumentListIcon class="w-7 h-7 text-primary-500" />
-          Personal Budgets
+          <CalendarDaysIcon class="w-7 h-7 text-primary-500" />
+          Budget Periods
         </h1>
         <p class="text-secondary-500 mt-1">
-          Simple item lists for wishlists, savings goals, or shopping lists
+          Track your income and expenses over specific time periods
         </p>
       </div>
       <button
@@ -131,116 +148,127 @@ function viewPersonalBudget(id: string) {
         @click="showCreateModal = true"
       >
         <PlusIcon class="w-5 h-5" />
-        New Personal Budget
+        New Budget Period
       </button>
     </div>
 
     <!-- Info Banner -->
     <UiInfoBanner
-      variant="tip"
+      variant="info"
       dismissible
-      dismiss-key="personal-budgets-intro"
+      dismiss-key="budget-periods-intro"
       class="mb-6"
     >
-      Personal budgets are standalone item lists - they're separate from your
-      <NuxtLink
-        to="/budget-periods"
-        class="text-accent-700 hover:underline font-medium"
-        >Budget Periods</NuxtLink
+      A budget period represents a time range (like a month) where you track
+      your income and expenses. Your financial insights on the
+      <NuxtLink to="/dashboard" class="text-primary-700 hover:underline font-medium"
+        >Dashboard</NuxtLink
       >
-      and don't affect your dashboard metrics. Perfect for tracking wishlists,
-      savings goals, or shopping lists.
+      are calculated from all your budget periods.
     </UiInfoBanner>
 
     <!-- Loading State -->
-    <div v-if="personalBudgetStore.loading" class="text-center py-16">
+    <div v-if="budgetStore.loading" class="text-center py-16">
       <div
         class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"
       ></div>
-      <p class="text-secondary-500">Loading your personal budgets...</p>
+      <p class="text-secondary-500">Loading your budget periods...</p>
     </div>
 
     <!-- Empty State -->
     <UiEmptyState
-      v-else-if="personalBudgetStore.personalBudgets.length === 0"
-      :icon="ClipboardDocumentListIcon"
-      title="No personal budgets yet"
-      description="Personal budgets are perfect for simple item lists like wishlists, savings goals, or shopping lists."
-      action-label="Create Your First Budget"
+      v-else-if="budgetStore.budgetPeriods.length === 0"
+      :icon="BanknotesIcon"
+      title="No budget periods yet"
+      description="Budget periods help you track your income and expenses over time. Create your first one to start managing your finances."
+      action-label="Create Your First Budget Period"
       @action="showCreateModal = true"
     >
-      <template #content>
-        <div class="text-left bg-secondary-50 rounded-lg p-4 mb-4">
-          <p class="text-sm font-medium text-secondary-700 mb-2">
-            Great for:
-          </p>
-          <ul class="text-sm text-secondary-500 space-y-1">
-            <li>Wish lists</li>
-            <li>Savings goals</li>
-            <li>Shopping lists</li>
-            <li>Expense planning</li>
-          </ul>
-        </div>
-      </template>
       <template #footer>
         <p class="text-sm text-secondary-400 mt-4">
-          For tracking actual income and expenses over time, use
-          <NuxtLink
-            to="/budget-periods"
-            class="text-primary-600 hover:text-primary-700 font-medium"
-            >Budget Periods</NuxtLink
-          >
-          instead.
+          Tip: Most people create a new budget period each month.
         </p>
       </template>
     </UiEmptyState>
 
-    <!-- Personal Budget Cards -->
+    <!-- Budget Period Cards -->
     <div v-else class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       <div
-        v-for="budget in personalBudgetStore.personalBudgets"
-        :key="budget.id"
+        v-for="period in budgetStore.budgetPeriods"
+        :key="period.id"
         class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 cursor-pointer hover:shadow-card-hover hover:border-primary-200 transition-all group"
-        @click="viewPersonalBudget(budget.id)"
+        @click="viewBudgetPeriod(period.id)"
       >
         <div class="flex justify-between items-start mb-5">
           <div class="flex-1">
             <h3
               class="font-semibold text-secondary-900 group-hover:text-primary-700 transition-colors"
             >
-              {{ budget.name }}
+              {{
+                period.name ||
+                `${formatDate(period.startDate)} - ${formatDate(period.endDate)}`
+              }}
             </h3>
             <p
-              v-if="budget.description"
-              class="text-sm text-secondary-500 mt-1 line-clamp-2"
+              v-if="period.name"
+              class="text-sm text-secondary-500 flex items-center gap-1 mt-1"
             >
-              {{ budget.description }}
+              <ClockIcon class="w-4 h-4" />
+              {{ formatDate(period.startDate) }} -
+              {{ formatDate(period.endDate) }}
             </p>
           </div>
           <div
             class="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center group-hover:bg-primary-100 transition-colors"
           >
-            <ClipboardDocumentListIcon class="w-5 h-5 text-primary-600" />
+            <CalendarDaysIcon class="w-5 h-5 text-primary-600" />
           </div>
         </div>
 
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-sm text-secondary-500 flex items-center gap-2">
-              <DocumentTextIcon class="w-4 h-4 text-secondary-400" />
-              Items
+              <ArrowTrendingUpIcon class="w-4 h-4 text-success-500" />
+              Income
             </span>
-            <span class="font-medium text-secondary-700">{{
-              budget.items.length
+            <span class="font-semibold text-success-600">{{
+              formatCurrency(getPeriodIncome(period))
             }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-secondary-500 flex items-center gap-2">
+              <CreditCardIcon class="w-4 h-4 text-danger-500" />
+              Expenses
+            </span>
+            <span class="font-semibold text-danger-600">
+              {{
+                formatCurrency(
+                  period.expenses.reduce((sum, e) => sum + e.amount, 0),
+                )
+              }}
+            </span>
           </div>
 
           <div
             class="border-t border-secondary-100 pt-3 flex justify-between items-center"
           >
-            <span class="text-sm font-medium text-secondary-600">Total</span>
-            <span class="font-bold text-lg text-primary-600">
-              {{ formatCurrency(getBudgetTotal(budget)) }}
+            <span class="text-sm font-medium text-secondary-600">Remaining</span>
+            <span
+              class="font-bold text-lg"
+              :class="
+                getPeriodIncome(period) -
+                  period.expenses.reduce((sum, e) => sum + e.amount, 0) >=
+                0
+                  ? 'text-primary-600'
+                  : 'text-danger-600'
+              "
+            >
+              {{
+                formatCurrency(
+                  getPeriodIncome(period) -
+                    period.expenses.reduce((sum, e) => sum + e.amount, 0),
+                )
+              }}
             </span>
           </div>
         </div>
@@ -249,12 +277,14 @@ function viewPersonalBudget(id: string) {
           class="mt-4 pt-3 border-t border-secondary-100 flex items-center justify-between"
         >
           <span class="text-xs text-secondary-400">
-            Created {{ formatDate(budget.createdAt) }}
+            {{ period.expenses.length }} expense{{
+              period.expenses.length === 1 ? "" : "s"
+            }}
           </span>
           <span
             class="text-xs text-primary-600 font-medium group-hover:text-primary-700"
           >
-            View details →
+            View details
           </span>
         </div>
       </div>
@@ -274,69 +304,72 @@ function viewPersonalBudget(id: string) {
             <div
               class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center"
             >
-              <ClipboardDocumentListIcon class="w-6 h-6 text-primary-600" />
+              <CalendarDaysIcon class="w-6 h-6 text-primary-600" />
             </div>
             <div>
               <h2 class="text-xl font-semibold text-secondary-900">
-                Create Personal Budget
+                Create Budget Period
               </h2>
               <p class="text-sm text-secondary-500">
-                Add items and track their costs
+                Set up a new period to track your finances
               </p>
             </div>
           </div>
 
-          <UiBaseAlert
-            v-if="error"
-            type="error"
-            :message="error"
-            class="mb-4"
-          />
+          <UiBaseAlert v-if="error" type="error" :message="error" class="mb-4" />
 
           <form @submit.prevent="handleCreate" class="space-y-5">
             <UiBaseInput
               v-model="createForm.name"
-              label="Budget Name"
-              placeholder="e.g., Vacation Budget, Wishlist"
-              required
+              label="Name (Optional)"
+              placeholder="e.g., January 2026"
             />
 
-            <UiBaseInput
-              v-model="createForm.description"
-              label="Description (Optional)"
-              placeholder="What is this budget for?"
-            />
+            <div class="grid grid-cols-2 gap-4">
+              <UiBaseInput
+                v-model="createForm.startDate"
+                label="Start Date"
+                type="date"
+                required
+              />
+              <UiBaseInput
+                v-model="createForm.endDate"
+                label="End Date"
+                type="date"
+                required
+              />
+            </div>
 
-            <!-- Budget Items -->
+            <!-- Income Sources -->
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <label class="block text-sm font-medium text-secondary-700"
-                  >Items (Optional)</label
+                  >Income Sources</label
                 >
                 <button
                   type="button"
                   class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
-                  @click="addItem"
+                  @click="addIncomeSource"
                 >
                   <PlusIcon class="w-4 h-4" />
-                  Add Item
+                  Add Source
                 </button>
               </div>
 
               <div
-                v-for="(item, index) in createForm.items"
+                v-for="(income, index) in createForm.incomes"
                 :key="index"
                 class="p-4 bg-secondary-50 rounded-lg space-y-3"
               >
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium text-secondary-600"
-                    >Item #{{ index + 1 }}</span
+                    >Income #{{ index + 1 }}</span
                   >
                   <button
-                    v-if="createForm.items.length > 1"
+                    v-if="createForm.incomes.length > 1"
                     type="button"
                     class="text-danger-500 hover:text-danger-600 p-1"
-                    @click="removeItem(index)"
+                    @click="removeIncomeSource(index)"
                   >
                     <TrashIcon class="w-4 h-4" />
                   </button>
@@ -344,39 +377,38 @@ function viewPersonalBudget(id: string) {
 
                 <div class="grid grid-cols-2 gap-3">
                   <UiBaseInput
-                    v-model="item.name"
-                    placeholder="Item name"
+                    v-model="income.name"
+                    placeholder="e.g., Main Job"
+                    required
                   />
                   <UiBaseInput
-                    v-model="item.amount"
+                    v-model="income.amount"
                     type="number"
                     placeholder="Amount"
+                    required
                   />
                 </div>
 
                 <UiBaseInput
-                  v-model="item.description"
+                  v-model="income.description"
                   placeholder="Description (optional)"
                 />
               </div>
 
-              <!-- Total Amount Display -->
+              <!-- Total Income Display -->
               <div
-                v-if="totalAmount > 0"
                 class="flex items-center justify-between p-3 bg-primary-50 rounded-lg"
               >
                 <span class="text-sm font-medium text-primary-700"
-                  >Total Amount</span
+                  >Total Income</span
                 >
                 <span class="text-lg font-bold text-primary-700">{{
-                  formatCurrency(totalAmount)
+                  formatCurrency(totalIncome)
                 }}</span>
               </div>
             </div>
 
-            <div
-              class="flex justify-end gap-3 pt-4 border-t border-secondary-100"
-            >
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
               <button
                 type="button"
                 class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
@@ -394,7 +426,7 @@ function viewPersonalBudget(id: string) {
                   class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
                 ></span>
                 <PlusIcon v-else class="w-5 h-5" />
-                Create Budget
+                Create Budget Period
               </button>
             </div>
           </form>

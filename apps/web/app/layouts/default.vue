@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   HomeIcon,
-  ChartBarIcon,
+  CalendarDaysIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
@@ -77,12 +77,12 @@ onUnmounted(() => {
                 <span>Dashboard</span>
               </NuxtLink>
               <NuxtLink
-                to="/metrics"
+                to="/budget-periods"
                 class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                 active-class="!text-primary-700 !bg-primary-100 font-medium"
               >
-                <ChartBarIcon class="w-5 h-5" />
-                <span>Metrics</span>
+                <CalendarDaysIcon class="w-5 h-5" />
+                <span>Budget Periods</span>
               </NuxtLink>
               <NuxtLink
                 to="/personal-budgets"
@@ -247,12 +247,12 @@ onUnmounted(() => {
               <span>Dashboard</span>
             </NuxtLink>
             <NuxtLink
-              to="/metrics"
+              to="/budget-periods"
               class="flex items-center gap-3 px-3 py-3 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
               active-class="!text-primary-700 !bg-primary-100 font-medium"
             >
-              <ChartBarIcon class="w-5 h-5" />
-              <span>Metrics</span>
+              <CalendarDaysIcon class="w-5 h-5" />
+              <span>Budget Periods</span>
             </NuxtLink>
             <NuxtLink
               to="/personal-budgets"

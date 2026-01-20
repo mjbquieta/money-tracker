@@ -896,7 +896,7 @@ async function handleDuplicateSubmit() {
 
   // Navigate to the new duplicated budget period
   if (result.data) {
-    router.push(`/budget/${result.data.id}`);
+    router.push(`/budget-periods/${result.data.id}`);
   }
 }
 
@@ -951,7 +951,7 @@ async function handleDeleteBudgetPeriod() {
   const result = await budgetStore.deleteBudgetPeriod(budgetPeriodId);
 
   if (result.success) {
-    router.push('/dashboard');
+    router.push('/budget-periods');
   }
 }
 
@@ -983,10 +983,10 @@ function getCategoryStyle(categoryName: string) {
         <p class="text-secondary-500 mb-6">The budget period you're looking for doesn't exist or has been deleted.</p>
         <button
           class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium"
-          @click="router.push('/dashboard')"
+          @click="router.push('/budget-periods')"
         >
           <ArrowLeftIcon class="w-5 h-5" />
-          Back to Dashboard
+          Back to Budget Periods
         </button>
       </div>
     </div>
@@ -996,10 +996,10 @@ function getCategoryStyle(categoryName: string) {
       <div class="mb-8">
         <button
           class="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm mb-4 group"
-          @click="router.push('/dashboard')"
+          @click="router.push('/budget-periods')"
         >
           <ArrowLeftIcon class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Dashboard
+          Back to Budget Periods
         </button>
 
         <div class="flex flex-col sm:flex-row justify-between items-start gap-4">

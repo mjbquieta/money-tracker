@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import {
-  PlusIcon,
-  CalendarDaysIcon,
-  BanknotesIcon,
-  CreditCardIcon,
-  WalletIcon,
-  ChartBarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
+  WalletIcon,
   SparklesIcon,
-  ClockIcon,
-  TrashIcon,
+  CalendarDaysIcon,
+  ClipboardDocumentListIcon,
+  ChartBarIcon,
+  ChartPieIcon,
+  CalendarIcon,
+  TagIcon,
+  RocketLaunchIcon,
+  BanknotesIcon,
+  ArrowRightIcon,
 } from "@heroicons/vue/24/outline";
-import type { IncomeItem } from "~/types";
 
 definePageMeta({
   middleware: "auth",
@@ -20,552 +21,516 @@ definePageMeta({
 
 const authStore = useAuthStore();
 const budgetStore = useBudgetStore();
-const router = useRouter();
+const personalBudgetStore = usePersonalBudgetStore();
 
-const showCreateModal = ref(false);
-const loading = ref(false);
-const error = ref<string | null>(null);
+const currentYear = new Date().getFullYear();
+const startYear = ref(currentYear - 1);
+const endYear = ref(currentYear);
+const loading = ref(true);
 
-const createForm = reactive({
-  name: "",
-  startDate: "",
-  endDate: "",
-  incomes: [{ name: "", description: "", amount: 0 }] as IncomeItem[],
+const availableYears = computed(() => {
+  const years: number[] = [];
+  for (let y = currentYear; y >= currentYear - 10; y--) {
+    years.push(y);
+  }
+  return years;
 });
 
-const totalIncome = computed(() =>
-  createForm.incomes.reduce((sum, inc) => sum + (inc.amount || 0), 0),
-);
+const availableEndYears = computed(() => {
+  return availableYears.value.filter((y) => y >= startYear.value);
+});
 
-function addIncomeSource() {
-  createForm.incomes.push({ name: "", description: "", amount: 0 });
-}
-
-function removeIncomeSource(index: number) {
-  if (createForm.incomes.length > 1) {
-    createForm.incomes.splice(index, 1);
-  }
-}
+const currency = computed(() => authStore.user?.settings?.currency || "USD");
 
 onMounted(async () => {
+  loading.value = true;
   await Promise.all([
-    budgetStore.fetchBudgetPeriods(),
+    budgetStore.fetchYearRangeMetrics(startYear.value, endYear.value),
     budgetStore.fetchOverallMetrics(),
+    personalBudgetStore.fetchPersonalBudgets(),
   ]);
+  loading.value = false;
 });
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
+watch([startYear, endYear], async ([newStart, newEnd]) => {
+  if (newEnd < newStart) {
+    endYear.value = newStart;
+    return;
+  }
+  loading.value = true;
+  await budgetStore.fetchYearRangeMetrics(newStart, newEnd);
+  loading.value = false;
+});
 
 function formatCurrency(amount: number) {
-  const currency = authStore.user?.settings?.currency || "USD";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency,
+    currency: currency.value,
   }).format(amount);
 }
 
-function getPeriodIncome(period: { incomes?: { amount: number }[] }) {
-  return period.incomes?.reduce((sum, inc) => sum + inc.amount, 0) || 0;
-}
+const metrics = computed(() => budgetStore.yearRangeMetrics);
+const overallMetrics = computed(() => budgetStore.overallMetrics);
 
-function resetForm() {
-  createForm.name = "";
-  createForm.startDate = "";
-  createForm.endDate = "";
-  createForm.incomes = [{ name: "", description: "", amount: 0 }];
-}
+const hasData = computed(() => {
+  if (!metrics.value) return false;
+  return metrics.value.totalIncome > 0 || metrics.value.totalExpenses > 0;
+});
 
-async function handleCreate() {
-  error.value = null;
+const budgetPeriodsCount = computed(() => {
+  return overallMetrics.value?.budgetPeriodsCount || 0;
+});
 
-  // Validate required fields
-  if (!createForm.startDate || !createForm.endDate) {
-    error.value = "Please fill in all required fields.";
-    return;
+const personalBudgetsCount = computed(() => {
+  return personalBudgetStore.personalBudgets.length;
+});
+
+const allMonthlyData = computed(() => {
+  if (!metrics.value?.yearlyBreakdown) return [];
+  const data: Array<{
+    year: number;
+    month: number;
+    income: number;
+    expenses: number;
+    label: string;
+  }> = [];
+  for (const yearData of metrics.value.yearlyBreakdown) {
+    for (const month of yearData.monthlyBreakdown) {
+      data.push({
+        year: yearData.year,
+        month: month.month,
+        income: month.income,
+        expenses: month.expenses,
+        label: `${monthNames[month.month - 1]} ${yearData.year}`,
+      });
+    }
   }
+  return data;
+});
 
-  // Filter out empty income sources and validate
-  const validIncomes = createForm.incomes.filter(
-    (inc) => inc.name.trim() && inc.amount > 0,
-  );
+const nonZeroMonthlyData = computed(() => {
+  return allMonthlyData.value.filter((m) => m.income > 0 || m.expenses > 0);
+});
 
-  if (validIncomes.length === 0) {
-    error.value =
-      "Please add at least one income source with a name and amount.";
-    return;
+const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const savingsRateStatus = computed(() => {
+  if (!metrics.value) return { color: "secondary", bgClass: "bg-secondary-50", iconClass: "text-secondary-600", valueClass: "text-secondary-900", progressClass: "bg-secondary-500" };
+
+  if (metrics.value.savingsRate >= 20) {
+    return { color: "success", bgClass: "bg-success-50", iconClass: "text-success-600", valueClass: "text-success-600", progressClass: "bg-success-500" };
+  } else if (metrics.value.savingsRate >= 0) {
+    return { color: "warning", bgClass: "bg-warning-50", iconClass: "text-warning-600", valueClass: "text-warning-600", progressClass: "bg-warning-500" };
+  } else {
+    return { color: "danger", bgClass: "bg-danger-50", iconClass: "text-danger-600", valueClass: "text-danger-600", progressClass: "bg-danger-500" };
   }
+});
 
-  if (new Date(createForm.startDate) >= new Date(createForm.endDate)) {
-    error.value = "Start date must be before end date.";
-    return;
-  }
+const categoryColors: Record<string, string> = {
+  Bills: "bg-danger-500",
+  Food: "bg-warning-500",
+  Transport: "bg-primary-500",
+  Savings: "bg-success-500",
+  Entertainment: "bg-accent-500",
+};
 
-  loading.value = true;
-
-  const result = await budgetStore.createBudgetPeriod({
-    name: createForm.name || undefined,
-    startDate: createForm.startDate,
-    endDate: createForm.endDate,
-    incomes: validIncomes,
-  });
-
-  loading.value = false;
-
-  if (!result.success && result.error) {
-    error.value =
-      typeof result.error.message === "string"
-        ? result.error.message
-        : result.error.message[0];
-    return;
-  }
-
-  showCreateModal.value = false;
-  resetForm();
+function getCategoryBarColor(category: string) {
+  return categoryColors[category] || "bg-secondary-500";
 }
-
-function viewBudgetPeriod(id: string) {
-  router.push(`/budget/${id}`);
-}
-
-const metrics = computed(() => budgetStore.overallMetrics);
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
     <!-- Welcome Header -->
-    <div class="mb-8">
+    <div class="mb-6">
       <h1 class="text-2xl font-bold text-secondary-900">
         Welcome back, {{ authStore.user?.name?.split(" ")[0] }}
       </h1>
-      <p class="text-secondary-500 mt-1">Here's an overview of your finances</p>
-    </div>
-
-    <!-- Quick Stats Cards -->
-    <div v-if="metrics" class="mb-10">
-      <div class="flex justify-between items-center mb-5">
-        <h2
-          class="text-lg font-semibold text-secondary-800 flex items-center gap-2"
-        >
-          <SparklesIcon class="w-5 h-5 text-accent-500" />
-          Overall Summary
-        </h2>
-        <NuxtLink
-          to="/metrics"
-          class="flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm font-medium transition-colors"
-        >
-          <ChartBarIcon class="w-4 h-4" />
-          View Detailed Metrics
-        </NuxtLink>
-      </div>
-
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Total Income Card -->
-        <div
-          class="bg-white rounded-xl shadow-card p-5 border border-secondary-100"
-        >
-          <div class="flex items-center gap-3 mb-3">
-            <div
-              class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center"
-            >
-              <ArrowTrendingUpIcon class="w-5 h-5 text-success-600" />
-            </div>
-            <span class="text-sm font-medium text-secondary-500"
-              >Total Income</span
-            >
-          </div>
-          <p class="text-2xl font-bold text-success-600">
-            {{ formatCurrency(metrics.totalIncome) }}
-          </p>
-        </div>
-
-        <!-- Total Expenses Card -->
-        <div
-          class="bg-white rounded-xl shadow-card p-5 border border-secondary-100"
-        >
-          <div class="flex items-center gap-3 mb-3">
-            <div
-              class="w-10 h-10 bg-danger-50 rounded-lg flex items-center justify-center"
-            >
-              <ArrowTrendingDownIcon class="w-5 h-5 text-danger-600" />
-            </div>
-            <span class="text-sm font-medium text-secondary-500"
-              >Total Expenses</span
-            >
-          </div>
-          <p class="text-2xl font-bold text-danger-600">
-            {{ formatCurrency(metrics.totalExpenses) }}
-          </p>
-        </div>
-
-        <!-- Net Savings Card -->
-        <div
-          class="bg-white rounded-xl shadow-card p-5 border border-secondary-100"
-        >
-          <div class="flex items-center gap-3 mb-3">
-            <div
-              class="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center"
-            >
-              <WalletIcon class="w-5 h-5 text-primary-600" />
-            </div>
-            <span class="text-sm font-medium text-secondary-500"
-              >Net Savings</span
-            >
-          </div>
-          <p
-            class="text-2xl font-bold"
-            :class="
-              metrics.savings >= 0 ? 'text-primary-600' : 'text-danger-600'
-            "
-          >
-            {{ formatCurrency(metrics.savings) }}
-          </p>
-        </div>
-
-        <!-- Savings Rate Card with Link -->
-        <NuxtLink
-          to="/metrics"
-          class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl shadow-card p-5 text-white hover:from-primary-600 hover:to-primary-800 transition-all group cursor-pointer"
-        >
-          <div class="flex items-center gap-3 mb-3">
-            <div
-              class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center"
-            >
-              <ChartBarIcon class="w-5 h-5 text-white" />
-            </div>
-            <span class="text-sm font-medium text-primary-100"
-              >Savings Rate</span
-            >
-          </div>
-          <p class="text-2xl font-bold">
-            {{ metrics.savingsRate.toFixed(1) }}%
-          </p>
-          <p
-            class="text-xs text-primary-200 mt-2 group-hover:text-white transition-colors"
-          >
-            View charts & analytics
-          </p>
-        </NuxtLink>
-      </div>
-    </div>
-
-    <!-- Budget Periods Section -->
-    <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
-    >
-      <div>
-        <h2
-          class="text-lg font-semibold text-secondary-800 flex items-center gap-2"
-        >
-          <CalendarDaysIcon class="w-5 h-5 text-primary-500" />
-          Budget Periods
-        </h2>
-        <p class="text-secondary-500 text-sm mt-1">
-          Manage your budget periods and track expenses
-        </p>
-      </div>
-      <button
-        class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
-        @click="showCreateModal = true"
-      >
-        <PlusIcon class="w-5 h-5" />
-        New Budget Period
-      </button>
+      <p class="text-secondary-500 mt-1">Here's your financial overview</p>
     </div>
 
     <!-- Loading State -->
-    <div v-if="budgetStore.loading" class="text-center py-16">
+    <div v-if="loading && !hasData" class="text-center py-16">
       <div
         class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"
       ></div>
-      <p class="text-secondary-500">Loading your budget periods...</p>
+      <p class="text-secondary-500">Loading your financial data...</p>
     </div>
 
-    <!-- Empty State -->
-    <div
-      v-else-if="budgetStore.budgetPeriods.length === 0"
-      class="text-center py-16"
-    >
+    <!-- Empty State (First-Time User) -->
+    <div v-else-if="!hasData && budgetPeriodsCount === 0" class="py-8">
       <div
-        class="bg-white rounded-2xl shadow-card p-10 max-w-md mx-auto border border-secondary-100"
+        class="bg-white rounded-2xl shadow-card border border-secondary-100 p-8 md:p-12 max-w-2xl mx-auto text-center"
       >
         <div
-          class="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-5"
+          class="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6"
         >
-          <BanknotesIcon class="w-8 h-8 text-primary-500" />
+          <RocketLaunchIcon class="w-10 h-10 text-primary-600" />
         </div>
-        <h3 class="text-xl font-semibold text-secondary-900 mb-2">
-          No budget periods yet
-        </h3>
-        <p class="text-secondary-500 mb-6">
-          Create your first budget period to start tracking your expenses and
-          savings.
+
+        <h2 class="text-2xl font-bold text-secondary-900 mb-3">
+          Welcome to Prospera!
+        </h2>
+        <p class="text-secondary-500 mb-8 max-w-md mx-auto">
+          Your financial dashboard will come to life once you create your first
+          budget period. Let's get started!
         </p>
-        <button
-          class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium mx-auto"
-          @click="showCreateModal = true"
-        >
-          <PlusIcon class="w-5 h-5" />
-          Create Your First Budget
-        </button>
-      </div>
-    </div>
 
-    <!-- Budget Period Cards -->
-    <div v-else class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-      <div
-        v-for="period in budgetStore.budgetPeriods"
-        :key="period.id"
-        class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 cursor-pointer hover:shadow-card-hover hover:border-primary-200 transition-all group"
-        @click="viewBudgetPeriod(period.id)"
-      >
-        <div class="flex justify-between items-start mb-5">
-          <div class="flex-1">
-            <h3
-              class="font-semibold text-secondary-900 group-hover:text-primary-700 transition-colors"
-            >
-              {{
-                period.name ||
-                `${formatDate(period.startDate)} - ${formatDate(period.endDate)}`
-              }}
-            </h3>
-            <p
-              v-if="period.name"
-              class="text-sm text-secondary-500 flex items-center gap-1 mt-1"
-            >
-              <ClockIcon class="w-4 h-4" />
-              {{ formatDate(period.startDate) }} -
-              {{ formatDate(period.endDate) }}
-            </p>
-          </div>
-          <div
-            class="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center group-hover:bg-primary-100 transition-colors"
-          >
-            <CalendarDaysIcon class="w-5 h-5 text-primary-600" />
+        <!-- Getting Started Steps -->
+        <div class="bg-secondary-50 rounded-xl p-6 mb-8 text-left">
+          <h3 class="font-semibold text-secondary-900 mb-4 text-center">
+            How to get started
+          </h3>
+          <div class="space-y-4">
+            <div class="flex gap-4">
+              <div
+                class="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold"
+              >
+                1
+              </div>
+              <div>
+                <p class="font-medium text-secondary-900">
+                  Create a Budget Period
+                </p>
+                <p class="text-sm text-secondary-500">
+                  A budget period represents a time range (like a month) where you
+                  track your income and expenses.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div
+                class="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold"
+              >
+                2
+              </div>
+              <div>
+                <p class="font-medium text-secondary-900">Add Your Income</p>
+                <p class="text-sm text-secondary-500">
+                  Record your earnings from jobs, freelance work, or other
+                  sources.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div
+                class="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold"
+              >
+                3
+              </div>
+              <div>
+                <p class="font-medium text-secondary-900">Track Your Expenses</p>
+                <p class="text-sm text-secondary-500">
+                  Log your spending to see where your money goes and find ways to
+                  save.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-secondary-500 flex items-center gap-2">
-              <ArrowTrendingUpIcon class="w-4 h-4 text-success-500" />
-              Income
-            </span>
-            <span class="font-semibold text-success-600">{{
-              formatCurrency(getPeriodIncome(period))
-            }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-secondary-500 flex items-center gap-2">
-              <CreditCardIcon class="w-4 h-4 text-danger-500" />
-              Expenses
-            </span>
-            <span class="font-semibold text-danger-600">
-              {{
-                formatCurrency(
-                  period.expenses.reduce((sum, e) => sum + e.amount, 0),
-                )
-              }}
-            </span>
-          </div>
-
-          <div
-            class="border-t border-secondary-100 pt-3 flex justify-between items-center"
+        <NuxtLink to="/budget-periods">
+          <button
+            class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
           >
-            <span class="text-sm font-medium text-secondary-600"
-              >Remaining</span
-            >
-            <span
-              class="font-bold text-lg"
-              :class="
-                getPeriodIncome(period) -
-                  period.expenses.reduce((sum, e) => sum + e.amount, 0) >=
-                0
-                  ? 'text-primary-600'
-                  : 'text-danger-600'
-              "
-            >
-              {{
-                formatCurrency(
-                  getPeriodIncome(period) -
-                    period.expenses.reduce((sum, e) => sum + e.amount, 0),
-                )
-              }}
-            </span>
-          </div>
-        </div>
+            Create Your First Budget Period
+            <ArrowRightIcon class="w-5 h-5" />
+          </button>
+        </NuxtLink>
 
-        <div
-          class="mt-4 pt-3 border-t border-secondary-100 flex items-center justify-between"
-        >
-          <span class="text-xs text-secondary-400">
-            {{ period.expenses.length }} expense{{
-              period.expenses.length === 1 ? "" : "s"
-            }}
-          </span>
-          <span
-            class="text-xs text-primary-600 font-medium group-hover:text-primary-700"
-          >
-            View details →
-          </span>
+        <div class="mt-6 pt-6 border-t border-secondary-200">
+          <p class="text-sm text-secondary-400">
+            Looking for simple item lists?
+            <NuxtLink
+              to="/personal-budgets"
+              class="text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Try Personal Budgets
+            </NuxtLink>
+            for wishlists and savings goals.
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- Create Modal -->
-    <Teleport to="body">
-      <div
-        v-if="showCreateModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-        @click.self="showCreateModal = false"
-      >
-        <div
-          class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6 animate-in fade-in zoom-in duration-200"
-        >
-          <div class="flex items-center gap-3 mb-6">
-            <div
-              class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center"
-            >
-              <CalendarDaysIcon class="w-6 h-6 text-primary-600" />
-            </div>
-            <div>
-              <h2 class="text-xl font-semibold text-secondary-900">
-                Create Budget Period
-              </h2>
-              <p class="text-sm text-secondary-500">
-                Set up a new budget to track
-              </p>
-            </div>
-          </div>
+    <!-- Dashboard with Data -->
+    <div v-else class="space-y-8">
+      <!-- Info Banner -->
+      <UiInfoBanner variant="info" dismissible dismiss-key="dashboard-intro">
+        Your financial insights are calculated from your
+        <NuxtLink
+          to="/budget-periods"
+          class="text-primary-700 hover:underline font-medium"
+          >Budget Periods</NuxtLink
+        >. The more periods you track, the better your insights become.
+      </UiInfoBanner>
 
-          <UiBaseAlert
-            v-if="error"
-            type="error"
-            :message="error"
-            class="mb-4"
+      <!-- Summary Cards -->
+      <div class="overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <h2
+            class="text-lg font-semibold text-secondary-800 flex items-center gap-2"
+          >
+            <SparklesIcon class="w-5 h-5 text-accent-500" />
+            Financial Summary
+          </h2>
+          <div class="flex items-center gap-2 text-sm">
+            <CalendarIcon class="w-4 h-4 text-secondary-400 flex-shrink-0" />
+            <select
+              v-model="startYear"
+              class="px-2 py-1.5 bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-700 text-sm min-w-0"
+            >
+              <option v-for="year in availableYears" :key="year" :value="year">
+                {{ year }}
+              </option>
+            </select>
+            <span class="text-secondary-400">to</span>
+            <select
+              v-model="endYear"
+              class="px-2 py-1.5 bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-700 text-sm min-w-0"
+            >
+              <option
+                v-for="year in availableEndYears"
+                :key="year"
+                :value="year"
+              >
+                {{ year }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div v-if="metrics" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Total Income -->
+          <DashboardMetricCard
+            :icon="ArrowTrendingUpIcon"
+            icon-bg-class="bg-success-50"
+            icon-class="text-success-600"
+            label="Total Income"
+            :value="formatCurrency(metrics.totalIncome)"
+            value-class="text-success-600"
+            :subtitle="`From ${metrics.budgetPeriodsCount} budget period${metrics.budgetPeriodsCount === 1 ? '' : 's'}`"
           />
 
-          <form @submit.prevent="handleCreate" class="space-y-5">
-            <UiBaseInput
-              v-model="createForm.name"
-              label="Name (Optional)"
-              placeholder="e.g., January 2026"
-            />
+          <!-- Total Expenses -->
+          <DashboardMetricCard
+            :icon="ArrowTrendingDownIcon"
+            icon-bg-class="bg-danger-50"
+            icon-class="text-danger-600"
+            label="Total Expenses"
+            :value="formatCurrency(metrics.totalExpenses)"
+            value-class="text-danger-600"
+          />
 
-            <div class="grid grid-cols-2 gap-4">
-              <UiBaseInput
-                v-model="createForm.startDate"
-                label="Start Date"
-                type="date"
-                required
-              />
-              <UiBaseInput
-                v-model="createForm.endDate"
-                label="End Date"
-                type="date"
-                required
-              />
-            </div>
+          <!-- Net Savings -->
+          <DashboardMetricCard
+            :icon="WalletIcon"
+            icon-bg-class="bg-primary-50"
+            icon-class="text-primary-600"
+            label="Net Savings"
+            :value="formatCurrency(metrics.savings)"
+            :value-class="metrics.savings >= 0 ? 'text-primary-600' : 'text-danger-600'"
+          />
 
-            <!-- Income Sources -->
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <label class="block text-sm font-medium text-secondary-700"
-                  >Income Sources</label
-                >
-                <button
-                  type="button"
-                  class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
-                  @click="addIncomeSource"
-                >
-                  <PlusIcon class="w-4 h-4" />
-                  Add Source
-                </button>
-              </div>
-
-              <div
-                v-for="(income, index) in createForm.incomes"
-                :key="index"
-                class="p-4 bg-secondary-50 rounded-lg space-y-3"
-              >
-                <div class="flex items-center justify-between">
-                  <span class="text-sm font-medium text-secondary-600"
-                    >Income #{{ index + 1 }}</span
-                  >
-                  <button
-                    v-if="createForm.incomes.length > 1"
-                    type="button"
-                    class="text-danger-500 hover:text-danger-600 p-1"
-                    @click="removeIncomeSource(index)"
-                  >
-                    <TrashIcon class="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <UiBaseInput
-                    v-model="income.name"
-                    placeholder="e.g., Main Job"
-                    required
-                  />
-                  <UiBaseInput
-                    v-model="income.amount"
-                    type="number"
-                    :placeholder="`Amount`"
-                    required
-                  />
-                </div>
-
-                <UiBaseInput
-                  v-model="income.description"
-                  placeholder="Description (optional)"
-                />
-              </div>
-
-              <!-- Total Income Display -->
-              <div
-                class="flex items-center justify-between p-3 bg-primary-50 rounded-lg"
-              >
-                <span class="text-sm font-medium text-primary-700"
-                  >Total Income</span
-                >
-                <span class="text-lg font-bold text-primary-700">{{
-                  formatCurrency(totalIncome)
-                }}</span>
-              </div>
-            </div>
-
-            <div
-              class="flex justify-end gap-3 pt-4 border-t border-secondary-100"
-            >
-              <button
-                type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
-                @click="showCreateModal = false"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium disabled:opacity-50"
-                :disabled="loading"
-              >
-                <span
-                  v-if="loading"
-                  class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
-                ></span>
-                <PlusIcon v-else class="w-5 h-5" />
-                Create Budget
-              </button>
-            </div>
-          </form>
+          <!-- Savings Rate -->
+          <DashboardMetricCard
+            :icon="SparklesIcon"
+            :icon-bg-class="savingsRateStatus.bgClass"
+            :icon-class="savingsRateStatus.iconClass"
+            label="Savings Rate"
+            :value="`${metrics.savingsRate.toFixed(1)}%`"
+            :value-class="savingsRateStatus.valueClass"
+            :show-progress="true"
+            :progress-value="metrics.savingsRate"
+            :progress-class="savingsRateStatus.progressClass"
+          />
         </div>
       </div>
-    </Teleport>
+
+      <!-- Charts Section -->
+      <div v-if="nonZeroMonthlyData.length > 0" class="space-y-6 overflow-hidden">
+        <!-- Monthly Income vs Expenses -->
+        <div
+          class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 overflow-hidden"
+        >
+          <h2
+            class="text-lg font-semibold text-secondary-800 mb-2 flex items-center gap-2"
+          >
+            <ChartBarIcon class="w-5 h-5 text-primary-500" />
+            Monthly Income vs Expenses
+          </h2>
+          <p class="text-sm text-secondary-500 mb-5">
+            See how your income compares to expenses each month
+          </p>
+          <ClientOnly>
+            <ChartsMonthlyBarChart
+              :data="nonZeroMonthlyData"
+              :currency="currency"
+            />
+            <template #fallback>
+              <div
+                class="h-80 flex items-center justify-center bg-secondary-50 rounded-xl"
+              >
+                <div
+                  class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"
+                ></div>
+              </div>
+            </template>
+          </ClientOnly>
+        </div>
+
+        <!-- Savings Trend and Category Breakdown -->
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div
+            class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 overflow-hidden"
+          >
+            <h2
+              class="text-lg font-semibold text-secondary-800 mb-2 flex items-center gap-2"
+            >
+              <ArrowTrendingUpIcon class="w-5 h-5 text-primary-500" />
+              Savings Trend
+            </h2>
+            <p class="text-sm text-secondary-500 mb-5">
+              Track how much you're saving over time
+            </p>
+            <ClientOnly>
+              <ChartsSavingsLineChart
+                :data="nonZeroMonthlyData"
+                :currency="currency"
+              />
+              <template #fallback>
+                <div
+                  class="h-80 flex items-center justify-center bg-secondary-50 rounded-xl"
+                >
+                  <div
+                    class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"
+                  ></div>
+                </div>
+              </template>
+            </ClientOnly>
+          </div>
+
+          <div
+            class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 overflow-hidden"
+          >
+            <h2
+              class="text-lg font-semibold text-secondary-800 mb-2 flex items-center gap-2"
+            >
+              <ChartPieIcon class="w-5 h-5 text-primary-500" />
+              Expenses by Category
+            </h2>
+            <p class="text-sm text-secondary-500 mb-5">
+              Understand where your money goes
+            </p>
+            <ClientOnly>
+              <ChartsCategoryPieChart
+                v-if="metrics"
+                :data="metrics.expensesByCategory"
+                :currency="currency"
+              />
+              <template #fallback>
+                <div
+                  class="h-80 flex items-center justify-center bg-secondary-50 rounded-xl"
+                >
+                  <div
+                    class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"
+                  ></div>
+                </div>
+              </template>
+            </ClientOnly>
+          </div>
+        </div>
+
+        <!-- Category Breakdown Table -->
+        <div
+          v-if="metrics && Object.keys(metrics.expensesByCategory).length > 0"
+          class="bg-white rounded-xl shadow-card border border-secondary-100 p-6"
+        >
+          <h2
+            class="text-lg font-semibold text-secondary-800 mb-5 flex items-center gap-2"
+          >
+            <TagIcon class="w-5 h-5 text-primary-500" />
+            Category Breakdown
+          </h2>
+          <div class="space-y-4">
+            <div
+              v-for="(data, category) in metrics.expensesByCategory"
+              :key="category"
+              class="space-y-2"
+            >
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-secondary-900">{{
+                    category
+                  }}</span>
+                  <span class="text-sm text-secondary-400"
+                    >({{ data.count }} expense{{
+                      data.count === 1 ? "" : "s"
+                    }})</span
+                  >
+                </div>
+                <div class="text-right">
+                  <span class="font-semibold text-secondary-900">{{
+                    formatCurrency(data.total)
+                  }}</span>
+                  <span class="text-sm text-primary-600 ml-2 font-medium">
+                    {{ ((data.total / metrics.totalExpenses) * 100).toFixed(1) }}%
+                  </span>
+                </div>
+              </div>
+              <div class="h-2 bg-secondary-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full transition-all duration-500"
+                  :class="getCategoryBarColor(String(category))"
+                  :style="{
+                    width: `${(data.total / metrics.totalExpenses) * 100}%`,
+                  }"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div>
+        <h2
+          class="text-lg font-semibold text-secondary-800 mb-5 flex items-center gap-2"
+        >
+          Quick Actions
+        </h2>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <DashboardQuickActionCard
+            to="/budget-periods"
+            :icon="CalendarDaysIcon"
+            label="Budget Periods"
+            :count="budgetPeriodsCount"
+            count-label="periods"
+            description="Manage your income and expenses over time"
+          />
+          <DashboardQuickActionCard
+            to="/personal-budgets"
+            :icon="ClipboardDocumentListIcon"
+            label="Personal Budgets"
+            :count="personalBudgetsCount"
+            count-label="budgets"
+            description="Wishlists, savings goals, and shopping lists"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
