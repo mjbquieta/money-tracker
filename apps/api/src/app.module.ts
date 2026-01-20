@@ -11,6 +11,7 @@ import { BudgetPeriodModule } from './budget-period/budget-period.module';
 import { ExpenseModule } from './expense/expense.module';
 import { ExpenseGroupModule } from './expense-group/expense-group.module';
 import { IncomeModule } from './income/income.module';
+import { PersonalBudgetModule } from './personal-budget/personal-budget.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { IncomeModule } from './income/income.module';
     ExpenseModule,
     ExpenseGroupModule,
     IncomeModule,
+    PersonalBudgetModule,
   ],
   providers: [
     {

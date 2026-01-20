@@ -8,6 +8,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ChevronDownIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
@@ -82,6 +83,14 @@ onUnmounted(() => {
               >
                 <ChartBarIcon class="w-5 h-5" />
                 <span>Metrics</span>
+              </NuxtLink>
+              <NuxtLink
+                to="/personal-budgets"
+                class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                active-class="!text-primary-700 !bg-primary-100 font-medium"
+              >
+                <ClipboardDocumentListIcon class="w-5 h-5" />
+                <span>Personal Budgets</span>
               </NuxtLink>
               <div class="w-px h-8 bg-secondary-200 mx-2" />
 
@@ -244,6 +253,14 @@ onUnmounted(() => {
             >
               <ChartBarIcon class="w-5 h-5" />
               <span>Metrics</span>
+            </NuxtLink>
+            <NuxtLink
+              to="/personal-budgets"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
+              active-class="!text-primary-700 !bg-primary-100 font-medium"
+            >
+              <ClipboardDocumentListIcon class="w-5 h-5" />
+              <span>Personal Budgets</span>
             </NuxtLink>
             <NuxtLink
               to="/settings"

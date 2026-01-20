@@ -971,12 +971,27 @@ function getCategoryStyle(categoryName: string) {
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
-    <div v-if="budgetStore.loading" class="text-center py-16">
+    <div v-if="budgetStore.loading && !period" class="text-center py-16">
       <div class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
       <p class="text-secondary-500">Loading budget period...</p>
     </div>
 
-    <div v-else-if="period">
+    <!-- Not Found State -->
+    <div v-else-if="!period" class="text-center py-16">
+      <div class="bg-white rounded-2xl shadow-card p-10 max-w-md mx-auto border border-secondary-100">
+        <h3 class="text-xl font-semibold text-secondary-900 mb-2">Budget period not found</h3>
+        <p class="text-secondary-500 mb-6">The budget period you're looking for doesn't exist or has been deleted.</p>
+        <button
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium"
+          @click="router.push('/dashboard')"
+        >
+          <ArrowLeftIcon class="w-5 h-5" />
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
+
+    <div v-else>
       <!-- Header -->
       <div class="mb-8">
         <button

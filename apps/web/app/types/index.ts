@@ -242,3 +242,57 @@ export interface ApiError {
   message: string | string[];
   error?: string;
 }
+
+// Personal Budget types
+export interface PersonalBudget {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items: PersonalBudgetItem[];
+}
+
+export interface PersonalBudgetItem {
+  id: string;
+  name: string;
+  description: string | null;
+  amount: number;
+  personalBudgetId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PersonalBudgetItemInput {
+  name: string;
+  description?: string;
+  amount: number;
+}
+
+export interface CreatePersonalBudgetPayload {
+  name: string;
+  description?: string;
+  items?: PersonalBudgetItemInput[];
+}
+
+export interface UpdatePersonalBudgetPayload {
+  name?: string;
+  description?: string;
+}
+
+export interface CreatePersonalBudgetItemPayload {
+  name: string;
+  description?: string;
+  amount: number;
+}
+
+export interface UpdatePersonalBudgetItemPayload {
+  name?: string;
+  description?: string;
+  amount?: number;
+}
+
+export interface PersonalBudgetSummary {
+  total: number;
+  itemCount: number;
+}

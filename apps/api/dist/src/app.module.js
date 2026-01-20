@@ -20,6 +20,7 @@ const budget_period_module_1 = require("./budget-period/budget-period.module");
 const expense_module_1 = require("./expense/expense.module");
 const expense_group_module_1 = require("./expense-group/expense-group.module");
 const income_module_1 = require("./income/income.module");
+const personal_budget_module_1 = require("./personal-budget/personal-budget.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +40,7 @@ exports.AppModule = AppModule = __decorate([
             expense_module_1.ExpenseModule,
             expense_group_module_1.ExpenseGroupModule,
             income_module_1.IncomeModule,
+            personal_budget_module_1.PersonalBudgetModule,
         ],
         providers: [
             {

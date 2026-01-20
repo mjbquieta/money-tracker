@@ -31,18 +31,19 @@ enum DefaultCategory {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  name          String?
-  username      String         @unique
-  status        UserStatus     @default(ACTIVE)
-  password      String
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  deletedAt     DateTime?      @map("deleted_at")
-  settings      Settings?
-  budgetPeriods BudgetPeriod[]
-  categories    Category[]
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String?
+  username        String           @unique
+  status          UserStatus       @default(ACTIVE)
+  password        String
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  deletedAt       DateTime?        @map("deleted_at")
+  settings        Settings?
+  budgetPeriods   BudgetPeriod[]
+  categories      Category[]
+  personalBudgets PersonalBudget[]
 
   @@map("users")
 }
@@ -150,4 +151,36 @@ model Expense {
   expenseGroup   ExpenseGroup? @relation(fields: [expenseGroupId], references: [id], onDelete: SetNull)
 
   @@map("expenses")
+}
+
+model PersonalBudget {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  userId String
+  user   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  PersonalBudgetItem[]
+
+  @@map("personal_budgets")
+}
+
+model PersonalBudgetItem {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  amount      Float     @default(0)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  personalBudgetId String         @map("personal_budget_id")
+  personalBudget   PersonalBudget @relation(fields: [personalBudgetId], references: [id], onDelete: Cascade)
+
+  @@map("personal_budget_items")
 }
