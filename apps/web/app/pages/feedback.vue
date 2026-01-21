@@ -26,19 +26,40 @@ const requestTypes = [
   { value: 'feedback', label: 'General Feedback', description: 'Share your thoughts about the app' },
 ];
 
+const error = ref('');
+
 async function handleSubmit() {
   if (!form.message.trim()) return;
 
   loading.value = true;
+  error.value = '';
 
-  // Simulate submission delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  try {
+    const response = await fetch('https://formspree.io/f/mkooqkvn', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        name: form.name || 'Anonymous',
+        email: form.email || 'not provided',
+        type: form.type,
+        message: form.message,
+        _subject: `[Prospera Feedback] ${requestTypes.find(t => t.value === form.type)?.label}`,
+      }),
+    });
 
-  // In a real app, you'd send this to your backend
-  console.log('Feedback submitted:', form);
+    if (!response.ok) {
+      throw new Error('Failed to send feedback');
+    }
 
-  loading.value = false;
-  submitted.value = true;
+    submitted.value = true;
+  } catch (e) {
+    error.value = 'Failed to send feedback. Please try again.';
+  } finally {
+    loading.value = false;
+  }
 }
 
 function resetForm() {
@@ -47,6 +68,7 @@ function resetForm() {
   form.type = 'feature';
   form.message = '';
   submitted.value = false;
+  error.value = '';
 }
 </script>
 
@@ -148,6 +170,11 @@ function resetForm() {
             required
             class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
           ></textarea>
+        </div>
+
+        <!-- Error Message -->
+        <div v-if="error" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+          {{ error }}
         </div>
 
         <!-- Submit Button -->
