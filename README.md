@@ -1,4 +1,4 @@
-# Money Tracker
+# Prospera
 
 A personal finance tracking application built as a monorepo with a NestJS API backend and Nuxt web frontend.
 
@@ -114,7 +114,7 @@ docker run -p 3000:3000 money-tracker-web
 Create a `docker-compose.yml` in the project root:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   db:
