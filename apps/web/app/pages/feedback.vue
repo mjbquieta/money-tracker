@@ -73,31 +73,31 @@ function resetForm() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50/30">
+  <div class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50/30 dark:from-secondary-950 dark:via-secondary-900 dark:to-secondary-950">
     <!-- Navbar -->
     <LayoutPublicNavbar />
 
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Header -->
       <div class="text-center mb-10">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-6">
-          <LightBulbIcon class="w-8 h-8 text-primary-600" />
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/50 rounded-2xl mb-6">
+          <LightBulbIcon class="w-8 h-8 text-primary-600 dark:text-primary-400" />
         </div>
-        <h1 class="text-3xl sm:text-4xl font-bold text-secondary-900 mb-4">
+        <h1 class="text-3xl sm:text-4xl font-bold text-secondary-900 dark:text-secondary-100 mb-4">
           Help Us Improve
         </h1>
-        <p class="text-lg text-secondary-600 max-w-xl mx-auto">
+        <p class="text-lg text-secondary-600 dark:text-secondary-400 max-w-xl mx-auto">
           Your feedback shapes the future of Prospera. Share your ideas, report issues, or just tell us what you think!
         </p>
       </div>
 
       <!-- Success State -->
-      <div v-if="submitted" class="bg-white rounded-2xl shadow-card border border-secondary-100 p-8 text-center">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-success-100 rounded-full mb-6">
-          <CheckCircleIcon class="w-8 h-8 text-success-600" />
+      <div v-if="submitted" class="bg-white dark:bg-secondary-800 rounded-2xl shadow-card border border-secondary-100 dark:border-secondary-700 p-8 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-success-100 dark:bg-success-900/50 rounded-full mb-6">
+          <CheckCircleIcon class="w-8 h-8 text-success-600 dark:text-success-400" />
         </div>
-        <h2 class="text-2xl font-bold text-secondary-900 mb-3">Thank You!</h2>
-        <p class="text-secondary-600 mb-6">
+        <h2 class="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-3">Thank You!</h2>
+        <p class="text-secondary-600 dark:text-secondary-400 mb-6">
           Your feedback has been received. We truly appreciate you taking the time to help us improve Prospera.
         </p>
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -108,7 +108,7 @@ function resetForm() {
             Submit Another
           </button>
           <NuxtLink to="/">
-            <button class="px-6 py-3 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors font-medium">
+            <button class="px-6 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-xl transition-colors font-medium">
               Back to Home
             </button>
           </NuxtLink>
@@ -116,10 +116,10 @@ function resetForm() {
       </div>
 
       <!-- Form -->
-      <form v-else class="bg-white rounded-2xl shadow-card border border-secondary-100 p-6 sm:p-8" @submit.prevent="handleSubmit">
+      <form v-else class="bg-white dark:bg-secondary-800 rounded-2xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 sm:p-8" @submit.prevent="handleSubmit">
         <!-- Request Type -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-secondary-700 mb-3">What would you like to share?</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">What would you like to share?</label>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               v-for="type in requestTypes"
@@ -127,12 +127,12 @@ function resetForm() {
               type="button"
               class="p-4 rounded-xl border-2 text-left transition-all"
               :class="form.type === type.value
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-secondary-200 hover:border-primary-300 hover:bg-primary-50/50'"
+                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30'
+                : 'border-secondary-200 dark:border-secondary-600 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50/50 dark:hover:bg-primary-900/20'"
               @click="form.type = type.value"
             >
-              <span class="block font-medium text-secondary-900">{{ type.label }}</span>
-              <span class="block text-xs text-secondary-500 mt-1">{{ type.description }}</span>
+              <span class="block font-medium text-secondary-900 dark:text-secondary-100">{{ type.label }}</span>
+              <span class="block text-xs text-secondary-500 dark:text-secondary-400 mt-1">{{ type.description }}</span>
             </button>
           </div>
         </div>
@@ -140,40 +140,40 @@ function resetForm() {
         <!-- Name & Email -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Name (optional)</label>
+            <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Name (optional)</label>
             <input
               v-model="form.name"
               type="text"
               placeholder="Your name"
-              class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              class="w-full px-4 py-3 border border-secondary-200 dark:border-secondary-600 rounded-xl bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Email (optional)</label>
+            <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Email (optional)</label>
             <input
               v-model="form.email"
               type="email"
               placeholder="your@email.com"
-              class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              class="w-full px-4 py-3 border border-secondary-200 dark:border-secondary-600 rounded-xl bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
             />
-            <p class="text-xs text-secondary-400 mt-1">In case we need to follow up</p>
+            <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-1">In case we need to follow up</p>
           </div>
         </div>
 
         <!-- Message -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Your Message *</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Your Message *</label>
           <textarea
             v-model="form.message"
             rows="6"
             placeholder="Tell us what's on your mind..."
             required
-            class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+            class="w-full px-4 py-3 border border-secondary-200 dark:border-secondary-600 rounded-xl bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
           ></textarea>
         </div>
 
         <!-- Error Message -->
-        <div v-if="error" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+        <div v-if="error" class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
           {{ error }}
         </div>
 
@@ -195,9 +195,9 @@ function resetForm() {
       </form>
 
       <!-- Note -->
-      <div class="mt-8 flex items-start gap-3 p-4 bg-primary-50 rounded-xl">
-        <SparklesIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
-        <p class="text-sm text-primary-700">
+      <div class="mt-8 flex items-start gap-3 p-4 bg-primary-50 dark:bg-primary-900/30 rounded-xl">
+        <SparklesIcon class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
+        <p class="text-sm text-primary-700 dark:text-primary-300">
           Every piece of feedback helps us build a better app. We read everything and prioritize based on community needs. Thank you for being part of the journey!
         </p>
       </div>

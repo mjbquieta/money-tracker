@@ -22,8 +22,8 @@ function updateCurrency(value: string) {
 
 <template>
   <div class="space-y-4">
-    <h3 class="text-lg font-semibold text-secondary-900">Currency Settings</h3>
-    <p class="text-sm text-secondary-500">Choose your preferred currency for tracking finances.</p>
+    <h3 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Currency Settings</h3>
+    <p class="text-sm text-secondary-500 dark:text-secondary-400">Choose your preferred currency for tracking finances.</p>
 
     <UiBaseSelect
       :model-value="modelValue.currency"
@@ -36,8 +36,8 @@ function updateCurrency(value: string) {
       </option>
     </UiBaseSelect>
 
-    <div class="mt-4 p-4 bg-primary-50 rounded-lg">
-      <p class="text-sm text-primary-700">
+    <div class="mt-4 p-4 bg-primary-50 dark:bg-primary-900/30 rounded-lg">
+      <p class="text-sm text-primary-700 dark:text-primary-300">
         You can change this later in your account settings.
       </p>
     </div>

@@ -19,6 +19,11 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/png', href: '/prospera-icon.png' },
       ],
+      script: [
+        {
+          innerHTML: `(function(){var t=localStorage.getItem('theme-preference');if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')})()`,
+        },
+      ],
     },
   },
 

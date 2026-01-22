@@ -109,14 +109,14 @@ async function handleSubmit() {
 <template>
   <div>
     <div class="text-center mb-6">
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-success-50 border border-success-200 rounded-full mb-4">
-        <SparklesIcon class="w-4 h-4 text-success-600" />
-        <span class="text-xs font-semibold text-success-700">100% Free</span>
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-success-50 dark:bg-success-900/30 border border-success-200 dark:border-success-800 rounded-full mb-4">
+        <SparklesIcon class="w-4 h-4 text-success-600 dark:text-success-400" />
+        <span class="text-xs font-semibold text-success-700 dark:text-success-300">100% Free</span>
       </div>
-      <h2 class="text-2xl font-bold text-secondary-900">
+      <h2 class="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
         Create your account
       </h2>
-      <p class="text-secondary-500 mt-2">Start tracking your finances today</p>
+      <p class="text-secondary-500 dark:text-secondary-400 mt-2">Start tracking your finances today</p>
     </div>
 
     <!-- Step Indicator -->
@@ -129,8 +129,8 @@ async function handleSubmit() {
         <div
           class="flex items-center gap-2 px-4 py-2 rounded-full transition-all"
           :class="index <= currentStep
-            ? 'bg-primary-50 text-primary-700'
-            : 'bg-secondary-50 text-secondary-400'"
+            ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+            : 'bg-secondary-50 dark:bg-secondary-800 text-secondary-400 dark:text-secondary-500'"
         >
           <div
             class="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-all"
@@ -138,7 +138,7 @@ async function handleSubmit() {
               ? 'bg-primary-500 text-white'
               : index === currentStep
                 ? 'bg-primary-500 text-white'
-                : 'bg-secondary-200 text-secondary-500'"
+                : 'bg-secondary-200 dark:bg-secondary-700 text-secondary-500 dark:text-secondary-400'"
           >
             <CheckCircleIcon v-if="index < currentStep" class="w-4 h-4" />
             <span v-else>{{ index + 1 }}</span>
@@ -148,7 +148,7 @@ async function handleSubmit() {
         <div
           v-if="index < steps.length - 1"
           class="w-8 h-0.5 mx-2"
-          :class="index < currentStep ? 'bg-primary-500' : 'bg-secondary-200'"
+          :class="index < currentStep ? 'bg-primary-500' : 'bg-secondary-200 dark:bg-secondary-700'"
         />
       </div>
     </div>
@@ -170,7 +170,7 @@ async function handleSubmit() {
         <button
           v-if="currentStep > 0"
           type="button"
-          class="flex items-center gap-2 px-5 py-3 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 border border-secondary-200 rounded-xl transition-colors font-medium group"
+          class="flex items-center gap-2 px-5 py-3 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-xl transition-colors font-medium group"
           @click="prevStep"
         >
           <ArrowLeftIcon class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -192,10 +192,10 @@ async function handleSubmit() {
       </div>
     </form>
 
-    <div class="mt-8 pt-6 border-t border-secondary-100">
-      <p class="text-center text-sm text-secondary-500">
+    <div class="mt-8 pt-6 border-t border-secondary-100 dark:border-secondary-700">
+      <p class="text-center text-sm text-secondary-500 dark:text-secondary-400">
         Already have an account?
-        <NuxtLink to="/auth/login" class="text-primary-600 hover:text-primary-700 font-semibold ml-1">
+        <NuxtLink to="/auth/login" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold ml-1">
           Sign in here
         </NuxtLink>
       </p>

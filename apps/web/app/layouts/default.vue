@@ -47,8 +47,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-secondary-50 flex flex-col">
-    <header class="bg-white border-b border-secondary-200 sticky top-0 z-50">
+  <div class="min-h-screen bg-secondary-50 dark:bg-secondary-950 flex flex-col">
+    <header class="bg-white dark:bg-secondary-900 border-b border-secondary-200 dark:border-secondary-700 sticky top-0 z-50">
       <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-14 sm:h-16 items-center">
           <!-- Logo -->
@@ -70,34 +70,35 @@ onUnmounted(() => {
             <template v-if="authStore.isAuthenticated">
               <NuxtLink
                 to="/dashboard"
-                class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                active-class="!text-primary-700 !bg-primary-100 font-medium"
+                class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
+                active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
               >
                 <HomeIcon class="w-5 h-5" />
                 <span>Dashboard</span>
               </NuxtLink>
               <NuxtLink
                 to="/budget-periods"
-                class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                active-class="!text-primary-700 !bg-primary-100 font-medium"
+                class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
+                active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
               >
                 <CalendarDaysIcon class="w-5 h-5" />
                 <span>Budget Periods</span>
               </NuxtLink>
               <NuxtLink
                 to="/personal-budgets"
-                class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                active-class="!text-primary-700 !bg-primary-100 font-medium"
+                class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
+                active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
               >
                 <ClipboardDocumentListIcon class="w-5 h-5" />
                 <span>Personal Budgets</span>
               </NuxtLink>
-              <div class="w-px h-8 bg-secondary-200 mx-2" />
+              <UiThemeToggle size="md" />
+              <div class="w-px h-8 bg-secondary-200 dark:bg-secondary-700 mx-2" />
 
               <!-- Account Dropdown -->
               <div class="relative account-menu-container">
                 <button
-                  class="flex items-center gap-2 px-3 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                  class="flex items-center gap-2 px-3 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                   @click.stop="accountMenuOpen = !accountMenuOpen"
                 >
                   <UserCircleIcon class="w-5 h-5" />
@@ -121,14 +122,14 @@ onUnmounted(() => {
                 >
                   <div
                     v-if="accountMenuOpen"
-                    class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-elevated border border-secondary-100 py-2 z-50"
+                    class="absolute right-0 mt-2 w-64 bg-white dark:bg-secondary-800 rounded-xl shadow-elevated border border-secondary-100 dark:border-secondary-700 py-2 z-50"
                   >
                     <!-- User Info -->
-                    <div class="px-4 py-3 border-b border-secondary-100">
-                      <p class="font-medium text-secondary-900">
+                    <div class="px-4 py-3 border-b border-secondary-100 dark:border-secondary-700">
+                      <p class="font-medium text-secondary-900 dark:text-secondary-100">
                         {{ authStore.user?.name }}
                       </p>
-                      <p class="text-sm text-secondary-500">
+                      <p class="text-sm text-secondary-500 dark:text-secondary-400">
                         {{ authStore.user?.email }}
                       </p>
                     </div>
@@ -137,7 +138,7 @@ onUnmounted(() => {
                     <div class="py-1">
                       <NuxtLink
                         to="/settings"
-                        class="flex items-center gap-3 px-4 py-2.5 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                        class="flex items-center gap-3 px-4 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 transition-colors"
                       >
                         <Cog6ToothIcon class="w-5 h-5" />
                         <span>Settings</span>
@@ -145,9 +146,9 @@ onUnmounted(() => {
                     </div>
 
                     <!-- Logout -->
-                    <div class="border-t border-secondary-100 pt-1">
+                    <div class="border-t border-secondary-100 dark:border-secondary-700 pt-1">
                       <button
-                        class="flex items-center gap-3 w-full px-4 py-2.5 text-danger-600 hover:bg-danger-50 transition-colors"
+                        class="flex items-center gap-3 w-full px-4 py-2.5 text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/30 transition-colors"
                         @click="authStore.logout"
                       >
                         <ArrowRightOnRectangleIcon class="w-5 h-5" />
@@ -160,9 +161,10 @@ onUnmounted(() => {
             </template>
 
             <template v-else>
+              <UiThemeToggle size="md" />
               <NuxtLink to="/auth/login">
                 <button
-                  class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors font-medium"
+                  class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors font-medium"
                 >
                   Login
                 </button>
@@ -180,9 +182,10 @@ onUnmounted(() => {
           <!-- Mobile Menu Button -->
           <div v-if="mounted" class="flex md:hidden items-center gap-2">
             <template v-if="!authStore.isAuthenticated">
+              <UiThemeToggle size="sm" />
               <NuxtLink to="/auth/login">
                 <button
-                  class="px-3 py-1.5 text-sm text-secondary-600 hover:text-primary-600 font-medium"
+                  class="px-3 py-1.5 text-sm text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 font-medium"
                 >
                   Login
                 </button>
@@ -196,8 +199,9 @@ onUnmounted(() => {
               </NuxtLink>
             </template>
             <template v-else>
+              <UiThemeToggle size="sm" />
               <button
-                class="p-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                class="p-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                 @click="mobileMenuOpen = !mobileMenuOpen"
               >
                 <Bars3Icon v-if="!mobileMenuOpen" class="w-6 h-6" />
@@ -219,19 +223,19 @@ onUnmounted(() => {
       >
         <div
           v-if="mobileMenuOpen && authStore.isAuthenticated"
-          class="md:hidden bg-white border-b border-secondary-200 shadow-lg"
+          class="md:hidden bg-white dark:bg-secondary-900 border-b border-secondary-200 dark:border-secondary-700 shadow-lg"
         >
           <div class="px-4 py-3 space-y-1">
             <!-- User Info -->
             <div
-              class="flex items-center gap-3 px-3 py-3 mb-2 bg-secondary-50 rounded-xl"
+              class="flex items-center gap-3 px-3 py-3 mb-2 bg-secondary-50 dark:bg-secondary-800 rounded-xl"
             >
               <UserCircleIcon class="w-10 h-10 text-secondary-400" />
               <div>
-                <p class="font-medium text-secondary-900">
+                <p class="font-medium text-secondary-900 dark:text-secondary-100">
                   {{ authStore.user?.name }}
                 </p>
-                <p class="text-sm text-secondary-500">
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">
                   {{ authStore.user?.email }}
                 </p>
               </div>
@@ -240,42 +244,42 @@ onUnmounted(() => {
             <!-- Navigation Links -->
             <NuxtLink
               to="/dashboard"
-              class="flex items-center gap-3 px-3 py-3 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
-              active-class="!text-primary-700 !bg-primary-100 font-medium"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
+              active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
             >
               <HomeIcon class="w-5 h-5" />
               <span>Dashboard</span>
             </NuxtLink>
             <NuxtLink
               to="/budget-periods"
-              class="flex items-center gap-3 px-3 py-3 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
-              active-class="!text-primary-700 !bg-primary-100 font-medium"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
+              active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
             >
               <CalendarDaysIcon class="w-5 h-5" />
               <span>Budget Periods</span>
             </NuxtLink>
             <NuxtLink
               to="/personal-budgets"
-              class="flex items-center gap-3 px-3 py-3 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
-              active-class="!text-primary-700 !bg-primary-100 font-medium"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
+              active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
             >
               <ClipboardDocumentListIcon class="w-5 h-5" />
               <span>Personal Budgets</span>
             </NuxtLink>
             <NuxtLink
               to="/settings"
-              class="flex items-center gap-3 px-3 py-3 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
-              active-class="!text-primary-700 !bg-primary-100 font-medium"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
+              active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
             >
               <Cog6ToothIcon class="w-5 h-5" />
               <span>Settings</span>
             </NuxtLink>
 
-            <div class="border-t border-secondary-100 my-2" />
+            <div class="border-t border-secondary-100 dark:border-secondary-700 my-2" />
 
             <!-- Logout Button -->
             <button
-              class="flex items-center gap-3 w-full px-3 py-3 text-danger-600 hover:bg-danger-50 rounded-xl transition-colors"
+              class="flex items-center gap-3 w-full px-3 py-3 text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/30 rounded-xl transition-colors"
               @click="authStore.logout"
             >
               <ArrowRightOnRectangleIcon class="w-5 h-5" />
@@ -290,10 +294,10 @@ onUnmounted(() => {
       <slot />
     </main>
 
-    <footer class="bg-white border-t border-secondary-200">
+    <footer class="bg-white dark:bg-secondary-900 border-t border-secondary-200 dark:border-secondary-700">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div class="flex items-center gap-2 text-secondary-500">
+          <div class="flex items-center gap-2 text-secondary-500 dark:text-secondary-400">
             <img
               src="/prospera-icon.png"
               alt="Prospera"
@@ -301,7 +305,7 @@ onUnmounted(() => {
             />
             <span class="text-xs sm:text-sm">Prospera</span>
           </div>
-          <p class="text-xs sm:text-sm text-secondary-400">
+          <p class="text-xs sm:text-sm text-secondary-400 dark:text-secondary-500">
             Build a healthier relationship with money.
           </p>
         </div>

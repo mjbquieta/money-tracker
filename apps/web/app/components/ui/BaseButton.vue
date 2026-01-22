@@ -14,10 +14,10 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const variantClasses = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300',
-  secondary: 'bg-gray-600 text-white hover:bg-gray-700 disabled:bg-gray-300',
+  primary: 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-800',
+  secondary: 'bg-gray-600 text-white hover:bg-gray-700 disabled:bg-gray-300 dark:disabled:bg-gray-700',
   outline:
-    'border-2 border-blue-600 text-blue-600 hover:bg-blue-50 disabled:border-gray-300 disabled:text-gray-300',
+    'border-2 border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:border-gray-300 dark:disabled:border-gray-600 disabled:text-gray-300 dark:disabled:text-gray-500',
 };
 </script>
 

@@ -213,16 +213,16 @@ async function handleDeleteBudget() {
     <!-- Loading State -->
     <div v-if="personalBudgetStore.loading && !budget" class="text-center py-16">
       <div
-        class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"
+        class="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"
       ></div>
-      <p class="text-secondary-500">Loading budget...</p>
+      <p class="text-secondary-500 dark:text-secondary-400">Loading budget...</p>
     </div>
 
     <!-- Not Found State -->
     <div v-else-if="!budget" class="text-center py-16">
-      <div class="bg-white rounded-2xl shadow-card p-10 max-w-md mx-auto border border-secondary-100">
-        <h3 class="text-xl font-semibold text-secondary-900 mb-2">Budget not found</h3>
-        <p class="text-secondary-500 mb-6">The budget you're looking for doesn't exist.</p>
+      <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-card p-10 max-w-md mx-auto border border-secondary-100 dark:border-secondary-700">
+        <h3 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">Budget not found</h3>
+        <p class="text-secondary-500 dark:text-secondary-400 mb-6">The budget you're looking for doesn't exist.</p>
         <NuxtLink
           to="/personal-budgets"
           class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium"
@@ -238,7 +238,7 @@ async function handleDeleteBudget() {
       <div class="mb-8">
         <NuxtLink
           to="/personal-budgets"
-          class="inline-flex items-center gap-2 text-secondary-500 hover:text-secondary-700 mb-4 transition-colors"
+          class="inline-flex items-center gap-2 text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-300 mb-4 transition-colors"
         >
           <ArrowLeftIcon class="w-4 h-4" />
           Back to Personal Budgets
@@ -246,25 +246,25 @@ async function handleDeleteBudget() {
 
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 class="text-2xl font-bold text-secondary-900">{{ budget.name }}</h1>
-            <p v-if="budget.description" class="text-secondary-500 mt-1">
+            <h1 class="text-2xl font-bold text-secondary-900 dark:text-secondary-100">{{ budget.name }}</h1>
+            <p v-if="budget.description" class="text-secondary-500 dark:text-secondary-400 mt-1">
               {{ budget.description }}
             </p>
-            <p class="text-sm text-secondary-400 mt-1">
+            <p class="text-sm text-secondary-400 dark:text-secondary-500 mt-1">
               Created {{ formatDate(budget.createdAt) }}
             </p>
           </div>
 
           <div class="flex items-center gap-2">
             <button
-              class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors"
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-800 rounded-lg transition-colors"
               @click="showEditBudgetModal = true"
             >
               <PencilIcon class="w-4 h-4" />
               Edit
             </button>
             <button
-              class="flex items-center gap-2 px-4 py-2 text-danger-600 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors"
+              class="flex items-center gap-2 px-4 py-2 text-danger-600 hover:text-danger-700 hover:bg-danger-50 dark:hover:bg-danger-900/30 rounded-lg transition-colors"
               @click="showDeleteConfirm = true"
             >
               <TrashIcon class="w-4 h-4" />
@@ -276,31 +276,31 @@ async function handleDeleteBudget() {
 
       <!-- Summary Card -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <div class="bg-white rounded-xl shadow-card p-5 border border-secondary-100">
+        <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card p-5 border border-secondary-100 dark:border-secondary-700">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
-              <DocumentTextIcon class="w-5 h-5 text-primary-600" />
+            <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
+              <DocumentTextIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
-            <span class="text-sm font-medium text-secondary-500">Total Items</span>
+            <span class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Total Items</span>
           </div>
-          <p class="text-2xl font-bold text-secondary-900">{{ budget.items.length }}</p>
+          <p class="text-2xl font-bold text-secondary-900 dark:text-secondary-100">{{ budget.items.length }}</p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-card p-5 border border-secondary-100">
+        <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card p-5 border border-secondary-100 dark:border-secondary-700">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center">
-              <BanknotesIcon class="w-5 h-5 text-success-600" />
+            <div class="w-10 h-10 bg-success-50 dark:bg-success-900/50 rounded-lg flex items-center justify-center">
+              <BanknotesIcon class="w-5 h-5 text-success-600 dark:text-success-400" />
             </div>
-            <span class="text-sm font-medium text-secondary-500">Total Amount</span>
+            <span class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Total Amount</span>
           </div>
-          <p class="text-2xl font-bold text-primary-600">{{ formatCurrency(totalAmount) }}</p>
+          <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">{{ formatCurrency(totalAmount) }}</p>
         </div>
       </div>
 
       <!-- Items Section -->
-      <div class="bg-white rounded-xl shadow-card border border-secondary-100">
-        <div class="p-5 border-b border-secondary-100 flex justify-between items-center">
-          <h2 class="text-lg font-semibold text-secondary-800 flex items-center gap-2">
+      <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700">
+        <div class="p-5 border-b border-secondary-100 dark:border-secondary-700 flex justify-between items-center">
+          <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 flex items-center gap-2">
             <ClipboardDocumentListIcon class="w-5 h-5 text-primary-500" />
             Budget Items
           </h2>
@@ -315,11 +315,11 @@ async function handleDeleteBudget() {
 
         <!-- Empty Items State -->
         <div v-if="budget.items.length === 0" class="p-10 text-center">
-          <div class="w-16 h-16 bg-secondary-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ClipboardDocumentListIcon class="w-8 h-8 text-secondary-400" />
+          <div class="w-16 h-16 bg-secondary-50 dark:bg-secondary-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <ClipboardDocumentListIcon class="w-8 h-8 text-secondary-400 dark:text-secondary-500" />
           </div>
-          <h3 class="text-lg font-medium text-secondary-700 mb-2">No items yet</h3>
-          <p class="text-secondary-500 mb-4">Add items to track their costs</p>
+          <h3 class="text-lg font-medium text-secondary-700 dark:text-secondary-300 mb-2">No items yet</h3>
+          <p class="text-secondary-500 dark:text-secondary-400 mb-4">Add items to track their costs</p>
           <button
             class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium"
             @click="openAddItemModal"
@@ -330,33 +330,33 @@ async function handleDeleteBudget() {
         </div>
 
         <!-- Items List -->
-        <div v-else class="divide-y divide-secondary-100">
+        <div v-else class="divide-y divide-secondary-100 dark:divide-secondary-700">
           <div
             v-for="item in budget.items"
             :key="item.id"
-            class="p-4 hover:bg-secondary-50 transition-colors"
+            class="p-4 hover:bg-secondary-50 dark:hover:bg-secondary-900/50 transition-colors"
           >
             <div class="flex justify-between items-start">
               <div class="flex-1">
-                <h3 class="font-medium text-secondary-900">{{ item.name }}</h3>
-                <p v-if="item.description" class="text-sm text-secondary-500 mt-1">
+                <h3 class="font-medium text-secondary-900 dark:text-secondary-100">{{ item.name }}</h3>
+                <p v-if="item.description" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
                   {{ item.description }}
                 </p>
               </div>
               <div class="flex items-center gap-3">
-                <span class="font-semibold text-primary-600">
+                <span class="font-semibold text-primary-600 dark:text-primary-400">
                   {{ formatCurrency(item.amount) }}
                 </span>
                 <div class="flex items-center gap-1">
                   <button
-                    class="p-1.5 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 rounded transition-colors"
+                    class="p-1.5 text-secondary-400 dark:text-secondary-500 hover:text-secondary-600 dark:hover:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded transition-colors"
                     title="Edit item"
                     @click="openEditItemModal(item)"
                   >
                     <PencilIcon class="w-4 h-4" />
                   </button>
                   <button
-                    class="p-1.5 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded transition-colors"
+                    class="p-1.5 text-secondary-400 dark:text-secondary-500 hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/30 rounded transition-colors"
                     title="Delete item"
                     @click="confirmDeleteItem(item)"
                   >
@@ -369,10 +369,10 @@ async function handleDeleteBudget() {
         </div>
 
         <!-- Total Footer -->
-        <div v-if="budget.items.length > 0" class="p-5 border-t border-secondary-100 bg-secondary-50">
+        <div v-if="budget.items.length > 0" class="p-5 border-t border-secondary-100 dark:border-secondary-700 bg-secondary-50 dark:bg-secondary-900">
           <div class="flex justify-between items-center">
-            <span class="font-semibold text-secondary-700">Total</span>
-            <span class="text-xl font-bold text-primary-600">{{ formatCurrency(totalAmount) }}</span>
+            <span class="font-semibold text-secondary-700 dark:text-secondary-300">Total</span>
+            <span class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ formatCurrency(totalAmount) }}</span>
           </div>
         </div>
       </div>
@@ -382,19 +382,19 @@ async function handleDeleteBudget() {
     <Teleport to="body">
       <div
         v-if="showItemModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showItemModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
-              <ClipboardDocumentListIcon class="w-6 h-6 text-primary-600" />
+            <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/50 rounded-xl flex items-center justify-center">
+              <ClipboardDocumentListIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
                 {{ editingItem ? 'Edit Item' : 'Add Item' }}
               </h2>
-              <p class="text-sm text-secondary-500">
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">
                 {{ editingItem ? 'Update item details' : 'Add a new item to your budget' }}
               </p>
             </div>
@@ -424,10 +424,10 @@ async function handleDeleteBudget() {
               placeholder="Additional details..."
             />
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
               <button
                 type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
                 @click="showItemModal = false"
               >
                 Cancel
@@ -453,17 +453,17 @@ async function handleDeleteBudget() {
     <Teleport to="body">
       <div
         v-if="showEditBudgetModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showEditBudgetModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
-              <PencilIcon class="w-6 h-6 text-primary-600" />
+            <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/50 rounded-xl flex items-center justify-center">
+              <PencilIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">Edit Budget</h2>
-              <p class="text-sm text-secondary-500">Update budget details</p>
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">Edit Budget</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Update budget details</p>
             </div>
           </div>
 
@@ -483,10 +483,10 @@ async function handleDeleteBudget() {
               placeholder="What is this budget for?"
             />
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
               <button
                 type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
                 @click="showEditBudgetModal = false"
               >
                 Cancel
@@ -512,27 +512,27 @@ async function handleDeleteBudget() {
     <Teleport to="body">
       <div
         v-if="showDeleteConfirm"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showDeleteConfirm = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 bg-danger-50 rounded-xl flex items-center justify-center">
-              <ExclamationTriangleIcon class="w-6 h-6 text-danger-600" />
+            <div class="w-12 h-12 bg-danger-50 dark:bg-danger-900/50 rounded-xl flex items-center justify-center">
+              <ExclamationTriangleIcon class="w-6 h-6 text-danger-600 dark:text-danger-400" />
             </div>
             <div>
-              <h2 class="text-lg font-semibold text-secondary-900">Delete Budget</h2>
-              <p class="text-sm text-secondary-500">This action cannot be undone</p>
+              <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Delete Budget</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">This action cannot be undone</p>
             </div>
           </div>
 
-          <p class="text-secondary-600 mb-6">
+          <p class="text-secondary-600 dark:text-secondary-400 mb-6">
             Are you sure you want to delete "{{ budget?.name }}"? All items in this budget will also be deleted.
           </p>
 
           <div class="flex justify-end gap-3">
             <button
-              class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+              class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
               @click="showDeleteConfirm = false"
             >
               Cancel
@@ -558,27 +558,27 @@ async function handleDeleteBudget() {
     <Teleport to="body">
       <div
         v-if="showDeleteItemConfirm"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showDeleteItemConfirm = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 bg-danger-50 rounded-xl flex items-center justify-center">
-              <ExclamationTriangleIcon class="w-6 h-6 text-danger-600" />
+            <div class="w-12 h-12 bg-danger-50 dark:bg-danger-900/50 rounded-xl flex items-center justify-center">
+              <ExclamationTriangleIcon class="w-6 h-6 text-danger-600 dark:text-danger-400" />
             </div>
             <div>
-              <h2 class="text-lg font-semibold text-secondary-900">Delete Item</h2>
-              <p class="text-sm text-secondary-500">This action cannot be undone</p>
+              <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Delete Item</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">This action cannot be undone</p>
             </div>
           </div>
 
-          <p class="text-secondary-600 mb-6">
+          <p class="text-secondary-600 dark:text-secondary-400 mb-6">
             Are you sure you want to delete "{{ itemToDelete?.name }}"?
           </p>
 
           <div class="flex justify-end gap-3">
             <button
-              class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+              class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
               @click="showDeleteItemConfirm = false"
             >
               Cancel

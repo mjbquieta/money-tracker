@@ -27,8 +27,8 @@ const passwordMismatch = computed(() => {
 
 <template>
   <div class="space-y-4">
-    <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
-    <p class="text-sm text-gray-500">Enter your account details to get started.</p>
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Personal Information</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400">Enter your account details to get started.</p>
 
     <UiBaseInput
       v-model="form.name"

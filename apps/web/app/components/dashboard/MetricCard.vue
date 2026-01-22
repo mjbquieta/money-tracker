@@ -26,7 +26,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div
-    class="bg-white rounded-xl shadow-card p-5 border border-secondary-100"
+    class="bg-white dark:bg-secondary-800 rounded-xl shadow-card p-5 border border-secondary-100 dark:border-secondary-700"
   >
     <div class="flex items-center gap-3 mb-3">
       <div
@@ -35,15 +35,15 @@ withDefaults(defineProps<Props>(), {
       >
         <component :is="icon" class="w-5 h-5" :class="iconClass" />
       </div>
-      <span class="text-sm font-medium text-secondary-500">{{ label }}</span>
+      <span class="text-sm font-medium text-secondary-500 dark:text-secondary-400">{{ label }}</span>
     </div>
     <p class="text-2xl font-bold" :class="valueClass">
       {{ value }}
     </p>
-    <p v-if="subtitle" class="text-xs text-secondary-400 mt-2">
+    <p v-if="subtitle" class="text-xs text-secondary-400 dark:text-secondary-500 mt-2">
       {{ subtitle }}
     </p>
-    <div v-if="showProgress" class="mt-3 h-2 bg-secondary-100 rounded-full overflow-hidden">
+    <div v-if="showProgress" class="mt-3 h-2 bg-secondary-100 dark:bg-secondary-700 rounded-full overflow-hidden">
       <div
         class="h-full transition-all duration-500"
         :class="progressClass"

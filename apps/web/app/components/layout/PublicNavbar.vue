@@ -21,7 +21,7 @@ onMounted(() => {
 <template>
   <nav
     class="w-full z-50"
-    :class="transparent ? 'absolute top-0 left-0 right-0' : 'bg-white border-b border-secondary-200'"
+    :class="transparent ? 'absolute top-0 left-0 right-0' : 'bg-white dark:bg-secondary-900 border-b border-secondary-200 dark:border-secondary-700'"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16 sm:h-20">
@@ -41,19 +41,20 @@ onMounted(() => {
         <div v-if="mounted" class="flex items-center gap-2 sm:gap-4">
           <NuxtLink
             to="/feedback"
-            class="flex items-center gap-1.5 px-3 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50/50 rounded-lg transition-colors text-sm font-medium"
+            class="flex items-center gap-1.5 px-3 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/50 rounded-lg transition-colors text-sm font-medium"
           >
             <LightBulbIcon class="w-4 h-4" />
             <span class="hidden sm:inline">Feedback</span>
           </NuxtLink>
           <NuxtLink
             to="/about"
-            class="flex items-center gap-1.5 px-3 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50/50 rounded-lg transition-colors text-sm font-medium"
+            class="flex items-center gap-1.5 px-3 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/50 rounded-lg transition-colors text-sm font-medium"
           >
             <HeartIcon class="w-4 h-4" />
             <span class="hidden sm:inline">About</span>
           </NuxtLink>
-          <div class="w-px h-6 bg-secondary-200 mx-1 hidden sm:block" />
+          <UiThemeToggle size="sm" />
+          <div class="w-px h-6 bg-secondary-200 dark:bg-secondary-700 mx-1 hidden sm:block" />
           <template v-if="authStore.isAuthenticated">
             <NuxtLink
               to="/dashboard"
@@ -66,7 +67,7 @@ onMounted(() => {
           <template v-else>
             <NuxtLink
               to="/auth/login"
-              class="px-3 sm:px-4 py-2 text-secondary-600 hover:text-primary-600 font-medium text-sm"
+              class="px-3 sm:px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 font-medium text-sm"
             >
               Sign In
             </NuxtLink>

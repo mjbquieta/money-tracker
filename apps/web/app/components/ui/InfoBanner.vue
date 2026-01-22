@@ -38,21 +38,21 @@ const variantStyles = computed(() => {
   switch (props.variant) {
     case "tip":
       return {
-        container: "bg-accent-50 border-accent-200",
-        icon: "text-accent-600",
-        text: "text-accent-800",
+        container: "bg-accent-50 dark:bg-accent-900/30 border-accent-200 dark:border-accent-700",
+        icon: "text-accent-600 dark:text-accent-400",
+        text: "text-accent-800 dark:text-accent-200",
       };
     case "warning":
       return {
-        container: "bg-warning-50 border-warning-200",
-        icon: "text-warning-600",
-        text: "text-warning-800",
+        container: "bg-warning-50 dark:bg-warning-900/30 border-warning-200 dark:border-warning-700",
+        icon: "text-warning-600 dark:text-warning-400",
+        text: "text-warning-800 dark:text-warning-200",
       };
     default:
       return {
-        container: "bg-primary-50 border-primary-200",
-        icon: "text-primary-600",
-        text: "text-primary-800",
+        container: "bg-primary-50 dark:bg-primary-900/30 border-primary-200 dark:border-primary-700",
+        icon: "text-primary-600 dark:text-primary-400",
+        text: "text-primary-800 dark:text-primary-200",
       };
   }
 });
@@ -85,7 +85,7 @@ const IconComponent = computed(() => {
     </div>
     <button
       v-if="dismissible"
-      class="flex-shrink-0 p-1 rounded-md hover:bg-black/5 transition-colors"
+      class="flex-shrink-0 p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
       :class="variantStyles.text"
       @click="dismiss"
     >

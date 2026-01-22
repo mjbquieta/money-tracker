@@ -68,10 +68,10 @@ const features = [
 ];
 
 const colorClasses = {
-  success: { bg: "bg-success-50", icon: "text-success-600" },
-  danger: { bg: "bg-danger-50", icon: "text-danger-600" },
-  primary: { bg: "bg-primary-50", icon: "text-primary-600" },
-  accent: { bg: "bg-accent-50", icon: "text-accent-600" },
+  success: { bg: "bg-success-50 dark:bg-success-900/30", icon: "text-success-600 dark:text-success-400" },
+  danger: { bg: "bg-danger-50 dark:bg-danger-900/30", icon: "text-danger-600 dark:text-danger-400" },
+  primary: { bg: "bg-primary-50 dark:bg-primary-900/30", icon: "text-primary-600 dark:text-primary-400" },
+  accent: { bg: "bg-accent-50 dark:bg-accent-900/30", icon: "text-accent-600 dark:text-accent-400" },
 };
 </script>
 
@@ -84,13 +84,13 @@ const colorClasses = {
     <section class="relative overflow-hidden pt-16 sm:pt-20">
       <!-- Background decoration - hidden on mobile for performance -->
       <div
-        class="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50/30"
+        class="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50/30 dark:from-secondary-950 dark:via-secondary-900 dark:to-primary-950/30"
       ></div>
       <div
-        class="hidden sm:block absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-primary-100 rounded-full blur-3xl opacity-30 -translate-y-1/2 translate-x-1/2"
+        class="hidden sm:block absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-primary-100 dark:bg-primary-900/30 rounded-full blur-3xl opacity-30 -translate-y-1/2 translate-x-1/2"
       ></div>
       <div
-        class="hidden sm:block absolute bottom-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-accent-100 rounded-full blur-3xl opacity-30 translate-y-1/2 -translate-x-1/2"
+        class="hidden sm:block absolute bottom-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-accent-100 dark:bg-accent-900/30 rounded-full blur-3xl opacity-30 translate-y-1/2 -translate-x-1/2"
       ></div>
 
       <div
@@ -106,16 +106,16 @@ const colorClasses = {
 
           <!-- Free Badge -->
           <div
-            class="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-success-50 border border-success-200 rounded-full mb-6 sm:mb-8"
+            class="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-success-50 dark:bg-success-900/30 border border-success-200 dark:border-success-700 rounded-full mb-6 sm:mb-8"
           >
-            <SparklesIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success-600" />
-            <span class="text-xs sm:text-sm font-semibold text-success-700"
+            <SparklesIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success-600 dark:text-success-400" />
+            <span class="text-xs sm:text-sm font-semibold text-success-700 dark:text-success-300"
               >100% Free Forever</span
             >
           </div>
 
           <h2
-            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-secondary-900 leading-tight"
+            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-secondary-900 dark:text-secondary-100 leading-tight"
           >
             Your Path to
             <span
@@ -126,7 +126,7 @@ const colorClasses = {
           </h2>
 
           <p
-            class="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-secondary-600 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0"
+            class="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0"
           >
             Track your money, manage expenses, and build healthier financial
             habits — so you can focus on growing your future with confidence.
@@ -162,7 +162,7 @@ const colorClasses = {
               </NuxtLink>
               <NuxtLink to="/auth/login">
                 <button
-                  class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-secondary-700 hover:text-primary-700 bg-white hover:bg-primary-50 border-2 border-secondary-200 hover:border-primary-300 rounded-xl transition-all font-semibold text-base sm:text-lg"
+                  class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-secondary-700 dark:text-secondary-300 hover:text-primary-700 dark:hover:text-primary-400 bg-white dark:bg-secondary-800 hover:bg-primary-50 dark:hover:bg-primary-900/50 border-2 border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-600 rounded-xl transition-all font-semibold text-base sm:text-lg"
                 >
                   Sign In
                 </button>
@@ -172,7 +172,7 @@ const colorClasses = {
 
           <!-- Trust indicators -->
           <div
-            class="mt-8 sm:mt-12 flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-xs sm:text-sm text-secondary-500 px-4 sm:px-0"
+            class="mt-8 sm:mt-12 flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-xs sm:text-sm text-secondary-500 dark:text-secondary-400 px-4 sm:px-0"
           >
             <div class="flex items-center gap-1.5 sm:gap-2">
               <CheckIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success-500" />
@@ -192,17 +192,17 @@ const colorClasses = {
     </section>
 
     <!-- Features Section -->
-    <section class="py-12 sm:py-16 lg:py-20 bg-white">
+    <section class="py-12 sm:py-16 lg:py-20 bg-white dark:bg-secondary-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10 sm:mb-16">
           <h2
-            class="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900"
+            class="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 dark:text-secondary-100"
           >
             Simple Tools for
-            <span class="text-primary-600">Lasting Prosperity</span>
+            <span class="text-primary-600 dark:text-primary-400">Lasting Prosperity</span>
           </h2>
           <p
-            class="mt-3 sm:mt-4 text-base sm:text-lg text-secondary-500 max-w-2xl mx-auto px-4 sm:px-0"
+            class="mt-3 sm:mt-4 text-base sm:text-lg text-secondary-500 dark:text-secondary-400 max-w-2xl mx-auto px-4 sm:px-0"
           >
             Everything you need to understand, control, and grow your finances —
             without the overwhelm.
@@ -215,7 +215,7 @@ const colorClasses = {
           <div
             v-for="feature in features"
             :key="feature.title"
-            class="bg-white p-5 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border border-secondary-100 hover:border-primary-200 hover:shadow-card-hover transition-all group"
+            class="bg-white dark:bg-secondary-800 p-5 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border border-secondary-100 dark:border-secondary-700 hover:border-primary-200 dark:hover:border-primary-600 hover:shadow-card-hover transition-all group"
           >
             <div
               class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-5 group-hover:scale-110 transition-transform"
@@ -232,11 +232,11 @@ const colorClasses = {
               />
             </div>
             <h3
-              class="text-lg sm:text-xl font-semibold text-secondary-900 mb-2 sm:mb-3"
+              class="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2 sm:mb-3"
             >
               {{ feature.title }}
             </h3>
-            <p class="text-sm sm:text-base text-secondary-500 leading-relaxed">
+            <p class="text-sm sm:text-base text-secondary-500 dark:text-secondary-400 leading-relaxed">
               {{ feature.description }}
             </p>
           </div>
@@ -313,15 +313,15 @@ const colorClasses = {
     </section>
 
     <!-- Simple How It Works -->
-    <section class="py-12 sm:py-16 lg:py-20 bg-secondary-50">
+    <section class="py-12 sm:py-16 lg:py-20 bg-secondary-50 dark:bg-secondary-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10 sm:mb-16">
           <h2
-            class="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900"
+            class="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 dark:text-secondary-100"
           >
             How It Works
           </h2>
-          <p class="mt-3 sm:mt-4 text-base sm:text-lg text-secondary-500">
+          <p class="mt-3 sm:mt-4 text-base sm:text-lg text-secondary-500 dark:text-secondary-400">
             Get started in just three simple steps
           </p>
         </div>
@@ -329,36 +329,36 @@ const colorClasses = {
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6 lg:gap-8">
           <div class="text-center">
             <div
-              class="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5"
+              class="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 dark:bg-primary-900/50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5"
             >
-              <span class="text-xl sm:text-2xl font-bold text-primary-600"
+              <span class="text-xl sm:text-2xl font-bold text-primary-600 dark:text-primary-400"
                 >1</span
               >
             </div>
             <h3
-              class="text-lg sm:text-xl font-semibold text-secondary-900 mb-2 sm:mb-3"
+              class="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2 sm:mb-3"
             >
               Sign Up Free
             </h3>
-            <p class="text-sm sm:text-base text-secondary-500 px-4 sm:px-0">
+            <p class="text-sm sm:text-base text-secondary-500 dark:text-secondary-400 px-4 sm:px-0">
               Create your account in seconds. No credit card, no commitments.
             </p>
           </div>
 
           <div class="text-center">
             <div
-              class="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5"
+              class="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 dark:bg-primary-900/50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5"
             >
-              <span class="text-xl sm:text-2xl font-bold text-primary-600"
+              <span class="text-xl sm:text-2xl font-bold text-primary-600 dark:text-primary-400"
                 >2</span
               >
             </div>
             <h3
-              class="text-lg sm:text-xl font-semibold text-secondary-900 mb-2 sm:mb-3"
+              class="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2 sm:mb-3"
             >
               Track Your Flow
             </h3>
-            <p class="text-sm sm:text-base text-secondary-500 px-4 sm:px-0">
+            <p class="text-sm sm:text-base text-secondary-500 dark:text-secondary-400 px-4 sm:px-0">
               Add income and expenses as they happen. Keep it simple, stay
               consistent.
             </p>
@@ -366,18 +366,18 @@ const colorClasses = {
 
           <div class="text-center">
             <div
-              class="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5"
+              class="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 dark:bg-primary-900/50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5"
             >
-              <span class="text-xl sm:text-2xl font-bold text-primary-600"
+              <span class="text-xl sm:text-2xl font-bold text-primary-600 dark:text-primary-400"
                 >3</span
               >
             </div>
             <h3
-              class="text-lg sm:text-xl font-semibold text-secondary-900 mb-2 sm:mb-3"
+              class="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2 sm:mb-3"
             >
               Grow With Clarity
             </h3>
-            <p class="text-sm sm:text-base text-secondary-500 px-4 sm:px-0">
+            <p class="text-sm sm:text-base text-secondary-500 dark:text-secondary-400 px-4 sm:px-0">
               Watch your progress unfold. Build confidence and healthier money
               habits.
             </p>
@@ -403,7 +403,7 @@ const colorClasses = {
     </section>
 
     <!-- Footer -->
-    <footer class="py-8 sm:py-12 bg-white border-t border-secondary-100">
+    <footer class="py-8 sm:py-12 bg-white dark:bg-secondary-900 border-t border-secondary-100 dark:border-secondary-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
           <div class="flex items-center gap-3">
@@ -412,23 +412,23 @@ const colorClasses = {
               alt="Prospera"
               class="w-8 h-8"
             />
-            <span class="font-semibold text-secondary-700">Prospera</span>
+            <span class="font-semibold text-secondary-700 dark:text-secondary-300">Prospera</span>
           </div>
           <div class="flex items-center gap-6 sm:gap-8">
             <NuxtLink
               to="/feedback"
-              class="text-secondary-500 hover:text-primary-600 transition-colors font-medium"
+              class="text-secondary-500 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium"
             >
               Request Improvements
             </NuxtLink>
             <NuxtLink
               to="/about"
-              class="text-secondary-500 hover:text-primary-600 transition-colors font-medium"
+              class="text-secondary-500 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium"
             >
               About & Donate
             </NuxtLink>
           </div>
-          <p class="text-sm text-secondary-400 flex items-center gap-1">
+          <p class="text-sm text-secondary-400 dark:text-secondary-500 flex items-center gap-1">
             Made with <HeartIcon class="w-4 h-4 text-danger-500" /> for everyone
           </p>
         </div>

@@ -283,18 +283,18 @@ function formatDate(dateString: string | undefined) {
     <!-- Header -->
     <div class="mb-8">
       <button
-        class="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm mb-4 group"
+        class="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm mb-4 group"
         @click="navigateTo('/dashboard')"
       >
         <ArrowLeftIcon class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
         Back to Dashboard
       </button>
 
-      <h1 class="text-2xl font-bold text-secondary-900 flex items-center gap-2">
+      <h1 class="text-2xl font-bold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
         <Cog6ToothIcon class="w-7 h-7 text-primary-500" />
         Settings
       </h1>
-      <p class="text-secondary-500 mt-1">Manage your account settings and preferences</p>
+      <p class="text-secondary-500 dark:text-secondary-400 mt-1">Manage your account settings and preferences</p>
     </div>
 
     <!-- Alerts -->
@@ -308,20 +308,20 @@ function formatDate(dateString: string | undefined) {
     </div>
 
     <!-- Account Information -->
-    <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-6">
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
       <div class="flex justify-between items-start mb-5">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
-            <UserIcon class="w-5 h-5 text-primary-600" />
+          <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
+            <UserIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
           </div>
           <div>
-            <h2 class="text-lg font-semibold text-secondary-900">Account Information</h2>
-            <p class="text-sm text-secondary-500">Your personal details</p>
+            <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Account Information</h2>
+            <p class="text-sm text-secondary-500 dark:text-secondary-400">Your personal details</p>
           </div>
         </div>
         <button
           v-if="!isEditingProfile"
-          class="flex items-center gap-2 px-4 py-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
+          class="flex items-center gap-2 px-4 py-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-primary-200 dark:border-primary-700 rounded-lg transition-colors font-medium"
           @click="startEditingProfile"
         >
           <PencilIcon class="w-4 h-4" />
@@ -330,25 +330,25 @@ function formatDate(dateString: string | undefined) {
       </div>
 
       <!-- Display Mode -->
-      <div v-if="!isEditingProfile" class="divide-y divide-secondary-100">
+      <div v-if="!isEditingProfile" class="divide-y divide-secondary-100 dark:divide-secondary-700">
         <div class="flex justify-between items-center py-4">
-          <span class="text-secondary-500">Name</span>
-          <span class="font-medium text-secondary-900">{{ authStore.user?.name }}</span>
+          <span class="text-secondary-500 dark:text-secondary-400">Name</span>
+          <span class="font-medium text-secondary-900 dark:text-secondary-100">{{ authStore.user?.name }}</span>
         </div>
         <div class="flex justify-between items-center py-4">
-          <span class="text-secondary-500">Username</span>
-          <span class="font-medium text-secondary-900">{{ authStore.user?.username }}</span>
+          <span class="text-secondary-500 dark:text-secondary-400">Username</span>
+          <span class="font-medium text-secondary-900 dark:text-secondary-100">{{ authStore.user?.username }}</span>
         </div>
         <div class="flex justify-between items-center py-4">
-          <span class="text-secondary-500">Email</span>
+          <span class="text-secondary-500 dark:text-secondary-400">Email</span>
           <div class="flex items-center gap-2">
-            <span class="font-medium text-secondary-900">{{ authStore.user?.email }}</span>
-            <span class="text-xs text-secondary-400 bg-secondary-100 px-2 py-0.5 rounded-full">Cannot be changed</span>
+            <span class="font-medium text-secondary-900 dark:text-secondary-100">{{ authStore.user?.email }}</span>
+            <span class="text-xs text-secondary-400 dark:text-secondary-500 bg-secondary-100 dark:bg-secondary-700 px-2 py-0.5 rounded-full">Cannot be changed</span>
           </div>
         </div>
         <div class="flex justify-between items-center py-4">
-          <span class="text-secondary-500">Member since</span>
-          <span class="font-medium text-secondary-900">
+          <span class="text-secondary-500 dark:text-secondary-400">Member since</span>
+          <span class="font-medium text-secondary-900 dark:text-secondary-100">
             {{ formatDate(authStore.user?.createdAt) }}
           </span>
         </div>
@@ -357,32 +357,32 @@ function formatDate(dateString: string | undefined) {
       <!-- Edit Mode -->
       <div v-else class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Name</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Name</label>
           <input
             v-model="profileForm.name"
             type="text"
-            class="w-full px-4 py-2.5 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            class="w-full px-4 py-2.5 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             placeholder="Your name"
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Username</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Username</label>
           <input
             v-model="profileForm.username"
             type="text"
-            class="w-full px-4 py-2.5 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            class="w-full px-4 py-2.5 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             placeholder="Your username"
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Email</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Email</label>
           <input
             :value="authStore.user?.email"
             type="email"
             disabled
-            class="w-full px-4 py-2.5 border border-secondary-200 rounded-lg bg-secondary-50 text-secondary-500 cursor-not-allowed"
+            class="w-full px-4 py-2.5 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-secondary-50 dark:bg-secondary-900 text-secondary-500 dark:text-secondary-400 cursor-not-allowed"
           />
-          <p class="text-xs text-secondary-400 mt-1">Email address cannot be changed.</p>
+          <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-1">Email address cannot be changed.</p>
         </div>
         <div class="flex gap-3 pt-2">
           <button
@@ -395,7 +395,7 @@ function formatDate(dateString: string | undefined) {
             Save Changes
           </button>
           <button
-            class="px-5 py-2.5 text-secondary-600 hover:bg-secondary-100 border border-secondary-200 rounded-lg transition-colors font-medium"
+            class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-100 dark:hover:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors font-medium"
             @click="cancelEditingProfile"
           >
             Cancel
@@ -405,15 +405,15 @@ function formatDate(dateString: string | undefined) {
     </div>
 
     <!-- Password Section -->
-    <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-6">
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
       <div class="flex justify-between items-start mb-5">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-warning-50 rounded-lg flex items-center justify-center">
-            <LockClosedIcon class="w-5 h-5 text-warning-600" />
+          <div class="w-10 h-10 bg-warning-50 dark:bg-warning-900/50 rounded-lg flex items-center justify-center">
+            <LockClosedIcon class="w-5 h-5 text-warning-600 dark:text-warning-400" />
           </div>
           <div>
-            <h2 class="text-lg font-semibold text-secondary-900">Password</h2>
-            <p class="text-sm text-secondary-500">Update your password to keep your account secure</p>
+            <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Password</h2>
+            <p class="text-sm text-secondary-500 dark:text-secondary-400">Update your password to keep your account secure</p>
           </div>
         </div>
         <button
@@ -514,23 +514,23 @@ function formatDate(dateString: string | undefined) {
     </div>
 
     <!-- Currency Settings -->
-    <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-6">
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
       <div class="flex items-center gap-3 mb-5">
-        <div class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center">
-          <CurrencyDollarIcon class="w-5 h-5 text-success-600" />
+        <div class="w-10 h-10 bg-success-50 dark:bg-success-900/50 rounded-lg flex items-center justify-center">
+          <CurrencyDollarIcon class="w-5 h-5 text-success-600 dark:text-success-400" />
         </div>
         <div>
-          <h2 class="text-lg font-semibold text-secondary-900">Currency</h2>
-          <p class="text-sm text-secondary-500">Choose your preferred currency for displaying amounts</p>
+          <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Currency</h2>
+          <p class="text-sm text-secondary-500 dark:text-secondary-400">Choose your preferred currency for displaying amounts</p>
         </div>
       </div>
 
       <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
         <div class="flex-1 max-w-xs w-full">
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Display Currency</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Display Currency</label>
           <select
             v-model="selectedCurrency"
-            class="w-full px-4 py-2.5 bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-700"
+            class="w-full px-4 py-2.5 bg-white dark:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-700 dark:text-secondary-300"
           >
             <option v-for="currency in currencies" :key="currency.code" :value="currency.code">
               {{ currency.symbol }} {{ currency.code }} - {{ currency.name }}
@@ -554,15 +554,15 @@ function formatDate(dateString: string | undefined) {
     </div>
 
     <!-- Categories Settings -->
-    <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-6">
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6">
       <div class="flex justify-between items-start mb-5">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-accent-50 rounded-lg flex items-center justify-center">
-            <TagIcon class="w-5 h-5 text-accent-600" />
+          <div class="w-10 h-10 bg-accent-50 dark:bg-accent-900/50 rounded-lg flex items-center justify-center">
+            <TagIcon class="w-5 h-5 text-accent-600 dark:text-accent-400" />
           </div>
           <div>
-            <h2 class="text-lg font-semibold text-secondary-900">Categories</h2>
-            <p class="text-sm text-secondary-500">Manage your expense categories</p>
+            <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Categories</h2>
+            <p class="text-sm text-secondary-500 dark:text-secondary-400">Manage your expense categories</p>
           </div>
         </div>
         <button

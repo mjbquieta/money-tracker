@@ -25,15 +25,15 @@ const emit = defineEmits<{
 
 const variantClasses = {
   danger: {
-    icon: 'bg-danger-100 text-danger-600',
+    icon: 'bg-danger-100 dark:bg-danger-900/50 text-danger-600 dark:text-danger-400',
     button: 'bg-danger-600 hover:bg-danger-700 focus:ring-danger-500',
   },
   warning: {
-    icon: 'bg-warning-100 text-warning-600',
+    icon: 'bg-warning-100 dark:bg-warning-900/50 text-warning-600 dark:text-warning-400',
     button: 'bg-warning-600 hover:bg-warning-700 focus:ring-warning-500',
   },
   primary: {
-    icon: 'bg-primary-100 text-primary-600',
+    icon: 'bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400',
     button: 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500',
   },
 };
@@ -76,7 +76,7 @@ function handleCancel() {
         >
           <div
             v-if="show"
-            class="bg-white rounded-2xl shadow-elevated max-w-md w-full overflow-hidden"
+            class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full overflow-hidden"
           >
             <!-- Header -->
             <div class="flex items-start gap-4 p-6 pb-4">
@@ -87,15 +87,15 @@ function handleCancel() {
                 <ExclamationTriangleIcon class="w-6 h-6" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-semibold text-secondary-900">
+                <h3 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
                   {{ title }}
                 </h3>
-                <p class="mt-2 text-secondary-600">
+                <p class="mt-2 text-secondary-600 dark:text-secondary-400">
                   {{ message }}
                 </p>
               </div>
               <button
-                class="p-1 text-secondary-400 hover:text-secondary-600 rounded-lg hover:bg-secondary-100 transition-colors"
+                class="p-1 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors"
                 :disabled="loading"
                 @click="handleCancel"
               >
@@ -104,9 +104,9 @@ function handleCancel() {
             </div>
 
             <!-- Actions -->
-            <div class="flex gap-3 p-6 pt-4 bg-secondary-50">
+            <div class="flex gap-3 p-6 pt-4 bg-secondary-50 dark:bg-secondary-900">
               <button
-                class="flex-1 px-4 py-2.5 text-secondary-700 hover:text-secondary-900 bg-white hover:bg-secondary-100 border border-secondary-200 rounded-xl font-medium transition-colors disabled:opacity-50"
+                class="flex-1 px-4 py-2.5 text-secondary-700 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-secondary-100 bg-white dark:bg-secondary-800 hover:bg-secondary-100 dark:hover:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-xl font-medium transition-colors disabled:opacity-50"
                 :disabled="loading"
                 @click="handleCancel"
               >

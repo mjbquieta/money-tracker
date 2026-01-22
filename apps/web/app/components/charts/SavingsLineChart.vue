@@ -102,23 +102,23 @@ const chartOptions = computed(() => ({
     <div class="flex flex-wrap gap-4 mb-4 text-sm">
       <div class="flex items-center gap-2 group relative">
         <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-        <span class="text-secondary-600">Monthly Income</span>
+        <span class="text-secondary-600 dark:text-secondary-400">Monthly Income</span>
         <div class="relative">
           <QuestionMarkCircleIcon class="w-4 h-4 text-secondary-400 cursor-help" />
-          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-secondary-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all w-52 z-10">
+          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-secondary-800 dark:bg-secondary-700 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all w-52 z-10">
             {{ metricDescriptions.monthlyIncome }}
-            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-secondary-800"></div>
+            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-secondary-800 dark:border-t-secondary-700"></div>
           </div>
         </div>
       </div>
       <div class="flex items-center gap-2 group relative">
         <span class="w-3 h-3 rounded-full bg-green-500"></span>
-        <span class="text-secondary-600">Monthly Remaining</span>
+        <span class="text-secondary-600 dark:text-secondary-400">Monthly Remaining</span>
         <div class="relative">
           <QuestionMarkCircleIcon class="w-4 h-4 text-secondary-400 cursor-help" />
-          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-secondary-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all w-56 z-10">
+          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-secondary-800 dark:bg-secondary-700 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all w-56 z-10">
             {{ metricDescriptions.monthlyRemaining }}
-            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-secondary-800"></div>
+            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-secondary-800 dark:border-t-secondary-700"></div>
           </div>
         </div>
       </div>

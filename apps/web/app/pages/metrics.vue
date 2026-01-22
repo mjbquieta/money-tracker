@@ -11,6 +11,6 @@ definePageMeta({
 
 <template>
   <div class="flex items-center justify-center min-h-screen">
-    <p class="text-secondary-500">Redirecting to dashboard...</p>
+    <p class="text-secondary-500 dark:text-secondary-400">Redirecting to dashboard...</p>
   </div>
 </template>

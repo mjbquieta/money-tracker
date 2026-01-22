@@ -28,7 +28,7 @@ const props = defineProps<Props>();
               ? 'bg-green-500 text-white'
               : index === props.currentStep
                 ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-600',
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
           ]"
         >
           <span v-if="index < props.currentStep">✓</span>
@@ -37,7 +37,7 @@ const props = defineProps<Props>();
         <span
           :class="[
             'text-sm mt-2 font-medium',
-            index <= props.currentStep ? 'text-gray-900' : 'text-gray-400',
+            index <= props.currentStep ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500',
           ]"
         >
           {{ step.label }}
@@ -47,7 +47,7 @@ const props = defineProps<Props>();
         v-if="index < props.steps.length - 1"
         :class="[
           'flex-1 h-1 mx-4',
-          index < props.currentStep ? 'bg-green-500' : 'bg-gray-200',
+          index < props.currentStep ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700',
         ]"
       />
     </div>

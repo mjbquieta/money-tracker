@@ -973,14 +973,14 @@ function getCategoryStyle(categoryName: string) {
     <!-- Loading State -->
     <div v-if="budgetStore.loading && !period" class="text-center py-16">
       <div class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-secondary-500">Loading budget period...</p>
+      <p class="text-secondary-500 dark:text-secondary-400">Loading budget period...</p>
     </div>
 
     <!-- Not Found State -->
     <div v-else-if="!period" class="text-center py-16">
-      <div class="bg-white rounded-2xl shadow-card p-10 max-w-md mx-auto border border-secondary-100">
-        <h3 class="text-xl font-semibold text-secondary-900 mb-2">Budget period not found</h3>
-        <p class="text-secondary-500 mb-6">The budget period you're looking for doesn't exist or has been deleted.</p>
+      <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-card p-10 max-w-md mx-auto border border-secondary-100 dark:border-secondary-700">
+        <h3 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">Budget period not found</h3>
+        <p class="text-secondary-500 dark:text-secondary-400 mb-6">The budget period you're looking for doesn't exist or has been deleted.</p>
         <button
           class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium"
           @click="router.push('/budget-periods')"
@@ -995,7 +995,7 @@ function getCategoryStyle(categoryName: string) {
       <!-- Header -->
       <div class="mb-8">
         <button
-          class="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm mb-4 group"
+          class="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm mb-4 group"
           @click="router.push('/budget-periods')"
         >
           <ArrowLeftIcon class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -1004,31 +1004,31 @@ function getCategoryStyle(categoryName: string) {
 
         <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
-            <h1 class="text-2xl font-bold text-secondary-900">
+            <h1 class="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
               {{ period.name || `${formatDate(period.startDate)} - ${formatDate(period.endDate)}` }}
             </h1>
-            <p v-if="period.name" class="text-secondary-500 mt-1">
+            <p v-if="period.name" class="text-secondary-500 dark:text-secondary-400 mt-1">
               {{ formatDate(period.startDate) }} - {{ formatDate(period.endDate) }}
             </p>
           </div>
 
           <div class="flex gap-2">
             <button
-              class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 border border-secondary-200 rounded-lg transition-colors"
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
               @click="openEditPeriod"
             >
               <PencilIcon class="w-4 h-4" />
               <span class="hidden sm:inline">Edit</span>
             </button>
             <button
-              class="flex items-center gap-2 px-4 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 border border-secondary-200 rounded-lg transition-colors"
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
               @click="openDuplicateModal"
             >
               <DocumentDuplicateIcon class="w-4 h-4" />
               <span class="hidden sm:inline">Duplicate</span>
             </button>
             <button
-              class="flex items-center gap-2 px-4 py-2 text-danger-600 hover:text-danger-700 hover:bg-danger-50 border border-danger-200 rounded-lg transition-colors"
+              class="flex items-center gap-2 px-4 py-2 text-danger-600 dark:text-danger-400 hover:text-danger-700 dark:hover:text-danger-300 hover:bg-danger-50 dark:hover:bg-danger-900/50 border border-danger-200 dark:border-danger-700 rounded-lg transition-colors"
               @click="showDeleteConfirm = true"
             >
               <TrashIcon class="w-4 h-4" />
@@ -1041,69 +1041,69 @@ function getCategoryStyle(categoryName: string) {
       <!-- Summary Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <!-- Income Card -->
-        <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-5">
+        <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-5">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center">
-              <ArrowTrendingUpIcon class="w-5 h-5 text-success-600" />
+            <div class="w-10 h-10 bg-success-50 dark:bg-success-900/50 rounded-lg flex items-center justify-center">
+              <ArrowTrendingUpIcon class="w-5 h-5 text-success-600 dark:text-success-400" />
             </div>
-            <span class="text-sm font-medium text-secondary-500">Income</span>
+            <span class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Income</span>
           </div>
-          <p class="text-2xl font-bold text-success-600">{{ formatCurrency(totalIncome) }}</p>
-          <p class="text-xs text-secondary-400 mt-2">{{ period.incomes?.length || 0 }} source{{ (period.incomes?.length || 0) === 1 ? '' : 's' }}</p>
+          <p class="text-2xl font-bold text-success-600 dark:text-success-400">{{ formatCurrency(totalIncome) }}</p>
+          <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-2">{{ period.incomes?.length || 0 }} source{{ (period.incomes?.length || 0) === 1 ? '' : 's' }}</p>
         </div>
 
         <!-- Total Expenses Card -->
-        <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-5">
+        <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-5">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-danger-50 rounded-lg flex items-center justify-center">
-              <CreditCardIcon class="w-5 h-5 text-danger-600" />
+            <div class="w-10 h-10 bg-danger-50 dark:bg-danger-900/50 rounded-lg flex items-center justify-center">
+              <CreditCardIcon class="w-5 h-5 text-danger-600 dark:text-danger-400" />
             </div>
-            <span class="text-sm font-medium text-secondary-500">Expenses</span>
+            <span class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Expenses</span>
           </div>
-          <p class="text-2xl font-bold text-danger-600">{{ formatCurrency(summary?.totalExpenses || 0) }}</p>
-          <p class="text-xs text-secondary-400 mt-2">{{ period.expenses.length }} expense{{ period.expenses.length === 1 ? '' : 's' }}</p>
+          <p class="text-2xl font-bold text-danger-600 dark:text-danger-400">{{ formatCurrency(summary?.totalExpenses || 0) }}</p>
+          <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-2">{{ period.expenses.length }} expense{{ period.expenses.length === 1 ? '' : 's' }}</p>
         </div>
 
         <!-- Remaining Card -->
-        <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-5">
+        <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-5">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
-              <WalletIcon class="w-5 h-5 text-primary-600" />
+            <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
+              <WalletIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
-            <span class="text-sm font-medium text-secondary-500">Remaining</span>
+            <span class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Remaining</span>
           </div>
           <p
             class="text-2xl font-bold"
-            :class="(summary?.remaining || 0) >= 0 ? 'text-primary-600' : 'text-danger-600'"
+            :class="(summary?.remaining || 0) >= 0 ? 'text-primary-600 dark:text-primary-400' : 'text-danger-600 dark:text-danger-400'"
           >
             {{ formatCurrency(summary?.remaining || 0) }}
           </p>
-          <p class="text-xs text-secondary-400 mt-2">
+          <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-2">
             {{ totalIncome > 0 ? ((summary?.remaining || 0) / totalIncome * 100).toFixed(1) : 0 }}% of budget
           </p>
         </div>
 
         <!-- Budget Used Card -->
-        <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-5">
+        <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-5">
           <div class="flex items-center gap-3 mb-3">
             <div
               class="w-10 h-10 rounded-lg flex items-center justify-center"
-              :class="spendingPercentage > 100 ? 'bg-danger-50' : spendingPercentage > 80 ? 'bg-warning-50' : 'bg-success-50'"
+              :class="spendingPercentage > 100 ? 'bg-danger-50 dark:bg-danger-900/50' : spendingPercentage > 80 ? 'bg-warning-50 dark:bg-warning-900/50' : 'bg-success-50 dark:bg-success-900/50'"
             >
               <ChartPieIcon
                 class="w-5 h-5"
-                :class="spendingPercentage > 100 ? 'text-danger-600' : spendingPercentage > 80 ? 'text-warning-600' : 'text-success-600'"
+                :class="spendingPercentage > 100 ? 'text-danger-600 dark:text-danger-400' : spendingPercentage > 80 ? 'text-warning-600 dark:text-warning-400' : 'text-success-600 dark:text-success-400'"
               />
             </div>
-            <span class="text-sm font-medium text-secondary-500">Budget Used</span>
+            <span class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Budget Used</span>
           </div>
           <p
             class="text-2xl font-bold"
-            :class="spendingPercentage > 100 ? 'text-danger-600' : spendingPercentage > 80 ? 'text-warning-600' : 'text-success-600'"
+            :class="spendingPercentage > 100 ? 'text-danger-600 dark:text-danger-400' : spendingPercentage > 80 ? 'text-warning-600 dark:text-warning-400' : 'text-success-600 dark:text-success-400'"
           >
             {{ spendingPercentage.toFixed(1) }}%
           </p>
-          <div class="mt-3 h-2 bg-secondary-100 rounded-full overflow-hidden">
+          <div class="mt-3 h-2 bg-secondary-100 dark:bg-secondary-700 rounded-full overflow-hidden">
             <div
               class="h-full transition-all duration-500"
               :class="spendingPercentage > 100 ? 'bg-danger-500' : spendingPercentage > 80 ? 'bg-warning-500' : 'bg-primary-500'"
@@ -1114,14 +1114,14 @@ function getCategoryStyle(categoryName: string) {
       </div>
 
       <!-- Income Sources Section -->
-      <div v-if="period.incomes && period.incomes.length > 0" class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-8">
+      <div v-if="period.incomes && period.incomes.length > 0" class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-8">
         <div class="flex justify-between items-center mb-5">
-          <h2 class="text-lg font-semibold text-secondary-800 flex items-center gap-2">
-            <ArrowTrendingUpIcon class="w-5 h-5 text-success-500" />
+          <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 flex items-center gap-2">
+            <ArrowTrendingUpIcon class="w-5 h-5 text-success-500 dark:text-success-400" />
             Income Sources
           </h2>
           <button
-            class="flex items-center gap-2 px-3 py-2 text-success-600 hover:text-success-700 hover:bg-success-50 border border-success-200 rounded-lg transition-colors font-medium"
+            class="flex items-center gap-2 px-3 py-2 text-success-600 dark:text-success-400 hover:text-success-700 dark:hover:text-success-300 hover:bg-success-50 dark:hover:bg-success-900/50 border border-success-200 dark:border-success-700 rounded-lg transition-colors font-medium"
             @click="openAddIncome"
           >
             <PlusIcon class="w-4 h-4" />
@@ -1133,23 +1133,23 @@ function getCategoryStyle(categoryName: string) {
           <div
             v-for="income in period.incomes"
             :key="income.id"
-            class="flex justify-between items-center p-4 bg-success-50/50 rounded-xl hover:bg-success-50 transition-colors group"
+            class="flex justify-between items-center p-4 bg-success-50/50 dark:bg-success-900/30 rounded-xl hover:bg-success-50 dark:hover:bg-success-900/50 transition-colors group"
           >
             <div class="flex-1">
-              <p class="font-medium text-secondary-900">{{ income.name }}</p>
-              <p v-if="income.description" class="text-sm text-secondary-500 mt-1">{{ income.description }}</p>
+              <p class="font-medium text-secondary-900 dark:text-secondary-100">{{ income.name }}</p>
+              <p v-if="income.description" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">{{ income.description }}</p>
             </div>
             <div class="flex items-center gap-4">
-              <p class="font-bold text-success-600 text-lg">{{ formatCurrency(income.amount) }}</p>
+              <p class="font-bold text-success-600 dark:text-success-400 text-lg">{{ formatCurrency(income.amount) }}</p>
               <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  class="p-2 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                  class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                   @click="openEditIncome(income)"
                 >
                   <PencilIcon class="w-4 h-4" />
                 </button>
                 <button
-                  class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                  class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/50 rounded-lg transition-colors"
                   @click="confirmDeleteIncome(income)"
                 >
                   <TrashIcon class="w-4 h-4" />
@@ -1160,22 +1160,22 @@ function getCategoryStyle(categoryName: string) {
         </div>
 
         <!-- Total Income Footer -->
-        <div class="mt-4 pt-4 border-t border-success-100 flex justify-between items-center">
-          <span class="text-sm font-medium text-secondary-600">Total Income</span>
-          <span class="text-xl font-bold text-success-600">{{ formatCurrency(totalIncome) }}</span>
+        <div class="mt-4 pt-4 border-t border-success-100 dark:border-success-800 flex justify-between items-center">
+          <span class="text-sm font-medium text-secondary-600 dark:text-secondary-400">Total Income</span>
+          <span class="text-xl font-bold text-success-600 dark:text-success-400">{{ formatCurrency(totalIncome) }}</span>
         </div>
       </div>
 
       <!-- Add Income Button when no incomes exist -->
-      <div v-else class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-8">
+      <div v-else class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-8">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-success-50 rounded-lg flex items-center justify-center">
-              <ArrowTrendingUpIcon class="w-5 h-5 text-success-600" />
+            <div class="w-10 h-10 bg-success-50 dark:bg-success-900/50 rounded-lg flex items-center justify-center">
+              <ArrowTrendingUpIcon class="w-5 h-5 text-success-600 dark:text-success-400" />
             </div>
             <div>
-              <h3 class="font-semibold text-secondary-900">Income Sources</h3>
-              <p class="text-sm text-secondary-500">Track your income sources</p>
+              <h3 class="font-semibold text-secondary-900 dark:text-secondary-100">Income Sources</h3>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Track your income sources</p>
             </div>
           </div>
           <button
@@ -1189,15 +1189,15 @@ function getCategoryStyle(categoryName: string) {
       </div>
 
       <!-- Expenses by Category -->
-      <div v-if="sortedCategories.length > 0" class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 mb-8">
+      <div v-if="sortedCategories.length > 0" class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-8">
         <div class="flex justify-between items-center mb-5">
-          <h2 class="text-lg font-semibold text-secondary-800 flex items-center gap-2">
-            <TagIcon class="w-5 h-5 text-primary-500" />
+          <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 flex items-center gap-2">
+            <TagIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" />
             Expenses by Category
           </h2>
-          <p v-if="topCategory" class="text-sm text-secondary-500">
-            Top: <span class="font-medium text-secondary-700">{{ topCategory.name }}</span>
-            <span class="text-primary-600 ml-1">({{ ((topCategory.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)</span>
+          <p v-if="topCategory" class="text-sm text-secondary-500 dark:text-secondary-400">
+            Top: <span class="font-medium text-secondary-700 dark:text-secondary-300">{{ topCategory.name }}</span>
+            <span class="text-primary-600 dark:text-primary-400 ml-1">({{ ((topCategory.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)</span>
           </p>
         </div>
         <div class="space-y-4">
@@ -1214,14 +1214,14 @@ function getCategoryStyle(categoryName: string) {
                 >
                   {{ category.name }}
                 </span>
-                <span class="text-sm text-secondary-500">{{ category.count }} expense{{ category.count === 1 ? '' : 's' }}</span>
+                <span class="text-sm text-secondary-500 dark:text-secondary-400">{{ category.count }} expense{{ category.count === 1 ? '' : 's' }}</span>
               </div>
               <div class="text-right">
-                <span class="font-semibold text-secondary-900">{{ formatCurrency(category.total) }}</span>
-                <span class="text-xs text-secondary-400 ml-2">({{ ((category.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)</span>
+                <span class="font-semibold text-secondary-900 dark:text-secondary-100">{{ formatCurrency(category.total) }}</span>
+                <span class="text-xs text-secondary-400 dark:text-secondary-500 ml-2">({{ ((category.total / (summary?.totalExpenses || 1)) * 100).toFixed(0) }}%)</span>
               </div>
             </div>
-            <div class="h-2 bg-secondary-100 rounded-full overflow-hidden">
+            <div class="h-2 bg-secondary-100 dark:bg-secondary-700 rounded-full overflow-hidden">
               <div
                 class="h-full transition-all duration-500"
                 :class="getCategoryStyle(category.name).bar"
@@ -1233,16 +1233,16 @@ function getCategoryStyle(categoryName: string) {
       </div>
 
       <!-- Expenses List -->
-      <div class="bg-white rounded-xl shadow-card border border-secondary-100 p-6">
+      <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-lg font-semibold text-secondary-800 flex items-center gap-2">
-            <CreditCardIcon class="w-5 h-5 text-primary-500" />
+          <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 flex items-center gap-2">
+            <CreditCardIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" />
             Expenses
           </h2>
           <div class="flex gap-2">
             <button
               v-if="expenseGroupStore.groups.length > 0"
-              class="flex items-center gap-2 px-3 py-2 text-secondary-600 hover:text-accent-600 hover:bg-accent-50 border border-secondary-200 rounded-lg transition-colors font-medium"
+              class="flex items-center gap-2 px-3 py-2 text-secondary-600 dark:text-secondary-400 hover:text-accent-600 dark:hover:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors font-medium"
               :title="allGroupsExpanded ? 'Collapse all groups' : 'Expand all groups'"
               @click="toggleAllGroups"
             >
@@ -1253,14 +1253,14 @@ function getCategoryStyle(categoryName: string) {
               <span class="hidden sm:inline">{{ allGroupsExpanded ? 'Collapse' : 'Expand' }}</span>
             </button>
             <button
-              class="flex items-center gap-2 px-3 py-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 border border-secondary-200 rounded-lg transition-colors font-medium"
+              class="flex items-center gap-2 px-3 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors font-medium"
               @click="openCreateGroupModal"
             >
               <FolderPlusIcon class="w-5 h-5" />
               <span class="hidden sm:inline">New Group</span>
             </button>
             <button
-              class="flex items-center gap-2 px-3 py-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
+              class="flex items-center gap-2 px-3 py-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-primary-200 dark:border-primary-700 rounded-lg transition-colors font-medium"
               @click="openBulkExpenseModal"
             >
               <QueueListIcon class="w-5 h-5" />
@@ -1278,10 +1278,10 @@ function getCategoryStyle(categoryName: string) {
 
         <!-- Empty State -->
         <div v-if="period.expenses.length === 0" class="text-center py-12">
-          <div class="w-16 h-16 bg-secondary-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <BanknotesIcon class="w-8 h-8 text-secondary-400" />
+          <div class="w-16 h-16 bg-secondary-50 dark:bg-secondary-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <BanknotesIcon class="w-8 h-8 text-secondary-400 dark:text-secondary-500" />
           </div>
-          <p class="text-secondary-500 mb-4">No expenses yet. Add your first expense to start tracking.</p>
+          <p class="text-secondary-500 dark:text-secondary-400 mb-4">No expenses yet. Add your first expense to start tracking.</p>
           <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all shadow-card hover:shadow-card-hover font-medium"
@@ -1291,7 +1291,7 @@ function getCategoryStyle(categoryName: string) {
               Add Expense
             </button>
             <button
-              class="flex items-center gap-2 px-5 py-2.5 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
+              class="flex items-center gap-2 px-5 py-2.5 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-primary-200 dark:border-primary-700 rounded-lg transition-colors font-medium"
               @click="openBulkExpenseModal"
             >
               <QueueListIcon class="w-5 h-5" />
@@ -1307,38 +1307,38 @@ function getCategoryStyle(categoryName: string) {
             <div
               v-for="group in expenseGroupStore.groups"
               :key="group.id"
-              class="border border-secondary-200 rounded-xl overflow-hidden"
+              class="border border-secondary-200 dark:border-secondary-600 rounded-xl overflow-hidden"
             >
               <!-- Group Header -->
               <div
-                class="flex items-center justify-between p-4 bg-secondary-50 cursor-pointer hover:bg-secondary-100 transition-colors"
+                class="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-900 cursor-pointer hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors"
                 @click="toggleGroupExpanded(group.id)"
               >
                 <div class="flex items-center gap-3">
                   <component
                     :is="expandedGroups.has(group.id) ? ChevronDownIcon : ChevronRightIcon"
-                    class="w-5 h-5 text-secondary-400"
+                    class="w-5 h-5 text-secondary-400 dark:text-secondary-500"
                   />
-                  <FolderIcon class="w-5 h-5 text-accent-500" />
+                  <FolderIcon class="w-5 h-5 text-accent-500 dark:text-accent-400" />
                   <div>
-                    <p class="font-medium text-secondary-900">{{ group.name }}</p>
-                    <p v-if="group.description" class="text-xs text-secondary-500">{{ group.description }}</p>
+                    <p class="font-medium text-secondary-900 dark:text-secondary-100">{{ group.name }}</p>
+                    <p v-if="group.description" class="text-xs text-secondary-500 dark:text-secondary-400">{{ group.description }}</p>
                   </div>
-                  <span class="px-2 py-0.5 bg-secondary-200 text-secondary-600 text-xs rounded-full">
+                  <span class="px-2 py-0.5 bg-secondary-200 dark:bg-secondary-700 text-secondary-600 dark:text-secondary-400 text-xs rounded-full">
                     {{ group.expenses.length }} expense{{ group.expenses.length === 1 ? '' : 's' }}
                   </span>
                 </div>
                 <div class="flex items-center gap-3">
-                  <p class="font-bold text-danger-600">{{ formatCurrency(getGroupTotal(group)) }}</p>
+                  <p class="font-bold text-danger-600 dark:text-danger-400">{{ formatCurrency(getGroupTotal(group)) }}</p>
                   <div class="flex gap-1" @click.stop>
                     <button
-                      class="p-1.5 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                      class="p-1.5 text-secondary-400 dark:text-secondary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                       @click="openEditGroupModal(group)"
                     >
                       <PencilIcon class="w-4 h-4" />
                     </button>
                     <button
-                      class="p-1.5 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                      class="p-1.5 text-secondary-400 dark:text-secondary-500 hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/50 rounded-lg transition-colors"
                       @click="confirmDeleteGroup(group)"
                     >
                       <TrashIcon class="w-4 h-4" />
@@ -1348,19 +1348,19 @@ function getCategoryStyle(categoryName: string) {
               </div>
 
               <!-- Group Expenses -->
-              <div v-if="expandedGroups.has(group.id)" class="border-t border-secondary-200">
-                <div v-if="group.expenses.length === 0" class="p-4 text-center text-secondary-400 text-sm">
+              <div v-if="expandedGroups.has(group.id)" class="border-t border-secondary-200 dark:border-secondary-600">
+                <div v-if="group.expenses.length === 0" class="p-4 text-center text-secondary-400 dark:text-secondary-500 text-sm">
                   No expenses in this group
                 </div>
-                <div v-else class="divide-y divide-secondary-100">
+                <div v-else class="divide-y divide-secondary-100 dark:divide-secondary-700">
                   <div
                     v-for="expense in group.expenses"
                     :key="expense.id"
-                    class="flex justify-between items-center p-4 hover:bg-secondary-50 transition-colors group"
+                    class="flex justify-between items-center p-4 hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors group"
                   >
                     <div class="flex-1">
                       <div class="flex items-center gap-3">
-                        <p class="font-medium text-secondary-900">{{ expense.name }}</p>
+                        <p class="font-medium text-secondary-900 dark:text-secondary-100">{{ expense.name }}</p>
                         <span
                           class="px-2.5 py-0.5 rounded-full text-xs font-medium"
                           :class="[getCategoryStyle(expense.category.name).bg, getCategoryStyle(expense.category.name).text]"
@@ -1368,26 +1368,26 @@ function getCategoryStyle(categoryName: string) {
                           {{ expense.category.name }}
                         </span>
                       </div>
-                      <p v-if="expense.description" class="text-sm text-secondary-500 mt-1">{{ expense.description }}</p>
+                      <p v-if="expense.description" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">{{ expense.description }}</p>
                     </div>
                     <div class="flex items-center gap-4">
-                      <p class="font-bold text-danger-600">{{ formatCurrency(expense.amount) }}</p>
+                      <p class="font-bold text-danger-600 dark:text-danger-400">{{ formatCurrency(expense.amount) }}</p>
                       <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
-                          class="p-2 text-secondary-400 hover:text-accent-600 hover:bg-accent-50 rounded-lg transition-colors"
+                          class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-accent-600 dark:hover:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/50 rounded-lg transition-colors"
                           title="Move to another group"
                           @click="openMoveExpenseModal(expense)"
                         >
                           <ArrowsRightLeftIcon class="w-4 h-4" />
                         </button>
                         <button
-                          class="p-2 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                          class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                           @click="openEditExpense(expense)"
                         >
                           <PencilIcon class="w-4 h-4" />
                         </button>
                         <button
-                          class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                          class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/50 rounded-lg transition-colors"
                           @click="confirmDeleteExpense(expense)"
                         >
                           <TrashIcon class="w-4 h-4" />
@@ -1402,17 +1402,17 @@ function getCategoryStyle(categoryName: string) {
 
           <!-- Ungrouped Expenses -->
           <div v-if="ungroupedExpenses.length > 0" class="space-y-3">
-            <p v-if="expenseGroupStore.groups.length > 0" class="text-sm font-medium text-secondary-500 mt-4">
+            <p v-if="expenseGroupStore.groups.length > 0" class="text-sm font-medium text-secondary-500 dark:text-secondary-400 mt-4">
               Ungrouped Expenses
             </p>
             <div
               v-for="expense in ungroupedExpenses"
               :key="expense.id"
-              class="flex justify-between items-center p-4 bg-secondary-50 rounded-xl hover:bg-secondary-100 transition-colors group"
+              class="flex justify-between items-center p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors group"
             >
               <div class="flex-1">
                 <div class="flex items-center gap-3">
-                  <p class="font-medium text-secondary-900">{{ expense.name }}</p>
+                  <p class="font-medium text-secondary-900 dark:text-secondary-100">{{ expense.name }}</p>
                   <span
                     class="px-2.5 py-0.5 rounded-full text-xs font-medium"
                     :class="[getCategoryStyle(expense.category.name).bg, getCategoryStyle(expense.category.name).text]"
@@ -1420,27 +1420,27 @@ function getCategoryStyle(categoryName: string) {
                     {{ expense.category.name }}
                   </span>
                 </div>
-                <p v-if="expense.description" class="text-sm text-secondary-500 mt-1">{{ expense.description }}</p>
+                <p v-if="expense.description" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">{{ expense.description }}</p>
               </div>
               <div class="flex items-center gap-4">
-                <p class="font-bold text-danger-600 text-lg">{{ formatCurrency(expense.amount) }}</p>
+                <p class="font-bold text-danger-600 dark:text-danger-400 text-lg">{{ formatCurrency(expense.amount) }}</p>
                 <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     v-if="expenseGroupStore.groups.length > 0"
-                    class="p-2 text-secondary-400 hover:text-accent-600 hover:bg-accent-50 rounded-lg transition-colors"
+                    class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-accent-600 dark:hover:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/50 rounded-lg transition-colors"
                     title="Move to a group"
                     @click="openMoveExpenseModal(expense)"
                   >
                     <ArrowsRightLeftIcon class="w-4 h-4" />
                   </button>
                   <button
-                    class="p-2 text-secondary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                    class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                     @click="openEditExpense(expense)"
                   >
                     <PencilIcon class="w-4 h-4" />
                   </button>
                   <button
-                    class="p-2 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                    class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/50 rounded-lg transition-colors"
                     @click="confirmDeleteExpense(expense)"
                   >
                     <TrashIcon class="w-4 h-4" />
@@ -1457,19 +1457,19 @@ function getCategoryStyle(categoryName: string) {
     <Teleport to="body">
       <div
         v-if="showExpenseModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showExpenseModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
-              <CreditCardIcon class="w-6 h-6 text-primary-600" />
+            <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/50 rounded-xl flex items-center justify-center">
+              <CreditCardIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
                 {{ editingExpense ? 'Edit Expense' : 'Add Expense' }}
               </h2>
-              <p class="text-sm text-secondary-500">{{ editingExpense ? 'Update expense details' : 'Track a new expense' }}</p>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">{{ editingExpense ? 'Update expense details' : 'Track a new expense' }}</p>
             </div>
           </div>
 
@@ -1515,13 +1515,13 @@ function getCategoryStyle(categoryName: string) {
               </UiBaseSelect>
 
               <div v-if="showNewCategoryInput" class="space-y-2">
-                <label class="text-sm font-medium text-secondary-700">New Category</label>
+                <label class="text-sm font-medium text-secondary-700 dark:text-secondary-300">New Category</label>
                 <div class="flex gap-2">
                   <input
                     v-model="newCategoryName"
                     type="text"
                     placeholder="Category name"
-                    class="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    class="flex-1 px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                     @keyup.enter="handleCreateCategory"
                   />
                   <button
@@ -1535,7 +1535,7 @@ function getCategoryStyle(categoryName: string) {
                   </button>
                   <button
                     type="button"
-                    class="px-4 py-2 text-secondary-600 hover:bg-secondary-50 border border-secondary-200 rounded-lg transition-colors"
+                    class="px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
                     @click="cancelNewCategory"
                   >
                     Cancel
@@ -1546,7 +1546,7 @@ function getCategoryStyle(categoryName: string) {
               <button
                 v-if="!showNewCategoryInput"
                 type="button"
-                class="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                class="flex items-center gap-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
                 @click="showNewCategoryInput = true"
               >
                 <PlusIcon class="w-4 h-4" />
@@ -1572,13 +1572,13 @@ function getCategoryStyle(categoryName: string) {
               </UiBaseSelect>
 
               <div v-if="showNewGroupInput" class="space-y-2">
-                <label class="text-sm font-medium text-secondary-700">New Group</label>
+                <label class="text-sm font-medium text-secondary-700 dark:text-secondary-300">New Group</label>
                 <div class="flex gap-2">
                   <input
                     v-model="newGroupName"
                     type="text"
                     placeholder="Group name"
-                    class="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
+                    class="flex-1 px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                     @keyup.enter.prevent="handleCreateGroupInline"
                   />
                   <button
@@ -1592,7 +1592,7 @@ function getCategoryStyle(categoryName: string) {
                   </button>
                   <button
                     type="button"
-                    class="px-4 py-2 text-secondary-600 hover:bg-secondary-50 border border-secondary-200 rounded-lg transition-colors"
+                    class="px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
                     @click="cancelNewGroup"
                   >
                     Cancel
@@ -1603,7 +1603,7 @@ function getCategoryStyle(categoryName: string) {
               <button
                 v-if="!showNewGroupInput"
                 type="button"
-                class="flex items-center gap-1 text-sm text-accent-600 hover:text-accent-700 font-medium"
+                class="flex items-center gap-1 text-sm text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 font-medium"
                 @click="showNewGroupInput = true"
               >
                 <FolderPlusIcon class="w-4 h-4" />
@@ -1611,10 +1611,10 @@ function getCategoryStyle(categoryName: string) {
               </button>
             </div>
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
               <button
                 type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
                 @click="showExpenseModal = false"
               >
                 Cancel
@@ -1638,17 +1638,17 @@ function getCategoryStyle(categoryName: string) {
     <Teleport to="body">
       <div
         v-if="showEditPeriodModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showEditPeriodModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
-              <PencilIcon class="w-6 h-6 text-primary-600" />
+            <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/50 rounded-xl flex items-center justify-center">
+              <PencilIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">Edit Budget Period</h2>
-              <p class="text-sm text-secondary-500">Update period details</p>
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">Edit Budget Period</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Update period details</p>
             </div>
           </div>
 
@@ -1677,16 +1677,16 @@ function getCategoryStyle(categoryName: string) {
             </div>
 
             <!-- Info about managing income -->
-            <div class="bg-secondary-50 rounded-lg p-4">
-              <p class="text-sm text-secondary-600">
+            <div class="bg-secondary-50 dark:bg-secondary-900 rounded-lg p-4">
+              <p class="text-sm text-secondary-600 dark:text-secondary-400">
                 <span class="font-medium">Note:</span> To manage income sources, use the Income Sources section on this page.
               </p>
             </div>
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
               <button
                 type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
                 @click="showEditPeriodModal = false"
               >
                 Cancel
@@ -1710,17 +1710,17 @@ function getCategoryStyle(categoryName: string) {
     <Teleport to="body">
       <div
         v-if="showDuplicateModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showDuplicateModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
-              <DocumentDuplicateIcon class="w-6 h-6 text-primary-600" />
+            <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/50 rounded-xl flex items-center justify-center">
+              <DocumentDuplicateIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">Duplicate Budget Period</h2>
-              <p class="text-sm text-secondary-500">Create a copy with the same expenses and incomes</p>
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">Duplicate Budget Period</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Create a copy with the same expenses and incomes</p>
             </div>
           </div>
 
@@ -1749,25 +1749,25 @@ function getCategoryStyle(categoryName: string) {
             </div>
 
             <!-- What will be duplicated info -->
-            <div class="bg-secondary-50 rounded-lg p-4 space-y-2">
-              <p class="text-sm font-medium text-secondary-700">What will be copied:</p>
-              <ul class="text-sm text-secondary-600 space-y-1">
+            <div class="bg-secondary-50 dark:bg-secondary-900 rounded-lg p-4 space-y-2">
+              <p class="text-sm font-medium text-secondary-700 dark:text-secondary-300">What will be copied:</p>
+              <ul class="text-sm text-secondary-600 dark:text-secondary-400 space-y-1">
                 <li class="flex items-center gap-2">
-                  <ArrowTrendingUpIcon class="w-4 h-4 text-success-500" />
+                  <ArrowTrendingUpIcon class="w-4 h-4 text-success-500 dark:text-success-400" />
                   {{ period?.incomes?.length || 0 }} income source{{ (period?.incomes?.length || 0) === 1 ? '' : 's' }}
-                  <span class="text-success-600 font-medium">({{ formatCurrency(totalIncome) }})</span>
+                  <span class="text-success-600 dark:text-success-400 font-medium">({{ formatCurrency(totalIncome) }})</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <CreditCardIcon class="w-4 h-4 text-danger-500" />
+                  <CreditCardIcon class="w-4 h-4 text-danger-500 dark:text-danger-400" />
                   {{ period?.expenses?.length || 0 }} expense{{ (period?.expenses?.length || 0) === 1 ? '' : 's' }}
                 </li>
               </ul>
             </div>
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
               <button
                 type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
                 @click="showDuplicateModal = false"
               >
                 Cancel
@@ -1791,28 +1791,28 @@ function getCategoryStyle(categoryName: string) {
     <Teleport to="body">
       <div
         v-if="showDeleteConfirm"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showDeleteConfirm = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-danger-50 rounded-xl flex items-center justify-center">
-              <ExclamationTriangleIcon class="w-6 h-6 text-danger-600" />
+            <div class="w-12 h-12 bg-danger-50 dark:bg-danger-900/50 rounded-xl flex items-center justify-center">
+              <ExclamationTriangleIcon class="w-6 h-6 text-danger-600 dark:text-danger-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">Delete Budget Period</h2>
-              <p class="text-sm text-secondary-500">This action cannot be undone</p>
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">Delete Budget Period</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">This action cannot be undone</p>
             </div>
           </div>
 
-          <p class="text-secondary-600 mb-6">
+          <p class="text-secondary-600 dark:text-secondary-400 mb-6">
             Are you sure you want to delete this budget period? This will also delete all associated expenses.
           </p>
 
-          <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+          <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
             <button
               type="button"
-              class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+              class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
               @click="showDeleteConfirm = false"
             >
               Cancel
@@ -1868,21 +1868,21 @@ function getCategoryStyle(categoryName: string) {
     <Teleport to="body">
       <div
         v-if="showBulkExpenseModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showBulkExpenseModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
-              <QueueListIcon class="w-6 h-6 text-primary-600" />
+            <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/50 rounded-xl flex items-center justify-center">
+              <QueueListIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div class="flex-1">
-              <h2 class="text-xl font-semibold text-secondary-900">Add Multiple Expenses</h2>
-              <p class="text-sm text-secondary-500">Add several expenses at once</p>
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">Add Multiple Expenses</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Add several expenses at once</p>
             </div>
             <button
               type="button"
-              class="p-2 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 rounded-lg transition-colors"
+              class="p-2 text-secondary-400 dark:text-secondary-500 hover:text-secondary-600 dark:hover:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded-lg transition-colors"
               @click="showBulkExpenseModal = false"
             >
               <XMarkIcon class="w-5 h-5" />
@@ -1893,14 +1893,14 @@ function getCategoryStyle(categoryName: string) {
 
           <form @submit.prevent="handleBulkExpenseSubmit" class="space-y-4">
             <!-- Category Creation -->
-            <div v-if="showBulkNewCategoryInput" class="bg-secondary-50 rounded-xl p-4 mb-4">
-              <label class="text-sm font-medium text-secondary-700 mb-2 block">Create New Category</label>
+            <div v-if="showBulkNewCategoryInput" class="bg-secondary-50 dark:bg-secondary-900 rounded-xl p-4 mb-4">
+              <label class="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2 block">Create New Category</label>
               <div class="flex gap-2">
                 <input
                   v-model="bulkNewCategoryName"
                   type="text"
                   placeholder="Category name"
-                  class="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  class="flex-1 px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                   @keyup.enter="handleBulkCreateCategory"
                 />
                 <button
@@ -1914,7 +1914,7 @@ function getCategoryStyle(categoryName: string) {
                 </button>
                 <button
                   type="button"
-                  class="px-4 py-2 text-secondary-600 hover:bg-secondary-100 border border-secondary-200 rounded-lg transition-colors"
+                  class="px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-100 dark:hover:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
                   @click="cancelBulkNewCategory"
                 >
                   Cancel
@@ -1925,7 +1925,7 @@ function getCategoryStyle(categoryName: string) {
             <button
               v-if="!showBulkNewCategoryInput"
               type="button"
-              class="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium mb-4"
+              class="flex items-center gap-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium mb-4"
               @click="showBulkNewCategoryInput = true"
             >
               <PlusIcon class="w-4 h-4" />
@@ -1933,14 +1933,14 @@ function getCategoryStyle(categoryName: string) {
             </button>
 
             <!-- Group Creation -->
-            <div v-if="showBulkNewGroupInput" class="bg-accent-50 rounded-xl p-4 mb-4">
-              <label class="text-sm font-medium text-secondary-700 mb-2 block">Create New Group</label>
+            <div v-if="showBulkNewGroupInput" class="bg-accent-50 dark:bg-accent-900/30 rounded-xl p-4 mb-4">
+              <label class="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2 block">Create New Group</label>
               <div class="flex gap-2">
                 <input
                   v-model="bulkNewGroupName"
                   type="text"
                   placeholder="Group name"
-                  class="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
+                  class="flex-1 px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                   @keyup.enter.prevent="handleBulkCreateGroup"
                 />
                 <button
@@ -1954,7 +1954,7 @@ function getCategoryStyle(categoryName: string) {
                 </button>
                 <button
                   type="button"
-                  class="px-4 py-2 text-secondary-600 hover:bg-secondary-100 border border-secondary-200 rounded-lg transition-colors"
+                  class="px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-100 dark:hover:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
                   @click="cancelBulkNewGroup"
                 >
                   Cancel
@@ -1965,7 +1965,7 @@ function getCategoryStyle(categoryName: string) {
             <button
               v-if="!showBulkNewGroupInput"
               type="button"
-              class="flex items-center gap-1 text-sm text-accent-600 hover:text-accent-700 font-medium mb-4"
+              class="flex items-center gap-1 text-sm text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 font-medium mb-4"
               @click="showBulkNewGroupInput = true"
             >
               <FolderPlusIcon class="w-4 h-4" />
@@ -1977,14 +1977,14 @@ function getCategoryStyle(categoryName: string) {
               <div
                 v-for="(expense, index) in bulkExpenses"
                 :key="index"
-                class="bg-secondary-50 rounded-xl p-4"
+                class="bg-secondary-50 dark:bg-secondary-900 rounded-xl p-4"
               >
                 <div class="flex items-center justify-between mb-3">
-                  <span class="text-sm font-medium text-secondary-600">Expense {{ index + 1 }}</span>
+                  <span class="text-sm font-medium text-secondary-600 dark:text-secondary-400">Expense {{ index + 1 }}</span>
                   <button
                     v-if="bulkExpenses.length > 1"
                     type="button"
-                    class="p-1 text-secondary-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                    class="p-1 text-secondary-400 dark:text-secondary-500 hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/50 rounded-lg transition-colors"
                     @click="removeBulkExpenseRow(index)"
                   >
                     <XMarkIcon class="w-4 h-4" />
@@ -1996,14 +1996,14 @@ function getCategoryStyle(categoryName: string) {
                     v-model="expense.name"
                     type="text"
                     placeholder="Expense name *"
-                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                    class="px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                   />
 
                   <input
                     v-model="expense.description"
                     type="text"
                     placeholder="Description (optional)"
-                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                    class="px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                   />
 
                   <input
@@ -2012,12 +2012,12 @@ function getCategoryStyle(categoryName: string) {
                     step="0.01"
                     min="0"
                     placeholder="Amount *"
-                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                    class="px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                   />
 
                   <select
                     v-model="expense.categoryId"
-                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm bg-white"
+                    class="px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                   >
                     <option value="" disabled>Category *</option>
                     <option
@@ -2031,7 +2031,7 @@ function getCategoryStyle(categoryName: string) {
 
                   <select
                     v-model="expense.expenseGroupId"
-                    class="px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent text-sm bg-white"
+                    class="px-3 py-2 border border-secondary-200 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent text-sm bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100"
                   >
                     <option value="">No group</option>
                     <option
@@ -2049,7 +2049,7 @@ function getCategoryStyle(categoryName: string) {
             <!-- Add Row Button -->
             <button
               type="button"
-              class="flex items-center gap-2 w-full justify-center py-3 border-2 border-dashed border-secondary-300 hover:border-primary-400 text-secondary-500 hover:text-primary-600 rounded-xl transition-colors"
+              class="flex items-center gap-2 w-full justify-center py-3 border-2 border-dashed border-secondary-300 dark:border-secondary-600 hover:border-primary-400 dark:hover:border-primary-500 text-secondary-500 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-xl transition-colors"
               @click="addBulkExpenseRow"
             >
               <PlusIcon class="w-5 h-5" />
@@ -2057,23 +2057,23 @@ function getCategoryStyle(categoryName: string) {
             </button>
 
             <!-- Summary -->
-            <div class="bg-primary-50 rounded-xl p-4 flex justify-between items-center">
+            <div class="bg-primary-50 dark:bg-primary-900/50 rounded-xl p-4 flex justify-between items-center">
               <div>
-                <p class="text-sm text-secondary-600">
+                <p class="text-sm text-secondary-600 dark:text-secondary-400">
                   <span class="font-medium">{{ validBulkExpensesCount }}</span> valid expense{{ validBulkExpensesCount === 1 ? '' : 's' }}
                 </p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-secondary-500">Total</p>
-                <p class="text-xl font-bold text-primary-600">{{ formatCurrency(bulkExpensesTotal) }}</p>
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">Total</p>
+                <p class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ formatCurrency(bulkExpensesTotal) }}</p>
               </div>
             </div>
 
             <!-- Actions -->
-            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
               <button
                 type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
                 @click="showBulkExpenseModal = false"
               >
                 Cancel
@@ -2097,19 +2097,19 @@ function getCategoryStyle(categoryName: string) {
     <Teleport to="body">
       <div
         v-if="showGroupModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showGroupModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-accent-50 rounded-xl flex items-center justify-center">
-              <FolderIcon class="w-6 h-6 text-accent-600" />
+            <div class="w-12 h-12 bg-accent-50 dark:bg-accent-900/50 rounded-xl flex items-center justify-center">
+              <FolderIcon class="w-6 h-6 text-accent-600 dark:text-accent-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
                 {{ editingGroup ? 'Edit Group' : 'Create Group' }}
               </h2>
-              <p class="text-sm text-secondary-500">
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">
                 {{ editingGroup ? 'Update group details' : 'Organize your expenses into groups' }}
               </p>
             </div>
@@ -2131,10 +2131,10 @@ function getCategoryStyle(categoryName: string) {
               placeholder="Brief description of this group"
             />
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
               <button
                 type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
                 @click="showGroupModal = false"
               >
                 Cancel
@@ -2158,17 +2158,17 @@ function getCategoryStyle(categoryName: string) {
     <Teleport to="body">
       <div
         v-if="showMoveExpenseModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showMoveExpenseModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-accent-50 rounded-xl flex items-center justify-center">
-              <ArrowsRightLeftIcon class="w-6 h-6 text-accent-600" />
+            <div class="w-12 h-12 bg-accent-50 dark:bg-accent-900/50 rounded-xl flex items-center justify-center">
+              <ArrowsRightLeftIcon class="w-6 h-6 text-accent-600 dark:text-accent-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">Move Expense</h2>
-              <p class="text-sm text-secondary-500">
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">Move Expense</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">
                 Move "{{ selectedExpenseForMove?.name }}" to a group
               </p>
             </div>
@@ -2181,15 +2181,15 @@ function getCategoryStyle(categoryName: string) {
             <button
               v-if="selectedExpenseForMove?.expenseGroupId"
               type="button"
-              class="w-full flex items-center gap-3 p-4 border border-secondary-200 rounded-xl hover:bg-secondary-50 transition-colors text-left"
+              class="w-full flex items-center gap-3 p-4 border border-secondary-200 dark:border-secondary-600 rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors text-left"
               @click="handleMoveExpense(null)"
             >
-              <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center">
-                <XMarkIcon class="w-5 h-5 text-secondary-500" />
+              <div class="w-10 h-10 bg-secondary-100 dark:bg-secondary-700 rounded-lg flex items-center justify-center">
+                <XMarkIcon class="w-5 h-5 text-secondary-500 dark:text-secondary-400" />
               </div>
               <div>
-                <p class="font-medium text-secondary-900">Remove from group</p>
-                <p class="text-sm text-secondary-500">Move to ungrouped expenses</p>
+                <p class="font-medium text-secondary-900 dark:text-secondary-100">Remove from group</p>
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">Move to ungrouped expenses</p>
               </div>
             </button>
 
@@ -2198,27 +2198,27 @@ function getCategoryStyle(categoryName: string) {
               v-for="group in expenseGroupStore.groups.filter(g => g.id !== selectedExpenseForMove?.expenseGroupId)"
               :key="group.id"
               type="button"
-              class="w-full flex items-center gap-3 p-4 border border-secondary-200 rounded-xl hover:bg-accent-50 hover:border-accent-300 transition-colors text-left"
+              class="w-full flex items-center gap-3 p-4 border border-secondary-200 dark:border-secondary-600 rounded-xl hover:bg-accent-50 dark:hover:bg-accent-900/50 hover:border-accent-300 dark:hover:border-accent-700 transition-colors text-left"
               @click="handleMoveExpense(group.id)"
             >
-              <div class="w-10 h-10 bg-accent-50 rounded-lg flex items-center justify-center">
-                <FolderIcon class="w-5 h-5 text-accent-500" />
+              <div class="w-10 h-10 bg-accent-50 dark:bg-accent-900/50 rounded-lg flex items-center justify-center">
+                <FolderIcon class="w-5 h-5 text-accent-500 dark:text-accent-400" />
               </div>
               <div class="flex-1">
-                <p class="font-medium text-secondary-900">{{ group.name }}</p>
-                <p class="text-sm text-secondary-500">{{ group.expenses.length }} expense{{ group.expenses.length === 1 ? '' : 's' }}</p>
+                <p class="font-medium text-secondary-900 dark:text-secondary-100">{{ group.name }}</p>
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">{{ group.expenses.length }} expense{{ group.expenses.length === 1 ? '' : 's' }}</p>
               </div>
             </button>
 
-            <div v-if="expenseGroupStore.groups.length === 0" class="text-center py-6 text-secondary-500">
+            <div v-if="expenseGroupStore.groups.length === 0" class="text-center py-6 text-secondary-500 dark:text-secondary-400">
               No groups available. Create a group first.
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-4 mt-4 border-t border-secondary-100">
+          <div class="flex justify-end gap-3 pt-4 mt-4 border-t border-secondary-100 dark:border-secondary-700">
             <button
               type="button"
-              class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+              class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
               @click="showMoveExpenseModal = false"
             >
               Cancel
@@ -2232,19 +2232,19 @@ function getCategoryStyle(categoryName: string) {
     <Teleport to="body">
       <div
         v-if="showIncomeModal"
-        class="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="showIncomeModal = false"
       >
-        <div class="bg-white rounded-2xl shadow-elevated max-w-md w-full p-6">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-md w-full p-6">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-success-50 rounded-xl flex items-center justify-center">
-              <ArrowTrendingUpIcon class="w-6 h-6 text-success-600" />
+            <div class="w-12 h-12 bg-success-50 dark:bg-success-900/50 rounded-xl flex items-center justify-center">
+              <ArrowTrendingUpIcon class="w-6 h-6 text-success-600 dark:text-success-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-secondary-900">
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
                 {{ editingIncome ? 'Edit Income' : 'Add Income Source' }}
               </h2>
-              <p class="text-sm text-secondary-500">{{ editingIncome ? 'Update income details' : 'Track a new income source' }}</p>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">{{ editingIncome ? 'Update income details' : 'Track a new income source' }}</p>
             </div>
           </div>
 
@@ -2272,10 +2272,10 @@ function getCategoryStyle(categoryName: string) {
               required
             />
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100">
+            <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
               <button
                 type="button"
-                class="px-5 py-2.5 text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50 rounded-lg transition-colors font-medium"
+                class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-lg transition-colors font-medium"
                 @click="showIncomeModal = false"
               >
                 Cancel

@@ -156,42 +156,42 @@ function getCategoryBarColor(category: string) {
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
     <!-- Welcome Header -->
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-secondary-900">
+      <h1 class="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
         Welcome back, {{ authStore.user?.name?.split(" ")[0] }}
       </h1>
-      <p class="text-secondary-500 mt-1">Here's your financial overview</p>
+      <p class="text-secondary-500 dark:text-secondary-400 mt-1">Here's your financial overview</p>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading && !hasData" class="text-center py-16">
       <div
-        class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"
+        class="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin mx-auto mb-4"
       ></div>
-      <p class="text-secondary-500">Loading your financial data...</p>
+      <p class="text-secondary-500 dark:text-secondary-400">Loading your financial data...</p>
     </div>
 
     <!-- Empty State (First-Time User) -->
     <div v-else-if="!hasData && budgetPeriodsCount === 0" class="py-8">
       <div
-        class="bg-white rounded-2xl shadow-card border border-secondary-100 p-8 md:p-12 max-w-2xl mx-auto text-center"
+        class="bg-white dark:bg-secondary-800 rounded-2xl shadow-card border border-secondary-100 dark:border-secondary-700 p-8 md:p-12 max-w-2xl mx-auto text-center"
       >
         <div
-          class="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6"
+          class="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/50 dark:to-primary-800/50 rounded-2xl flex items-center justify-center mx-auto mb-6"
         >
-          <RocketLaunchIcon class="w-10 h-10 text-primary-600" />
+          <RocketLaunchIcon class="w-10 h-10 text-primary-600 dark:text-primary-400" />
         </div>
 
-        <h2 class="text-2xl font-bold text-secondary-900 mb-3">
+        <h2 class="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-3">
           Welcome to Prospera!
         </h2>
-        <p class="text-secondary-500 mb-8 max-w-md mx-auto">
+        <p class="text-secondary-500 dark:text-secondary-400 mb-8 max-w-md mx-auto">
           Your financial dashboard will come to life once you create your first
           budget period. Let's get started!
         </p>
 
         <!-- Getting Started Steps -->
-        <div class="bg-secondary-50 rounded-xl p-6 mb-8 text-left">
-          <h3 class="font-semibold text-secondary-900 mb-4 text-center">
+        <div class="bg-secondary-50 dark:bg-secondary-900 rounded-xl p-6 mb-8 text-left">
+          <h3 class="font-semibold text-secondary-900 dark:text-secondary-100 mb-4 text-center">
             How to get started
           </h3>
           <div class="space-y-4">
@@ -202,10 +202,10 @@ function getCategoryBarColor(category: string) {
                 1
               </div>
               <div>
-                <p class="font-medium text-secondary-900">
+                <p class="font-medium text-secondary-900 dark:text-secondary-100">
                   Create a Budget Period
                 </p>
-                <p class="text-sm text-secondary-500">
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">
                   A budget period represents a time range (like a month) where you
                   track your income and expenses.
                 </p>
@@ -218,8 +218,8 @@ function getCategoryBarColor(category: string) {
                 2
               </div>
               <div>
-                <p class="font-medium text-secondary-900">Add Your Income</p>
-                <p class="text-sm text-secondary-500">
+                <p class="font-medium text-secondary-900 dark:text-secondary-100">Add Your Income</p>
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">
                   Record your earnings from jobs, freelance work, or other
                   sources.
                 </p>
@@ -232,8 +232,8 @@ function getCategoryBarColor(category: string) {
                 3
               </div>
               <div>
-                <p class="font-medium text-secondary-900">Track Your Expenses</p>
-                <p class="text-sm text-secondary-500">
+                <p class="font-medium text-secondary-900 dark:text-secondary-100">Track Your Expenses</p>
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">
                   Log your spending to see where your money goes and find ways to
                   save.
                 </p>
@@ -251,12 +251,12 @@ function getCategoryBarColor(category: string) {
           </button>
         </NuxtLink>
 
-        <div class="mt-6 pt-6 border-t border-secondary-200">
-          <p class="text-sm text-secondary-400">
+        <div class="mt-6 pt-6 border-t border-secondary-200 dark:border-secondary-700">
+          <p class="text-sm text-secondary-400 dark:text-secondary-500">
             Looking for simple item lists?
             <NuxtLink
               to="/personal-budgets"
-              class="text-primary-600 hover:text-primary-700 font-medium"
+              class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
             >
               Try Personal Budgets
             </NuxtLink>
@@ -282,7 +282,7 @@ function getCategoryBarColor(category: string) {
       <div class="overflow-hidden">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <h2
-            class="text-lg font-semibold text-secondary-800 flex items-center gap-2"
+            class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 flex items-center gap-2"
           >
             <SparklesIcon class="w-5 h-5 text-accent-500" />
             Financial Summary
@@ -291,7 +291,7 @@ function getCategoryBarColor(category: string) {
             <CalendarIcon class="w-4 h-4 text-secondary-400 flex-shrink-0" />
             <select
               v-model="startYear"
-              class="px-2 py-1.5 bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-700 text-sm min-w-0"
+              class="px-2 py-1.5 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-700 dark:text-secondary-300 text-sm min-w-0"
             >
               <option v-for="year in availableYears" :key="year" :value="year">
                 {{ year }}
@@ -300,7 +300,7 @@ function getCategoryBarColor(category: string) {
             <span class="text-secondary-400">to</span>
             <select
               v-model="endYear"
-              class="px-2 py-1.5 bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-700 text-sm min-w-0"
+              class="px-2 py-1.5 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-700 dark:text-secondary-300 text-sm min-w-0"
             >
               <option
                 v-for="year in availableEndYears"
@@ -364,15 +364,15 @@ function getCategoryBarColor(category: string) {
       <div v-if="nonZeroMonthlyData.length > 0" class="space-y-6 overflow-hidden">
         <!-- Monthly Income vs Expenses -->
         <div
-          class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 overflow-hidden"
+          class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 overflow-hidden"
         >
           <h2
-            class="text-lg font-semibold text-secondary-800 mb-2 flex items-center gap-2"
+            class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-2 flex items-center gap-2"
           >
             <ChartBarIcon class="w-5 h-5 text-primary-500" />
             Monthly Income vs Expenses
           </h2>
-          <p class="text-sm text-secondary-500 mb-5">
+          <p class="text-sm text-secondary-500 dark:text-secondary-400 mb-5">
             See how your income compares to expenses each month
           </p>
           <ClientOnly>
@@ -382,10 +382,10 @@ function getCategoryBarColor(category: string) {
             />
             <template #fallback>
               <div
-                class="h-80 flex items-center justify-center bg-secondary-50 rounded-xl"
+                class="h-80 flex items-center justify-center bg-secondary-50 dark:bg-secondary-900 rounded-xl"
               >
                 <div
-                  class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"
+                  class="w-8 h-8 border-3 border-primary-200 dark:border-primary-800 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"
                 ></div>
               </div>
             </template>
@@ -395,15 +395,15 @@ function getCategoryBarColor(category: string) {
         <!-- Savings Trend and Category Breakdown -->
         <div class="grid lg:grid-cols-2 gap-6">
           <div
-            class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 overflow-hidden"
+            class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 overflow-hidden"
           >
             <h2
-              class="text-lg font-semibold text-secondary-800 mb-2 flex items-center gap-2"
+              class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-2 flex items-center gap-2"
             >
               <ArrowTrendingUpIcon class="w-5 h-5 text-primary-500" />
               Savings Trend
             </h2>
-            <p class="text-sm text-secondary-500 mb-5">
+            <p class="text-sm text-secondary-500 dark:text-secondary-400 mb-5">
               Track how much you're saving over time
             </p>
             <ClientOnly>
@@ -413,10 +413,10 @@ function getCategoryBarColor(category: string) {
               />
               <template #fallback>
                 <div
-                  class="h-80 flex items-center justify-center bg-secondary-50 rounded-xl"
+                  class="h-80 flex items-center justify-center bg-secondary-50 dark:bg-secondary-900 rounded-xl"
                 >
                   <div
-                    class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"
+                    class="w-8 h-8 border-3 border-primary-200 dark:border-primary-800 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"
                   ></div>
                 </div>
               </template>
@@ -424,15 +424,15 @@ function getCategoryBarColor(category: string) {
           </div>
 
           <div
-            class="bg-white rounded-xl shadow-card border border-secondary-100 p-6 overflow-hidden"
+            class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 overflow-hidden"
           >
             <h2
-              class="text-lg font-semibold text-secondary-800 mb-2 flex items-center gap-2"
+              class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-2 flex items-center gap-2"
             >
               <ChartPieIcon class="w-5 h-5 text-primary-500" />
               Expenses by Category
             </h2>
-            <p class="text-sm text-secondary-500 mb-5">
+            <p class="text-sm text-secondary-500 dark:text-secondary-400 mb-5">
               Understand where your money goes
             </p>
             <ClientOnly>
@@ -443,10 +443,10 @@ function getCategoryBarColor(category: string) {
               />
               <template #fallback>
                 <div
-                  class="h-80 flex items-center justify-center bg-secondary-50 rounded-xl"
+                  class="h-80 flex items-center justify-center bg-secondary-50 dark:bg-secondary-900 rounded-xl"
                 >
                   <div
-                    class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"
+                    class="w-8 h-8 border-3 border-primary-200 dark:border-primary-800 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"
                   ></div>
                 </div>
               </template>
@@ -457,10 +457,10 @@ function getCategoryBarColor(category: string) {
         <!-- Category Breakdown Table -->
         <div
           v-if="metrics && Object.keys(metrics.expensesByCategory).length > 0"
-          class="bg-white rounded-xl shadow-card border border-secondary-100 p-6"
+          class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6"
         >
           <h2
-            class="text-lg font-semibold text-secondary-800 mb-5 flex items-center gap-2"
+            class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-5 flex items-center gap-2"
           >
             <TagIcon class="w-5 h-5 text-primary-500" />
             Category Breakdown
@@ -473,25 +473,25 @@ function getCategoryBarColor(category: string) {
             >
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
-                  <span class="font-medium text-secondary-900">{{
+                  <span class="font-medium text-secondary-900 dark:text-secondary-100">{{
                     category
                   }}</span>
-                  <span class="text-sm text-secondary-400"
+                  <span class="text-sm text-secondary-400 dark:text-secondary-500"
                     >({{ data.count }} expense{{
                       data.count === 1 ? "" : "s"
                     }})</span
                   >
                 </div>
                 <div class="text-right">
-                  <span class="font-semibold text-secondary-900">{{
+                  <span class="font-semibold text-secondary-900 dark:text-secondary-100">{{
                     formatCurrency(data.total)
                   }}</span>
-                  <span class="text-sm text-primary-600 ml-2 font-medium">
+                  <span class="text-sm text-primary-600 dark:text-primary-400 ml-2 font-medium">
                     {{ ((data.total / metrics.totalExpenses) * 100).toFixed(1) }}%
                   </span>
                 </div>
               </div>
-              <div class="h-2 bg-secondary-100 rounded-full overflow-hidden">
+              <div class="h-2 bg-secondary-100 dark:bg-secondary-700 rounded-full overflow-hidden">
                 <div
                   class="h-full transition-all duration-500"
                   :class="getCategoryBarColor(String(category))"
@@ -508,7 +508,7 @@ function getCategoryBarColor(category: string) {
       <!-- Quick Actions -->
       <div>
         <h2
-          class="text-lg font-semibold text-secondary-800 mb-5 flex items-center gap-2"
+          class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-5 flex items-center gap-2"
         >
           Quick Actions
         </h2>

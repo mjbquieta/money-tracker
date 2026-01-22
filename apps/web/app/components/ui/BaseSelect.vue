@@ -25,7 +25,7 @@ function handleChange(event: Event) {
 
 <template>
   <div class="flex flex-col gap-1">
-    <label v-if="props.label" class="text-sm font-medium text-gray-700">
+    <label v-if="props.label" class="text-sm font-medium text-gray-700 dark:text-gray-300">
       {{ props.label }}
       <span v-if="props.required" class="text-red-500">*</span>
     </label>
@@ -34,9 +34,9 @@ function handleChange(event: Event) {
       :required="props.required"
       :disabled="props.disabled"
       :class="[
-        'px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors',
-        props.error ? 'border-red-500' : 'border-gray-300',
-        props.disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white',
+        'px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-secondary-900 dark:text-secondary-100',
+        props.error ? 'border-red-500' : 'border-gray-300 dark:border-secondary-600',
+        props.disabled ? 'bg-gray-100 dark:bg-secondary-900 cursor-not-allowed' : 'bg-white dark:bg-secondary-700',
       ]"
       @change="handleChange"
     >

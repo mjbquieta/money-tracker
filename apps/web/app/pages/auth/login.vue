@@ -40,8 +40,8 @@ async function handleSubmit() {
 <template>
   <div>
     <div class="text-center mb-8">
-      <h2 class="text-2xl font-bold text-secondary-900">Welcome back</h2>
-      <p class="text-secondary-500 mt-2">
+      <h2 class="text-2xl font-bold text-secondary-900 dark:text-secondary-100">Welcome back</h2>
+      <p class="text-secondary-500 dark:text-secondary-400 mt-2">
         Sign in to continue tracking your finances
       </p>
     </div>
@@ -50,7 +50,7 @@ async function handleSubmit() {
 
     <form class="space-y-5" @submit.prevent="handleSubmit">
       <div>
-        <label class="block text-sm font-medium text-secondary-700 mb-2"
+        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2"
           >Email address</label
         >
         <div class="relative">
@@ -64,13 +64,13 @@ async function handleSubmit() {
             type="text"
             placeholder="you@example.com"
             required
-            class="w-full pl-11 pr-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            class="w-full pl-11 pr-4 py-3 border border-secondary-200 dark:border-secondary-600 rounded-xl bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
           />
         </div>
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-secondary-700 mb-2"
+        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2"
           >Password</label
         >
         <div class="relative">
@@ -84,7 +84,7 @@ async function handleSubmit() {
             type="password"
             placeholder="Enter your password"
             required
-            class="w-full pl-11 pr-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            class="w-full pl-11 pr-4 py-3 border border-secondary-200 dark:border-secondary-600 rounded-xl bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
           />
         </div>
       </div>
@@ -107,12 +107,12 @@ async function handleSubmit() {
       </button>
     </form>
 
-    <div class="mt-8 pt-6 border-t border-secondary-100">
-      <p class="text-center text-sm text-secondary-500">
+    <div class="mt-8 pt-6 border-t border-secondary-100 dark:border-secondary-700">
+      <p class="text-center text-sm text-secondary-500 dark:text-secondary-400">
         Don't have an account?
         <NuxtLink
           to="/auth/register"
-          class="text-primary-600 hover:text-primary-700 font-semibold ml-1"
+          class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold ml-1"
         >
           Create one for free
         </NuxtLink>
