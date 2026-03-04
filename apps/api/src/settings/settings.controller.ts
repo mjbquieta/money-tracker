@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UUID } from 'crypto';
-import { AuthGuard } from '../auth/auth.guard';
+import { TwoFactorAuthGuard } from '../auth/two-factor-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { SettingsService } from './settings.service';
 import { UpdateSettingsDto } from './settings.dto';
@@ -9,7 +9,7 @@ import { UpdateSettingsDto } from './settings.dto';
 @ApiTags('Settings')
 @ApiBearerAuth()
 @Controller('api/v1/settings')
-@UseGuards(AuthGuard)
+@UseGuards(TwoFactorAuthGuard)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 

@@ -6,6 +6,7 @@ exports.createTestBudgetPeriod = createTestBudgetPeriod;
 exports.createTestExpense = createTestExpense;
 exports.createTestExpenseTemplate = createTestExpenseTemplate;
 exports.createTestRecurringExpense = createTestRecurringExpense;
+exports.createTestRefreshToken = createTestRefreshToken;
 exports.createTestIncome = createTestIncome;
 const crypto_1 = require("crypto");
 function createTestUser(overrides = {}) {
@@ -99,6 +100,25 @@ function createTestRecurringExpense(overrides = {}) {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestRefreshToken(overrides = {}) {
+    const rawToken = (0, crypto_1.randomUUID)();
+    const tokenHash = (0, crypto_1.createHash)('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        tokenHash,
+        rawToken,
+        userId: (0, crypto_1.randomUUID)(),
+        userAgent: 'Mozilla/5.0 Test',
+        ipAddress: '127.0.0.1',
+        isRevoked: false,
+        expiresAt,
+        lastUsedAt: null,
+        createdAt: new Date(),
         ...overrides,
     };
 }

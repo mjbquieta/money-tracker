@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IncomeController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const income_service_1 = require("./income.service");
 const income_dto_1 = require("./income.dto");
@@ -92,7 +92,7 @@ exports.IncomeController = IncomeController = __decorate([
     (0, swagger_1.ApiTags)('Incomes'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/incomes'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     __metadata("design:paramtypes", [income_service_1.IncomeService])
 ], IncomeController);
 //# sourceMappingURL=income.controller.js.map

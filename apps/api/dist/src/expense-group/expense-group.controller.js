@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpenseGroupController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const expense_group_service_1 = require("./expense-group.service");
 const expense_group_dto_1 = require("./expense-group.dto");
@@ -129,7 +129,7 @@ exports.ExpenseGroupController = ExpenseGroupController = __decorate([
     (0, swagger_1.ApiTags)('Expense Groups'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/expense-groups'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     __metadata("design:paramtypes", [expense_group_service_1.ExpenseGroupService])
 ], ExpenseGroupController);
 //# sourceMappingURL=expense-group.controller.js.map

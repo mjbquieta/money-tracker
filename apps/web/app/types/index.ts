@@ -457,3 +457,28 @@ export interface CategoryComparisonPeriod {
   totalIncome: number;
   expensesByCategory: Record<string, { total: number; count: number }>;
 }
+
+// Session / Auth types
+export interface Session {
+  id: string;
+  userAgent: string | null;
+  ipAddress: string | null;
+  lastUsedAt: string | null;
+  createdAt: string;
+  isCurrent: boolean;
+}
+
+export interface TwoFactorSetupResponse {
+  secret: string;
+  qrCodeDataUrl: string;
+  otpAuthUrl: string;
+}
+
+export interface TwoFactorVerifyResponse {
+  enabled: boolean;
+  backupCodes: string[];
+}
+
+export interface BackupCodesResponse {
+  backupCodes: string[];
+}

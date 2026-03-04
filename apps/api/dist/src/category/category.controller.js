@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const category_service_1 = require("./category.service");
 const category_dto_1 = require("./category.dto");
@@ -118,7 +118,7 @@ exports.CategoryController = CategoryController = __decorate([
     (0, swagger_1.ApiTags)('Categories'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/categories'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     __metadata("design:paramtypes", [category_service_1.CategoryService])
 ], CategoryController);
 //# sourceMappingURL=category.controller.js.map

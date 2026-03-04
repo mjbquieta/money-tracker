@@ -72,6 +72,18 @@ export declare function createTestRecurringExpense(overrides?: Record<string, un
     updatedAt: Date;
     deletedAt: null;
 };
+export declare function createTestRefreshToken(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    tokenHash: string;
+    rawToken: `${string}-${string}-${string}-${string}-${string}`;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
+    userAgent: string;
+    ipAddress: string;
+    isRevoked: boolean;
+    expiresAt: Date;
+    lastUsedAt: null;
+    createdAt: Date;
+};
 export declare function createTestIncome(overrides?: Record<string, unknown>): {
     id: `${string}-${string}-${string}-${string}-${string}`;
     name: string;

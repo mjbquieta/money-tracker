@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpenseController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const expense_service_1 = require("./expense.service");
 const expense_dto_1 = require("./expense.dto");
@@ -105,7 +105,7 @@ exports.ExpenseController = ExpenseController = __decorate([
     (0, swagger_1.ApiTags)('Expenses'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/expenses'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     __metadata("design:paramtypes", [expense_service_1.ExpenseService])
 ], ExpenseController);
 //# sourceMappingURL=expense.controller.js.map

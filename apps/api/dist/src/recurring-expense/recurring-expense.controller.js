@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RecurringExpenseController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const recurring_expense_service_1 = require("./recurring-expense.service");
 const recurring_expense_dto_1 = require("./recurring-expense.dto");
@@ -105,7 +105,7 @@ exports.RecurringExpenseController = RecurringExpenseController = __decorate([
     (0, swagger_1.ApiTags)('Recurring Expenses'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/recurring-expenses'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     __metadata("design:paramtypes", [recurring_expense_service_1.RecurringExpenseService])
 ], RecurringExpenseController);
 //# sourceMappingURL=recurring-expense.controller.js.map

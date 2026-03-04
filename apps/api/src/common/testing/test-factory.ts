@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 
 export function createTestUser(overrides: Record<string, unknown> = {}) {
   return {
@@ -97,6 +97,27 @@ export function createTestRecurringExpense(overrides: Record<string, unknown> = 
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestRefreshToken(overrides: Record<string, unknown> = {}) {
+  const rawToken = randomUUID();
+  const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  return {
+    id: randomUUID(),
+    tokenHash,
+    rawToken,
+    userId: randomUUID(),
+    userAgent: 'Mozilla/5.0 Test',
+    ipAddress: '127.0.0.1',
+    isRevoked: false,
+    expiresAt,
+    lastUsedAt: null,
+    createdAt: new Date(),
     ...overrides,
   };
 }

@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
-import { AuthGuard } from '../auth/auth.guard';
+import { TwoFactorAuthGuard } from '../auth/two-factor-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { RecurringExpenseService } from './recurring-expense.service';
 import { CreateRecurringExpenseDto, UpdateRecurringExpenseDto, GenerateRecurringExpensesDto } from './recurring-expense.dto';
@@ -20,7 +20,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @ApiTags('Recurring Expenses')
 @ApiBearerAuth()
 @Controller('api/v1/recurring-expenses')
-@UseGuards(AuthGuard)
+@UseGuards(TwoFactorAuthGuard)
 export class RecurringExpenseController {
   constructor(private readonly recurringExpenseService: RecurringExpenseService) {}
 

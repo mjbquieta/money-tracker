@@ -16,7 +16,7 @@ exports.SettingsController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const settings_service_1 = require("./settings.service");
 const settings_dto_1 = require("./settings.dto");
@@ -54,7 +54,7 @@ exports.SettingsController = SettingsController = __decorate([
     (0, swagger_1.ApiTags)('Settings'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/settings'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     __metadata("design:paramtypes", [settings_service_1.SettingsService])
 ], SettingsController);
 //# sourceMappingURL=settings.controller.js.map

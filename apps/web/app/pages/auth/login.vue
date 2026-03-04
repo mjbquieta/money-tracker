@@ -33,6 +33,11 @@ async function handleSubmit() {
     return;
   }
 
+  if (result.requiresTwoFactor) {
+    router.push("/auth/two-factor");
+    return;
+  }
+
   router.push("/dashboard");
 }
 </script>

@@ -9,7 +9,9 @@ function createMockModel() {
         create: jest.fn(),
         createMany: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn(),
         delete: jest.fn(),
+        deleteMany: jest.fn(),
         count: jest.fn(),
         aggregate: jest.fn(),
         groupBy: jest.fn(),
@@ -28,6 +30,8 @@ function createMockPrismaService() {
         personalBudgetItem: createMockModel(),
         expenseTemplate: createMockModel(),
         recurringExpense: createMockModel(),
+        refreshToken: createMockModel(),
+        twoFactorBackupCode: createMockModel(),
         $transaction: jest.fn((fn) => {
             if (typeof fn === 'function') {
                 return fn(createMockPrismaService());

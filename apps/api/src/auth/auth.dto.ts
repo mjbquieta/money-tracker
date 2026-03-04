@@ -1,8 +1,10 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
+  Length,
   registerDecorator,
   ValidationArguments,
   ValidationOptions,
@@ -58,6 +60,34 @@ class LoginDto {
   @IsNotEmpty()
   @IsUsernameOrEmailProvided()
   password: string;
+}
+
+export class VerifyTwoFactorDto {
+  @IsString()
+  @IsNotEmpty()
+  @Length(6, 6)
+  code: string;
+}
+
+export class DisableTwoFactorDto {
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(6, 6)
+  code: string;
+}
+
+export class TwoFactorAuthenticateDto {
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isBackupCode?: boolean;
 }
 
 export { LoginDto };

@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
@@ -7,12 +10,14 @@ const common_1 = require("@nestjs/common");
 const nestjs_pino_1 = require("nestjs-pino");
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const response_interceptor_1 = require("./common/interceptors/response.interceptor");
 const http_exception_filter_1 = require("./common/filters/http-exception.filter");
 async function bootstrap() {
     const configService = new config_1.ConfigService();
     const app = await core_1.NestFactory.create(app_module_1.AppModule, { bufferLogs: true });
     app.useLogger(app.get(nestjs_pino_1.Logger));
+    app.use((0, cookie_parser_1.default)());
     app.enableCors({
         origin: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

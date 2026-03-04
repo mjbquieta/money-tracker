@@ -17,7 +17,7 @@ const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
 const user_dto_1 = require("./user.dto");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const swagger_1 = require("@nestjs/swagger");
 let UserController = class UserController {
@@ -45,7 +45,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "create", null);
 __decorate([
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     (0, common_1.Patch)('profile'),
     openapi.ApiResponse({ status: 200, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
@@ -55,7 +55,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateProfile", null);
 __decorate([
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     (0, common_1.Patch)('password'),
     openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),

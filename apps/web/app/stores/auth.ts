@@ -10,24 +10,23 @@ import type {
 } from '~/types';
 
 interface LoginResponse {
-  user: User;
+  user?: User;
   accessToken: string;
+  requiresTwoFactor?: boolean;
 }
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
-  const token = ref<string | null>(null);
-  const isAuthenticated = computed(() => !!user.value && !!token.value);
+  const isAuthenticated = computed(() => !!user.value);
   const isHydrated = ref(false);
   const api = useApi();
+  const { setAccessToken, clearAccessToken } = useAuthInterceptor();
 
-  // Hydrate auth state from localStorage - called explicitly on client
+  // Hydrate user from localStorage (token is now in memory / http-only cookie)
   function hydrateFromStorage() {
     if (!import.meta.client) return;
 
-    const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    if (savedToken) token.value = savedToken;
     if (savedUser) {
       try {
         user.value = JSON.parse(savedUser);
@@ -45,18 +44,16 @@ export const useAuthStore = defineStore('auth', () => {
 
   function setAuth(userData: User, accessToken: string) {
     user.value = userData;
-    token.value = accessToken;
+    setAccessToken(accessToken);
     if (import.meta.client) {
-      localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(userData));
     }
   }
 
   function clearAuth() {
     user.value = null;
-    token.value = null;
+    clearAccessToken();
     if (import.meta.client) {
-      localStorage.removeItem('token');
       localStorage.removeItem('user');
     }
   }
@@ -65,13 +62,21 @@ export const useAuthStore = defineStore('auth', () => {
     const { data, error } = await api.post<LoginResponse>('/api/v1/auth/login', payload);
 
     if (error) {
-      return { success: false, error };
+      return { success: false, error, requiresTwoFactor: false };
     }
 
     if (data) {
-      setAuth(data.user, data.accessToken);
+      // 2FA required — store partial token and signal caller
+      if (data.requiresTwoFactor) {
+        setAccessToken(data.accessToken);
+        return { success: true, error: null, requiresTwoFactor: true };
+      }
+
+      if (data.user) {
+        setAuth(data.user, data.accessToken);
+      }
     }
-    return { success: true, error: null };
+    return { success: true, error: null, requiresTwoFactor: false };
   }
 
   async function register(payload: RegisterPayload) {
@@ -92,7 +97,14 @@ export const useAuthStore = defineStore('auth', () => {
     return { success: true, error: null };
   }
 
-  function logout() {
+  async function logout() {
+    await api.post('/api/v1/auth/logout', {});
+    clearAuth();
+    navigateTo('/');
+  }
+
+  async function logoutAll() {
+    await api.post('/api/v1/auth/logout-all', {});
     clearAuth();
     navigateTo('/');
   }
@@ -148,13 +160,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     user,
-    token,
     isAuthenticated,
     isHydrated,
     hydrateFromStorage,
     login,
     register,
     logout,
+    logoutAll,
     updateSettings,
     updateProfile,
     changePassword,

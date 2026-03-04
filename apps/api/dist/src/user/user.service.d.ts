@@ -41,6 +41,8 @@ export declare class UserService {
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        twoFactorSecret: string | null;
+        isTwoFactorEnabled: boolean;
     }) | null>;
     findByCredentials(val: string, password: string, isEmail?: boolean): Promise<import("lodash").Omit<{
         settings: {
@@ -61,6 +63,8 @@ export declare class UserService {
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        twoFactorSecret: string | null;
+        isTwoFactorEnabled: boolean;
     }, "password">>;
     findOne(userId: UUID): Promise<import("lodash").Omit<{
         settings: {
@@ -93,6 +97,8 @@ export declare class UserService {
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        twoFactorSecret: string | null;
+        isTwoFactorEnabled: boolean;
     }, "password">>;
     updateProfile(userId: UUID, payload: UpdateProfileDto): Promise<import("lodash").Omit<{
         settings: {
@@ -125,6 +131,8 @@ export declare class UserService {
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        twoFactorSecret: string | null;
+        isTwoFactorEnabled: boolean;
     }, "password">>;
     changePassword(userId: UUID, payload: ChangePasswordDto): Promise<{
         message: string;

@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BudgetPeriodController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const budget_period_service_1 = require("./budget-period.service");
 const budget_period_dto_1 = require("./budget-period.dto");
@@ -197,7 +197,7 @@ exports.BudgetPeriodController = BudgetPeriodController = __decorate([
     (0, swagger_1.ApiTags)('Budget Periods'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/budget-periods'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     __metadata("design:paramtypes", [budget_period_service_1.BudgetPeriodService])
 ], BudgetPeriodController);
 //# sourceMappingURL=budget-period.controller.js.map

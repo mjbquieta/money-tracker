@@ -16,6 +16,9 @@ const auth_service_1 = require("./auth.service");
 const jwt_strategy_1 = require("./jwt.strategy");
 const user_module_1 = require("../user/user.module");
 const auth_guard_1 = require("./auth.guard");
+const refresh_token_service_1 = require("./refresh-token.service");
+const two_factor_service_1 = require("./two-factor.service");
+const two_factor_auth_guard_1 = require("./two-factor-auth.guard");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -29,14 +32,28 @@ exports.AuthModule = AuthModule = __decorate([
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({
                     secret: configService.get('JWT_SECRET'),
-                    signOptions: { expiresIn: '7d' },
+                    signOptions: { expiresIn: '15m' },
                 }),
                 inject: [config_1.ConfigService],
             }),
         ],
         controllers: [auth_controller_1.AuthController],
-        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, auth_guard_1.AuthGuard],
-        exports: [auth_service_1.AuthService, auth_guard_1.AuthGuard, jwt_1.JwtModule],
+        providers: [
+            auth_service_1.AuthService,
+            jwt_strategy_1.JwtStrategy,
+            auth_guard_1.AuthGuard,
+            two_factor_auth_guard_1.TwoFactorAuthGuard,
+            refresh_token_service_1.RefreshTokenService,
+            two_factor_service_1.TwoFactorService,
+        ],
+        exports: [
+            auth_service_1.AuthService,
+            auth_guard_1.AuthGuard,
+            two_factor_auth_guard_1.TwoFactorAuthGuard,
+            jwt_1.JwtModule,
+            refresh_token_service_1.RefreshTokenService,
+            two_factor_service_1.TwoFactorService,
+        ],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

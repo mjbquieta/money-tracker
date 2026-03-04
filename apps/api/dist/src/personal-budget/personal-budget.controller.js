@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonalBudgetController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
-const auth_guard_1 = require("../auth/auth.guard");
+const two_factor_auth_guard_1 = require("../auth/two-factor-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const personal_budget_service_1 = require("./personal-budget.service");
 const personal_budget_dto_1 = require("./personal-budget.dto");
@@ -145,7 +145,7 @@ exports.PersonalBudgetController = PersonalBudgetController = __decorate([
     (0, swagger_1.ApiTags)('Personal Budgets'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/personal-budgets'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(two_factor_auth_guard_1.TwoFactorAuthGuard),
     __metadata("design:paramtypes", [personal_budget_service_1.PersonalBudgetService])
 ], PersonalBudgetController);
 //# sourceMappingURL=personal-budget.controller.js.map

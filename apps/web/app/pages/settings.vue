@@ -513,6 +513,16 @@ function formatDate(dateString: string | undefined) {
       </div>
     </div>
 
+    <!-- Two-Factor Authentication -->
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
+      <SettingsTwoFactorSetup />
+    </div>
+
+    <!-- Active Sessions -->
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
+      <SettingsActiveSessions />
+    </div>
+
     <!-- Currency Settings -->
     <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
       <div class="flex items-center gap-3 mb-5">

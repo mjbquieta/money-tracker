@@ -6,7 +6,9 @@ type MockPrismaModel = {
     create: jest.Mock;
     createMany: jest.Mock;
     update: jest.Mock;
+    updateMany: jest.Mock;
     delete: jest.Mock;
+    deleteMany: jest.Mock;
     count: jest.Mock;
     aggregate: jest.Mock;
     groupBy: jest.Mock;

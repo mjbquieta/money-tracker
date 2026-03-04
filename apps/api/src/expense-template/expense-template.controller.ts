@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
-import { AuthGuard } from '../auth/auth.guard';
+import { TwoFactorAuthGuard } from '../auth/two-factor-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ExpenseTemplateService } from './expense-template.service';
 import { CreateExpenseTemplateDto, UpdateExpenseTemplateDto, CreateExpenseFromTemplateDto } from './expense-template.dto';
@@ -20,7 +20,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @ApiTags('Expense Templates')
 @ApiBearerAuth()
 @Controller('api/v1/expense-templates')
-@UseGuards(AuthGuard)
+@UseGuards(TwoFactorAuthGuard)
 export class ExpenseTemplateController {
   constructor(private readonly expenseTemplateService: ExpenseTemplateService) {}
 
