@@ -29,6 +29,22 @@ export declare class ExpenseController {
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
+            expenseTags: ({
+                tag: {
+                    id: string;
+                    name: string;
+                    createdAt: Date;
+                    updatedAt: Date | null;
+                    deletedAt: Date | null;
+                    userId: string;
+                    color: string;
+                };
+            } & {
+                id: string;
+                createdAt: Date;
+                expenseId: string;
+                tagId: string;
+            })[];
         } & {
             id: string;
             name: string;
@@ -66,6 +82,22 @@ export declare class ExpenseController {
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         };
+        expenseTags: ({
+            tag: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                userId: string;
+                color: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            expenseId: string;
+            tagId: string;
+        })[];
     } & {
         id: string;
         name: string;
@@ -91,6 +123,22 @@ export declare class ExpenseController {
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         };
+        expenseTags: ({
+            tag: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                userId: string;
+                color: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            expenseId: string;
+            tagId: string;
+        })[];
     } & {
         id: string;
         name: string;
@@ -141,6 +189,22 @@ export declare class ExpenseController {
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         };
+        expenseTags: ({
+            tag: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                userId: string;
+                color: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            expenseId: string;
+            tagId: string;
+        })[];
     } & {
         id: string;
         name: string;

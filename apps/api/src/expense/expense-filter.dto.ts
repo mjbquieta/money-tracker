@@ -1,5 +1,5 @@
-import { IsOptional, IsString, IsUUID, IsNumber, IsDateString, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsUUID, IsNumber, IsDateString, IsArray, Min } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 
 export class ExpenseFilterDto extends PaginationQueryDto {
@@ -34,4 +34,10 @@ export class ExpenseFilterDto extends PaginationQueryDto {
   @IsNumber()
   @Min(0)
   amountMax?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  tagIds?: string[];
 }

@@ -86,6 +86,7 @@ export const useExpenseStore = defineStore('expense', () => {
     if (filters.dateTo) params.set('dateTo', filters.dateTo);
     if (filters.amountMin !== undefined) params.set('amountMin', String(filters.amountMin));
     if (filters.amountMax !== undefined) params.set('amountMax', String(filters.amountMax));
+    if (filters.tagIds?.length) params.set('tagIds', filters.tagIds.join(','));
     if (filters.limit) params.set('limit', String(filters.limit));
     if (filters.cursor) params.set('cursor', filters.cursor);
     if (filters.page) params.set('page', String(filters.page));

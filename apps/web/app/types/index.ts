@@ -63,6 +63,7 @@ export interface Expense {
   expenseGroupId: string | null;
   category: Category;
   expenseGroup?: ExpenseGroup | null;
+  expenseTags?: ExpenseTag[];
   createdAt: string;
   updatedAt: string;
 }
@@ -342,6 +343,7 @@ export interface ExpenseFilters {
   dateTo?: string;
   amountMin?: number;
   amountMax?: number;
+  tagIds?: string[];
 }
 
 export interface ApiError {
@@ -481,4 +483,28 @@ export interface TwoFactorVerifyResponse {
 
 export interface BackupCodesResponse {
   backupCodes: string[];
+}
+
+// Tag types
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseTag {
+  id: string;
+  tag: Tag;
+}
+
+export interface CreateTagPayload {
+  name: string;
+  color?: string;
+}
+
+export interface UpdateTagPayload {
+  name?: string;
+  color?: string;
 }

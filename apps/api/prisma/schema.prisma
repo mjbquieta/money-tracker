@@ -57,6 +57,7 @@ model User {
   personalBudgets       PersonalBudget[]
   expenseTemplates      ExpenseTemplate[]
   recurringExpenses     RecurringExpense[]
+  tags                  Tag[]
   refreshTokens         RefreshToken[]
   twoFactorBackupCodes  TwoFactorBackupCode[]
 
@@ -167,8 +168,43 @@ model Expense {
   budgetPeriod   BudgetPeriod  @relation(fields: [budgetPeriodId], references: [id], onDelete: Cascade)
   expenseGroupId String?       @map("expense_group_id")
   expenseGroup   ExpenseGroup? @relation(fields: [expenseGroupId], references: [id], onDelete: SetNull)
+  expenseTags    ExpenseTag[]
 
   @@map("expenses")
+}
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String
+  color     String    @default("#6B7280") // Gray default
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenseTags ExpenseTag[]
+
+  // Each user can have only one tag with the same name
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+model ExpenseTag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  expenseId String  @map("expense_id")
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  tagId     String  @map("tag_id")
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, tagId])
+  @@index([expenseId])
+  @@index([tagId])
+  @@map("expense_tags")
 }
 
 model PersonalBudget {

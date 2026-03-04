@@ -64,7 +64,10 @@ export class ExpenseService {
         budgetPeriodId: payload.budgetPeriodId,
         expenseGroupId: payload.expenseGroupId,
       },
-      include: { category: true },
+      include: {
+        category: true,
+        expenseTags: { include: { tag: true } },
+      },
     });
   }
 
@@ -101,6 +104,12 @@ export class ExpenseService {
       if (filters.amountMax !== undefined) where.amount.lte = filters.amountMax;
     }
 
+    if (filters.tagIds?.length) {
+      where.expenseTags = {
+        some: { tagId: { in: filters.tagIds } },
+      };
+    }
+
     const prismaArgs = buildPrismaArgs(filters);
 
     const [items, totalCount] = await Promise.all([
@@ -109,6 +118,7 @@ export class ExpenseService {
         include: {
           category: true,
           budgetPeriod: true,
+          expenseTags: { include: { tag: true } },
         },
         ...prismaArgs,
       }),
@@ -131,6 +141,7 @@ export class ExpenseService {
       include: {
         category: true,
         budgetPeriod: true,
+        expenseTags: { include: { tag: true } },
       },
     });
 
@@ -176,7 +187,10 @@ export class ExpenseService {
     return this.prisma.expense.update({
       where: { id: expenseId },
       data: payload,
-      include: { category: true },
+      include: {
+        category: true,
+        expenseTags: { include: { tag: true } },
+      },
     });
   }
 

@@ -84,6 +84,15 @@ export declare function createTestRefreshToken(overrides?: Record<string, unknow
     lastUsedAt: null;
     createdAt: Date;
 };
+export declare function createTestTag(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    name: string;
+    color: string;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+};
 export declare function createTestIncome(overrides?: Record<string, unknown>): {
     id: `${string}-${string}-${string}-${string}-${string}`;
     name: string;

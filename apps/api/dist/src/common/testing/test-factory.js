@@ -7,6 +7,7 @@ exports.createTestExpense = createTestExpense;
 exports.createTestExpenseTemplate = createTestExpenseTemplate;
 exports.createTestRecurringExpense = createTestRecurringExpense;
 exports.createTestRefreshToken = createTestRefreshToken;
+exports.createTestTag = createTestTag;
 exports.createTestIncome = createTestIncome;
 const crypto_1 = require("crypto");
 function createTestUser(overrides = {}) {
@@ -119,6 +120,18 @@ function createTestRefreshToken(overrides = {}) {
         expiresAt,
         lastUsedAt: null,
         createdAt: new Date(),
+        ...overrides,
+    };
+}
+function createTestTag(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: `Tag ${Date.now()}`,
+        color: '#6B7280',
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
         ...overrides,
     };
 }

@@ -122,6 +122,19 @@ export function createTestRefreshToken(overrides: Record<string, unknown> = {}) 
   };
 }
 
+export function createTestTag(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: `Tag ${Date.now()}`,
+    color: '#6B7280',
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
 export function createTestIncome(overrides: Record<string, unknown> = {}) {
   return {
     id: randomUUID(),

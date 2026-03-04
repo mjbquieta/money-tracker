@@ -22,8 +22,9 @@ class ExpenseFilterDto extends pagination_dto_1.PaginationQueryDto {
     dateTo;
     amountMin;
     amountMax;
+    tagIds;
     static _OPENAPI_METADATA_FACTORY() {
-        return { search: { required: false, type: () => String }, budgetPeriodId: { required: false, type: () => String, format: "uuid" }, categoryId: { required: false, type: () => String, format: "uuid" }, dateFrom: { required: false, type: () => String }, dateTo: { required: false, type: () => String }, amountMin: { required: false, type: () => Number, minimum: 0 }, amountMax: { required: false, type: () => Number, minimum: 0 } };
+        return { search: { required: false, type: () => String }, budgetPeriodId: { required: false, type: () => String, format: "uuid" }, categoryId: { required: false, type: () => String, format: "uuid" }, dateFrom: { required: false, type: () => String }, dateTo: { required: false, type: () => String }, amountMin: { required: false, type: () => Number, minimum: 0 }, amountMax: { required: false, type: () => Number, minimum: 0 }, tagIds: { required: false, type: () => [String], format: "uuid" } };
     }
 }
 exports.ExpenseFilterDto = ExpenseFilterDto;
@@ -66,4 +67,11 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], ExpenseFilterDto.prototype, "amountMax", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsUUID)(undefined, { each: true }),
+    (0, class_transformer_1.Transform)(({ value }) => (typeof value === 'string' ? value.split(',') : value)),
+    __metadata("design:type", Array)
+], ExpenseFilterDto.prototype, "tagIds", void 0);
 //# sourceMappingURL=expense-filter.dto.js.map

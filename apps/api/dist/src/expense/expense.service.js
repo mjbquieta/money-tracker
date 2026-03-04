@@ -60,7 +60,10 @@ let ExpenseService = class ExpenseService {
                 budgetPeriodId: payload.budgetPeriodId,
                 expenseGroupId: payload.expenseGroupId,
             },
-            include: { category: true },
+            include: {
+                category: true,
+                expenseTags: { include: { tag: true } },
+            },
         });
     }
     async findAll(userId, filters) {
@@ -94,6 +97,11 @@ let ExpenseService = class ExpenseService {
             if (filters.amountMax !== undefined)
                 where.amount.lte = filters.amountMax;
         }
+        if (filters.tagIds?.length) {
+            where.expenseTags = {
+                some: { tagId: { in: filters.tagIds } },
+            };
+        }
         const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(filters);
         const [items, totalCount] = await Promise.all([
             this.prisma.expense.findMany({
@@ -101,6 +109,7 @@ let ExpenseService = class ExpenseService {
                 include: {
                     category: true,
                     budgetPeriod: true,
+                    expenseTags: { include: { tag: true } },
                 },
                 ...prismaArgs,
             }),
@@ -121,6 +130,7 @@ let ExpenseService = class ExpenseService {
             include: {
                 category: true,
                 budgetPeriod: true,
+                expenseTags: { include: { tag: true } },
             },
         });
         if (!expense) {
@@ -157,7 +167,10 @@ let ExpenseService = class ExpenseService {
         return this.prisma.expense.update({
             where: { id: expenseId },
             data: payload,
-            include: { category: true },
+            include: {
+                category: true,
+                expenseTags: { include: { tag: true } },
+            },
         });
     }
     async delete(userId, expenseId) {

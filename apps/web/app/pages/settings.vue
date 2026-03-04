@@ -563,6 +563,11 @@ function formatDate(dateString: string | undefined) {
       </p>
     </div>
 
+    <!-- Tags -->
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
+      <SettingsTagManager />
+    </div>
+
     <!-- Categories Settings -->
     <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6">
       <div class="flex justify-between items-start mb-5">

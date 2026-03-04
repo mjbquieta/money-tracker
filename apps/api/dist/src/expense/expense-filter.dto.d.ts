@@ -7,4 +7,5 @@ export declare class ExpenseFilterDto extends PaginationQueryDto {
     dateTo?: string;
     amountMin?: number;
     amountMax?: number;
+    tagIds?: string[];
 }

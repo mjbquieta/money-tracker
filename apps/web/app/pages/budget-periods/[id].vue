@@ -40,6 +40,7 @@ const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
 const expenseGroupStore = useExpenseGroupStore();
 const recurringExpenseStore = useRecurringExpenseStore();
+const tagStore = useTagStore();
 
 const budgetPeriodId = route.params.id as string;
 
@@ -73,6 +74,7 @@ const expenseForm = reactive({
 const showNewGroupInput = ref(false);
 const newGroupName = ref('');
 const groupLoading = ref(false);
+const selectedTagIds = ref<string[]>([]);
 
 const editPeriodForm = reactive({
   name: '',
@@ -657,6 +659,7 @@ onMounted(async () => {
     expenseStore.fetchCategories(),
     expenseGroupStore.fetchGroups(budgetPeriodId),
     fetchSpendingStatus(),
+    tagStore.fetchTags(),
   ]);
 });
 
@@ -710,6 +713,7 @@ function resetExpenseForm() {
   newCategoryName.value = '';
   expenseForm.categoryId = '';
   expenseForm.expenseGroupId = '';
+  selectedTagIds.value = [];
   showNewGroupInput.value = false;
   newGroupName.value = '';
   editingExpense.value = null;
@@ -727,6 +731,7 @@ function openEditExpense(expense: Expense) {
   expenseForm.amount = expense.amount;
   expenseForm.categoryId = expense.categoryId;
   expenseForm.expenseGroupId = expense.expenseGroupId || '';
+  selectedTagIds.value = expense.expenseTags?.map((et) => et.tag.id) ?? [];
   showNewGroupInput.value = false;
   newGroupName.value = '';
   showExpenseModal.value = true;
@@ -848,6 +853,14 @@ async function handleExpenseSubmit() {
       return;
     }
 
+    // Update tags if changed
+    if (result.data && selectedTagIds.value.length >= 0) {
+      const tagResult = await tagStore.tagExpense(result.data.id, selectedTagIds.value);
+      if (tagResult.data) {
+        result.data = tagResult.data;
+      }
+    }
+
     // Update local state
     if (result.data && budgetStore.currentPeriod) {
       const index = budgetStore.currentPeriod.expenses.findIndex((e) => e.id === result.data!.id);
@@ -927,6 +940,14 @@ async function handleExpenseSubmit() {
         : result.error.message[0];
       loading.value = false;
       return;
+    }
+
+    // Set tags on the newly created expense
+    if (result.data && selectedTagIds.value.length > 0) {
+      const tagResult = await tagStore.tagExpense(result.data.id, selectedTagIds.value);
+      if (tagResult.data) {
+        result.data = tagResult.data;
+      }
     }
 
     // Update local state
@@ -1643,6 +1664,14 @@ function getCategoryStyle(categoryName: string) {
                         </span>
                       </div>
                       <p v-if="expense.description" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">{{ expense.description }}</p>
+                      <div v-if="expense.expenseTags?.length" class="flex flex-wrap gap-1 mt-1">
+                        <UiTagBadge
+                          v-for="et in expense.expenseTags"
+                          :key="et.id"
+                          :name="et.tag.name"
+                          :color="et.tag.color"
+                        />
+                      </div>
                     </div>
                     <div class="flex items-center gap-4">
                       <p class="font-bold text-danger-600 dark:text-danger-400">{{ formatCurrency(expense.amount) }}</p>
@@ -1695,6 +1724,14 @@ function getCategoryStyle(categoryName: string) {
                   </span>
                 </div>
                 <p v-if="expense.description" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">{{ expense.description }}</p>
+                <div v-if="expense.expenseTags?.length" class="flex flex-wrap gap-1 mt-1">
+                  <UiTagBadge
+                    v-for="et in expense.expenseTags"
+                    :key="et.id"
+                    :name="et.tag.name"
+                    :color="et.tag.color"
+                  />
+                </div>
               </div>
               <div class="flex items-center gap-4">
                 <p class="font-bold text-danger-600 dark:text-danger-400 text-lg">{{ formatCurrency(expense.amount) }}</p>
@@ -1943,6 +1980,15 @@ function getCategoryStyle(categoryName: string) {
                 <FolderPlusIcon class="w-4 h-4" />
                 Create new group
               </button>
+            </div>
+
+            <!-- Tags (Optional) -->
+            <div v-if="tagStore.tags.length > 0" class="space-y-2">
+              <label class="text-sm font-medium text-secondary-700 dark:text-secondary-300">Tags (Optional)</label>
+              <UiTagPicker
+                v-model="selectedTagIds"
+                :tags="tagStore.tags"
+              />
             </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
