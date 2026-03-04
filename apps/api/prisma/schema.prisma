@@ -30,6 +30,13 @@ enum DefaultCategory {
   ENTERTAINMENT
 }
 
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  CANCELLED
+}
+
 enum RecurrenceFrequency {
   DAILY
   WEEKLY
@@ -58,6 +65,7 @@ model User {
   expenseTemplates      ExpenseTemplate[]
   recurringExpenses     RecurringExpense[]
   tags                  Tag[]
+  financialGoals        FinancialGoal[]
   refreshTokens         RefreshToken[]
   twoFactorBackupCodes  TwoFactorBackupCode[]
 
@@ -312,4 +320,38 @@ model TwoFactorBackupCode {
 
   @@index([userId])
   @@map("two_factor_backup_codes")
+}
+
+model FinancialGoal {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  targetAmount Float     @map("target_amount")
+  currentAmount Float    @default(0) @map("current_amount")
+  targetDate  DateTime?  @map("target_date")
+  status      GoalStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime?  @updatedAt @map("updated_at")
+  deletedAt   DateTime?  @map("deleted_at")
+
+  // Relations
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions GoalContribution[]
+
+  @@map("financial_goals")
+}
+
+model GoalContribution {
+  id        String   @id @default(uuid())
+  amount    Float
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  goalId String         @map("goal_id")
+  goal   FinancialGoal  @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@map("goal_contributions")
 }

@@ -33,6 +33,8 @@ function createMockPrismaService() {
         refreshToken: createMockModel(),
         tag: createMockModel(),
         expenseTag: createMockModel(),
+        financialGoal: createMockModel(),
+        goalContribution: createMockModel(),
         twoFactorBackupCode: createMockModel(),
         $transaction: jest.fn((fn) => {
             if (typeof fn === 'function') {

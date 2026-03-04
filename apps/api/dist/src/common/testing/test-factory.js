@@ -8,6 +8,8 @@ exports.createTestExpenseTemplate = createTestExpenseTemplate;
 exports.createTestRecurringExpense = createTestRecurringExpense;
 exports.createTestRefreshToken = createTestRefreshToken;
 exports.createTestTag = createTestTag;
+exports.createTestFinancialGoal = createTestFinancialGoal;
+exports.createTestGoalContribution = createTestGoalContribution;
 exports.createTestIncome = createTestIncome;
 const crypto_1 = require("crypto");
 function createTestUser(overrides = {}) {
@@ -132,6 +134,34 @@ function createTestTag(overrides = {}) {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestFinancialGoal(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'Emergency Fund',
+        description: '6 months of expenses',
+        targetAmount: 10000,
+        currentAmount: 0,
+        targetDate: new Date('2026-12-31'),
+        status: 'ACTIVE',
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        contributions: [],
+        _count: { contributions: 0 },
+        ...overrides,
+    };
+}
+function createTestGoalContribution(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        amount: 500,
+        note: 'Monthly savings',
+        goalId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
         ...overrides,
     };
 }

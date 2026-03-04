@@ -135,6 +135,36 @@ export function createTestTag(overrides: Record<string, unknown> = {}) {
   };
 }
 
+export function createTestFinancialGoal(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: 'Emergency Fund',
+    description: '6 months of expenses',
+    targetAmount: 10000,
+    currentAmount: 0,
+    targetDate: new Date('2026-12-31'),
+    status: 'ACTIVE',
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    contributions: [],
+    _count: { contributions: 0 },
+    ...overrides,
+  };
+}
+
+export function createTestGoalContribution(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    amount: 500,
+    note: 'Monthly savings',
+    goalId: randomUUID(),
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
 export function createTestIncome(overrides: Record<string, unknown> = {}) {
   return {
     id: randomUUID(),

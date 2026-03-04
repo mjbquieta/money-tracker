@@ -508,3 +508,57 @@ export interface UpdateTagPayload {
   name?: string;
   color?: string;
 }
+
+// Financial Goal types
+export type GoalStatus = 'ACTIVE' | 'COMPLETED' | 'PAUSED' | 'CANCELLED';
+
+export interface GoalContribution {
+  id: string;
+  amount: number;
+  note: string | null;
+  goalId: string;
+  createdAt: string;
+}
+
+export interface FinancialGoal {
+  id: string;
+  name: string;
+  description: string | null;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string | null;
+  status: GoalStatus;
+  contributions: GoalContribution[];
+  _count: { contributions: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoalsSummary {
+  totalGoals: number;
+  activeGoals: number;
+  completedGoals: number;
+  totalTargetAmount: number;
+  totalCurrentAmount: number;
+  overallProgress: number;
+}
+
+export interface CreateFinancialGoalPayload {
+  name: string;
+  description?: string;
+  targetAmount: number;
+  targetDate?: string;
+}
+
+export interface UpdateFinancialGoalPayload {
+  name?: string;
+  description?: string;
+  targetAmount?: number;
+  targetDate?: string;
+  status?: GoalStatus;
+}
+
+export interface CreateGoalContributionPayload {
+  amount: number;
+  note?: string;
+}

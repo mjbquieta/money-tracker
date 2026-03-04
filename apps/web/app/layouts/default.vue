@@ -9,6 +9,7 @@ import {
   XMarkIcon,
   ChevronDownIcon,
   ClipboardDocumentListIcon,
+  FlagIcon,
 } from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
@@ -91,6 +92,14 @@ onUnmounted(() => {
               >
                 <ClipboardDocumentListIcon class="w-5 h-5" />
                 <span>Personal Budgets</span>
+              </NuxtLink>
+              <NuxtLink
+                to="/financial-goals"
+                class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
+                active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
+              >
+                <FlagIcon class="w-5 h-5" />
+                <span>Goals</span>
               </NuxtLink>
               <UiThemeToggle size="md" />
               <div class="w-px h-8 bg-secondary-200 dark:bg-secondary-700 mx-2" />
@@ -265,6 +274,14 @@ onUnmounted(() => {
             >
               <ClipboardDocumentListIcon class="w-5 h-5" />
               <span>Personal Budgets</span>
+            </NuxtLink>
+            <NuxtLink
+              to="/financial-goals"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
+              active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
+            >
+              <FlagIcon class="w-5 h-5" />
+              <span>Goals</span>
             </NuxtLink>
             <NuxtLink
               to="/settings"

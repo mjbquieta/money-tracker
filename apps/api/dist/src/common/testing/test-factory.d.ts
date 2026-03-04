@@ -93,6 +93,30 @@ export declare function createTestTag(overrides?: Record<string, unknown>): {
     updatedAt: Date;
     deletedAt: null;
 };
+export declare function createTestFinancialGoal(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    name: string;
+    description: string;
+    targetAmount: number;
+    currentAmount: number;
+    targetDate: Date;
+    status: string;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+    contributions: never[];
+    _count: {
+        contributions: number;
+    };
+};
+export declare function createTestGoalContribution(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    amount: number;
+    note: string;
+    goalId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+};
 export declare function createTestIncome(overrides?: Record<string, unknown>): {
     id: `${string}-${string}-${string}-${string}-${string}`;
     name: string;
