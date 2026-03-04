@@ -13,11 +13,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpenseGroupController = void 0;
+const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const auth_guard_1 = require("../auth/auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const expense_group_service_1 = require("./expense-group.service");
 const expense_group_dto_1 = require("./expense-group.dto");
+const swagger_1 = require("@nestjs/swagger");
 let ExpenseGroupController = class ExpenseGroupController {
     expenseGroupService;
     constructor(expenseGroupService) {
@@ -51,6 +53,7 @@ let ExpenseGroupController = class ExpenseGroupController {
 exports.ExpenseGroupController = ExpenseGroupController;
 __decorate([
     (0, common_1.Get)(),
+    openapi.ApiResponse({ status: 200, type: [Object] }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Query)('budgetPeriodId')),
     __metadata("design:type", Function),
@@ -59,6 +62,7 @@ __decorate([
 ], ExpenseGroupController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    openapi.ApiResponse({ status: 200, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -67,6 +71,7 @@ __decorate([
 ], ExpenseGroupController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    openapi.ApiResponse({ status: 201, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -75,6 +80,7 @@ __decorate([
 ], ExpenseGroupController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    openapi.ApiResponse({ status: 200, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __param(2, (0, common_1.Body)()),
@@ -84,6 +90,7 @@ __decorate([
 ], ExpenseGroupController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -92,6 +99,7 @@ __decorate([
 ], ExpenseGroupController.prototype, "delete", null);
 __decorate([
     (0, common_1.Post)(':id/expenses'),
+    openapi.ApiResponse({ status: 201, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __param(2, (0, common_1.Body)()),
@@ -101,6 +109,7 @@ __decorate([
 ], ExpenseGroupController.prototype, "addExpenses", null);
 __decorate([
     (0, common_1.Post)('move-expenses'),
+    openapi.ApiResponse({ status: 201 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -109,6 +118,7 @@ __decorate([
 ], ExpenseGroupController.prototype, "moveExpenses", null);
 __decorate([
     (0, common_1.Delete)('expenses/:expenseId'),
+    openapi.ApiResponse({ status: 200, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('expenseId')),
     __metadata("design:type", Function),
@@ -116,6 +126,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ExpenseGroupController.prototype, "removeExpenseFromGroup", null);
 exports.ExpenseGroupController = ExpenseGroupController = __decorate([
+    (0, swagger_1.ApiTags)('Expense Groups'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/expense-groups'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __metadata("design:paramtypes", [expense_group_service_1.ExpenseGroupService])

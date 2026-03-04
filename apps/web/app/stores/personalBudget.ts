@@ -7,25 +7,45 @@ import type {
   CreatePersonalBudgetItemPayload,
   UpdatePersonalBudgetItemPayload,
   PersonalBudgetSummary,
+  PaginationMeta,
 } from '~/types';
+
+interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}
 
 export const usePersonalBudgetStore = defineStore('personalBudget', () => {
   const personalBudgets = ref<PersonalBudget[]>([]);
+  const personalBudgetPagination = ref<PaginationMeta | null>(null);
   const currentBudget = ref<PersonalBudget | null>(null);
   const currentSummary = ref<PersonalBudgetSummary | null>(null);
   const loading = ref(false);
   const api = useApi();
 
-  async function fetchPersonalBudgets() {
+  async function fetchPersonalBudgets(loadMore = false) {
     loading.value = true;
-    const { data, error } = await api.get<PersonalBudget[]>('/api/v1/personal-budgets');
+
+    let url = '/api/v1/personal-budgets?limit=20';
+    if (loadMore && personalBudgetPagination.value?.nextCursor) {
+      url += `&cursor=${personalBudgetPagination.value.nextCursor}`;
+    }
+
+    const { data, error } = await api.get<PaginatedResponse<PersonalBudget>>(url);
     loading.value = false;
 
     if (error) {
       return { success: false, error };
     }
 
-    personalBudgets.value = data ?? [];
+    if (data) {
+      if (loadMore) {
+        personalBudgets.value = [...personalBudgets.value, ...data.data];
+      } else {
+        personalBudgets.value = data.data;
+      }
+      personalBudgetPagination.value = data.pagination;
+    }
     return { success: true, error: null };
   }
 
@@ -149,6 +169,7 @@ export const usePersonalBudgetStore = defineStore('personalBudget', () => {
 
   return {
     personalBudgets,
+    personalBudgetPagination,
     currentBudget,
     currentSummary,
     currentTotal,

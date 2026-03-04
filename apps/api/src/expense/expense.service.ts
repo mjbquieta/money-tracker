@@ -6,6 +6,8 @@ import {
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto } from './expense.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { buildPrismaArgs, buildPaginatedResponse } from '../common/helpers/pagination.helper';
 
 @Injectable()
 export class ExpenseService {
@@ -66,7 +68,7 @@ export class ExpenseService {
     });
   }
 
-  async findAll(userId: UUID, budgetPeriodId?: UUID) {
+  async findAll(userId: UUID, pagination: PaginationQueryDto, budgetPeriodId?: UUID) {
     const where: any = {
       budgetPeriod: {
         userId,
@@ -79,14 +81,21 @@ export class ExpenseService {
       where.budgetPeriodId = budgetPeriodId;
     }
 
-    return this.prisma.expense.findMany({
-      where,
-      include: {
-        category: true,
-        budgetPeriod: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const prismaArgs = buildPrismaArgs(pagination);
+
+    const [items, totalCount] = await Promise.all([
+      this.prisma.expense.findMany({
+        where,
+        include: {
+          category: true,
+          budgetPeriod: true,
+        },
+        ...prismaArgs,
+      }),
+      this.prisma.expense.count({ where }),
+    ]);
+
+    return buildPaginatedResponse(items, pagination, totalCount);
   }
 
   async findOne(userId: UUID, expenseId: UUID) {

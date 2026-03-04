@@ -14,7 +14,11 @@ import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ExpenseService } from './expense.service';
 import { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto } from './expense.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Expenses')
+@ApiBearerAuth()
 @Controller('api/v1/expenses')
 @UseGuards(AuthGuard)
 export class ExpenseController {
@@ -23,9 +27,10 @@ export class ExpenseController {
   @Get()
   findAll(
     @CurrentUser('id') userId: UUID,
-    @Query('budgetPeriodId') budgetPeriodId?: UUID,
+    @Query('budgetPeriodId') budgetPeriodId: UUID | undefined,
+    @Query() pagination: PaginationQueryDto,
   ) {
-    return this.expenseService.findAll(userId, budgetPeriodId);
+    return this.expenseService.findAll(userId, pagination, budgetPeriodId);
   }
 
   @Get(':id')

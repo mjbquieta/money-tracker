@@ -19,7 +19,10 @@ import {
   AddExpensesToGroupDto,
   MoveExpensesToGroupDto,
 } from './expense-group.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Expense Groups')
+@ApiBearerAuth()
 @Controller('api/v1/expense-groups')
 @UseGuards(AuthGuard)
 export class ExpenseGroupController {

@@ -1,29 +1,33 @@
 import { UUID } from 'crypto';
 import { PersonalBudgetService } from './personal-budget.service';
 import { CreatePersonalBudgetDto, CreatePersonalBudgetItemDto, UpdatePersonalBudgetDto, UpdatePersonalBudgetItemDto } from './personal-budget.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 export declare class PersonalBudgetController {
     private readonly personalBudgetService;
     constructor(personalBudgetService: PersonalBudgetService);
-    findAll(userId: UUID): Promise<({
-        items: {
+    findAll(userId: UUID, pagination: PaginationQueryDto): Promise<{
+        data: ({
+            items: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                description: string | null;
+                amount: number;
+                personalBudgetId: string;
+            }[];
+        } & {
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
+            userId: string;
             description: string | null;
-            amount: number;
-            personalBudgetId: string;
-        }[];
-    } & {
-        id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date | null;
-        deletedAt: Date | null;
-        userId: string;
-        description: string | null;
-    })[]>;
+        })[];
+        pagination: import("../common/interfaces/api-response.interface").PaginationMeta;
+    }>;
     findOne(userId: UUID, id: UUID): Promise<{
         items: {
             id: string;

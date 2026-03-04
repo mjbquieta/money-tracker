@@ -14,6 +14,7 @@ const auth_module_1 = require("./auth/auth.module");
 const prisma_module_1 = require("./prisma/prisma.module");
 const core_1 = require("@nestjs/core");
 const throttler_1 = require("@nestjs/throttler");
+const nestjs_pino_1 = require("nestjs-pino");
 const settings_module_1 = require("./settings/settings.module");
 const category_module_1 = require("./category/category.module");
 const budget_period_module_1 = require("./budget-period/budget-period.module");
@@ -28,6 +29,20 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             config_1.ConfigModule.forRoot(),
+            nestjs_pino_1.LoggerModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                inject: [config_1.ConfigService],
+                useFactory: (configService) => ({
+                    pinoHttp: {
+                        transport: configService.get('APP_ENV') !== 'production'
+                            ? { target: 'pino-pretty', options: { colorize: true } }
+                            : undefined,
+                        level: configService.get('APP_ENV') !== 'production' ? 'debug' : 'info',
+                        redact: ['req.headers.authorization', 'req.body.password', 'req.body.currentPassword', 'req.body.newPassword'],
+                        autoLogging: true,
+                    },
+                }),
+            }),
             throttler_1.ThrottlerModule.forRoot({
                 throttlers: [{ ttl: 60000, limit: 100 }],
             }),

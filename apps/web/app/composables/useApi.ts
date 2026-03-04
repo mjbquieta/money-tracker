@@ -1,4 +1,4 @@
-import type { ApiError } from '~/types';
+import type { ApiError, ApiEnvelope, ApiErrorEnvelope, ApiResponseMeta } from '~/types';
 
 export function useApi() {
   const config = useRuntimeConfig();
@@ -14,7 +14,7 @@ export function useApi() {
   async function request<T>(
     endpoint: string,
     options: RequestInit = {}
-  ): Promise<{ data: T | null; error: ApiError | null }> {
+  ): Promise<{ data: T | null; error: ApiError | null; meta: ApiResponseMeta | null }> {
     try {
       const token = getToken();
       const headers: Record<string, string> = {
@@ -31,13 +31,26 @@ export function useApi() {
         headers,
       });
 
-      const data = await response.json();
+      const json = await response.json();
 
       if (!response.ok) {
-        return { data: null, error: data as ApiError };
+        // Handle envelope error format: { error: { statusCode, message }, meta }
+        if (json.error && json.meta) {
+          const envelope = json as ApiErrorEnvelope;
+          return { data: null, error: envelope.error, meta: envelope.meta };
+        }
+        // Fallback for non-envelope errors (e.g., validation pipe before interceptor)
+        return { data: null, error: json as ApiError, meta: null };
       }
 
-      return { data: data as T, error: null };
+      // Unwrap envelope: { data, meta } → extract data
+      if (json.data !== undefined && json.meta) {
+        const envelope = json as ApiEnvelope<T>;
+        return { data: envelope.data, error: null, meta: envelope.meta };
+      }
+
+      // Fallback for non-envelope responses
+      return { data: json as T, error: null, meta: null };
     } catch (err) {
       return {
         data: null,
@@ -45,6 +58,7 @@ export function useApi() {
           statusCode: 500,
           message: 'Network error. Please try again.',
         },
+        meta: null,
       };
     }
   }

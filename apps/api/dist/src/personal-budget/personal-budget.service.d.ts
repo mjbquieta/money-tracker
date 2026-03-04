@@ -1,6 +1,7 @@
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalBudgetDto, CreatePersonalBudgetItemDto, UpdatePersonalBudgetDto, UpdatePersonalBudgetItemDto } from './personal-budget.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 export declare class PersonalBudgetService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -24,26 +25,29 @@ export declare class PersonalBudgetService {
         userId: string;
         description: string | null;
     }) | null>;
-    findAll(userId: UUID): Promise<({
-        items: {
+    findAll(userId: UUID, pagination: PaginationQueryDto): Promise<{
+        data: ({
+            items: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                description: string | null;
+                amount: number;
+                personalBudgetId: string;
+            }[];
+        } & {
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
+            userId: string;
             description: string | null;
-            amount: number;
-            personalBudgetId: string;
-        }[];
-    } & {
-        id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date | null;
-        deletedAt: Date | null;
-        userId: string;
-        description: string | null;
-    })[]>;
+        })[];
+        pagination: import("../common/interfaces/api-response.interface").PaginationMeta;
+    }>;
     findOne(userId: UUID, personalBudgetId: UUID): Promise<{
         items: {
             id: string;

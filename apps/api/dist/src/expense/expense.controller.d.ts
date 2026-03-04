@@ -1,43 +1,47 @@
 import { UUID } from 'crypto';
 import { ExpenseService } from './expense.service';
 import { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto } from './expense.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 export declare class ExpenseController {
     private readonly expenseService;
     constructor(expenseService: ExpenseService);
-    findAll(userId: UUID, budgetPeriodId?: UUID): Promise<({
-        budgetPeriod: {
-            id: string;
-            name: string | null;
-            createdAt: Date;
-            updatedAt: Date | null;
-            deletedAt: Date | null;
-            userId: string;
-            startDate: Date;
-            endDate: Date;
-        };
-        category: {
+    findAll(userId: UUID, budgetPeriodId: UUID | undefined, pagination: PaginationQueryDto): Promise<{
+        data: ({
+            budgetPeriod: {
+                id: string;
+                name: string | null;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                userId: string;
+                startDate: Date;
+                endDate: Date;
+            };
+            category: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                userId: string;
+                description: string | null;
+                isDefault: boolean;
+                defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
+            };
+        } & {
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            userId: string;
             description: string | null;
-            isDefault: boolean;
-            defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
-        };
-    } & {
-        id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date | null;
-        deletedAt: Date | null;
-        description: string | null;
-        amount: number;
-        budgetPeriodId: string;
-        categoryId: string;
-        expenseGroupId: string | null;
-    })[]>;
+            amount: number;
+            categoryId: string;
+            budgetPeriodId: string;
+            expenseGroupId: string | null;
+        })[];
+        pagination: import("../common/interfaces/api-response.interface").PaginationMeta;
+    }>;
     findOne(userId: UUID, id: UUID): Promise<{
         budgetPeriod: {
             id: string;
@@ -68,8 +72,8 @@ export declare class ExpenseController {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
     create(userId: UUID, payload: CreateExpenseDto): Promise<{
@@ -92,8 +96,8 @@ export declare class ExpenseController {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
     createBulk(userId: UUID, payload: CreateBulkExpenseDto): Promise<({
@@ -116,8 +120,8 @@ export declare class ExpenseController {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     })[]>;
     update(userId: UUID, id: UUID, payload: UpdateExpenseDto): Promise<{
@@ -140,8 +144,8 @@ export declare class ExpenseController {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
     delete(userId: UUID, id: UUID): Promise<{
@@ -152,8 +156,8 @@ export declare class ExpenseController {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
 }

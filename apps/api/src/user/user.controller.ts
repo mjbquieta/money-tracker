@@ -15,7 +15,10 @@ import {
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { UUID } from 'crypto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
+@ApiBearerAuth()
 @Controller('api/v1/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}

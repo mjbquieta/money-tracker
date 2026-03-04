@@ -13,7 +13,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SettingsController = void 0;
+const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const auth_guard_1 = require("../auth/auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const settings_service_1 = require("./settings.service");
@@ -33,6 +35,7 @@ let SettingsController = class SettingsController {
 exports.SettingsController = SettingsController;
 __decorate([
     (0, common_1.Get)(),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -40,6 +43,7 @@ __decorate([
 ], SettingsController.prototype, "findByUserId", null);
 __decorate([
     (0, common_1.Patch)(),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -47,6 +51,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SettingsController.prototype, "update", null);
 exports.SettingsController = SettingsController = __decorate([
+    (0, swagger_1.ApiTags)('Settings'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/settings'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __metadata("design:paramtypes", [settings_service_1.SettingsService])

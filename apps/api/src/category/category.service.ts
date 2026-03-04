@@ -7,6 +7,8 @@ import { Prisma } from '@prisma/client';
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCategoryDto, DefaultCategory, UpdateCategoryDto } from './category.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { buildPrismaArgs, buildPaginatedResponse } from '../common/helpers/pagination.helper';
 
 @Injectable()
 export class CategoryService {
@@ -60,14 +62,24 @@ export class CategoryService {
     });
   }
 
-  async findAll(userId: UUID) {
-    return this.prisma.category.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-      },
-      orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
-    });
+  async findAll(userId: UUID, pagination: PaginationQueryDto) {
+    const where = {
+      userId,
+      deletedAt: null,
+    };
+
+    const prismaArgs = buildPrismaArgs(pagination);
+
+    const [items, totalCount] = await Promise.all([
+      this.prisma.category.findMany({
+        where,
+        ...prismaArgs,
+        orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+      }),
+      this.prisma.category.count({ where }),
+    ]);
+
+    return buildPaginatedResponse(items, pagination, totalCount);
   }
 
   async findOne(userId: UUID, categoryId: UUID) {

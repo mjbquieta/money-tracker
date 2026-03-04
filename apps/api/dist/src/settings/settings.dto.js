@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Currency = exports.UpdateSettingsDto = exports.SettingsDto = void 0;
+const openapi = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 var Currency;
 (function (Currency) {
@@ -24,6 +25,9 @@ var Currency;
 })(Currency || (exports.Currency = Currency = {}));
 class SettingsDto {
     currency;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { currency: { required: true, enum: require("./settings.dto").Currency } };
+    }
 }
 exports.SettingsDto = SettingsDto;
 __decorate([
@@ -32,6 +36,9 @@ __decorate([
 ], SettingsDto.prototype, "currency", void 0);
 class UpdateSettingsDto {
     currency;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { currency: { required: false, enum: require("./settings.dto").Currency } };
+    }
 }
 exports.UpdateSettingsDto = UpdateSettingsDto;
 __decorate([

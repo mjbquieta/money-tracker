@@ -1,5 +1,10 @@
 import { defineStore } from 'pinia';
-import type { Expense, CreateExpensePayload, UpdateExpensePayload, CreateBulkExpensePayload, Category, CreateCategoryPayload } from '~/types';
+import type { Expense, CreateExpensePayload, UpdateExpensePayload, CreateBulkExpensePayload, Category, CreateCategoryPayload, PaginationMeta } from '~/types';
+
+interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}
 
 export const useExpenseStore = defineStore('expense', () => {
   const categories = ref<Category[]>([]);
@@ -8,14 +13,14 @@ export const useExpenseStore = defineStore('expense', () => {
 
   async function fetchCategories() {
     loading.value = true;
-    const { data, error } = await api.get<Category[]>('/api/v1/categories');
+    const { data, error } = await api.get<PaginatedResponse<Category>>('/api/v1/categories?limit=100');
     loading.value = false;
 
     if (error) {
       return { success: false, error };
     }
 
-    categories.value = data ?? [];
+    categories.value = data?.data ?? [];
     return { success: true, error: null };
   }
 

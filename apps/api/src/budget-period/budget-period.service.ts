@@ -10,6 +10,8 @@ import {
   DuplicateBudgetPeriodDto,
   UpdateBudgetPeriodDto,
 } from './budget-period.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { buildPrismaArgs, buildPaginatedResponse } from '../common/helpers/pagination.helper';
 
 // Helper type for budget period with incomes
 type BudgetPeriodWithIncomes = {
@@ -69,23 +71,33 @@ export class BudgetPeriodService {
     });
   }
 
-  async findAll(userId: UUID) {
-    return this.prisma.budgetPeriod.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-      },
-      include: {
-        expenses: {
-          where: { deletedAt: null },
-          include: { category: true },
+  async findAll(userId: UUID, pagination: PaginationQueryDto) {
+    const where = {
+      userId,
+      deletedAt: null,
+    };
+
+    const prismaArgs = buildPrismaArgs(pagination);
+
+    const [items, totalCount] = await Promise.all([
+      this.prisma.budgetPeriod.findMany({
+        where,
+        include: {
+          expenses: {
+            where: { deletedAt: null },
+            include: { category: true },
+          },
+          incomes: {
+            where: { deletedAt: null },
+          },
         },
-        incomes: {
-          where: { deletedAt: null },
-        },
-      },
-      orderBy: { startDate: 'desc' },
-    });
+        ...prismaArgs,
+        orderBy: { startDate: prismaArgs.orderBy.createdAt },
+      }),
+      this.prisma.budgetPeriod.count({ where }),
+    ]);
+
+    return buildPaginatedResponse(items, pagination, totalCount);
   }
 
   async findOne(userId: UUID, budgetPeriodId: UUID) {

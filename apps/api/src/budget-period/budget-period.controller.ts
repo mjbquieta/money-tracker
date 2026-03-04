@@ -18,15 +18,22 @@ import {
   DuplicateBudgetPeriodDto,
   UpdateBudgetPeriodDto,
 } from './budget-period.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Budget Periods')
+@ApiBearerAuth()
 @Controller('api/v1/budget-periods')
 @UseGuards(AuthGuard)
 export class BudgetPeriodController {
   constructor(private readonly budgetPeriodService: BudgetPeriodService) {}
 
   @Get()
-  findAll(@CurrentUser('id') userId: UUID) {
-    return this.budgetPeriodService.findAll(userId);
+  findAll(
+    @CurrentUser('id') userId: UUID,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    return this.budgetPeriodService.findAll(userId, pagination);
   }
 
   @Get(':id')

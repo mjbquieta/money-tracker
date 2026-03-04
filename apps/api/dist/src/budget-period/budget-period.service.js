@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BudgetPeriodService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const pagination_helper_1 = require("../common/helpers/pagination.helper");
 function computeIncome(budgetPeriod) {
     return budgetPeriod.incomes.reduce((sum, inc) => sum + inc.amount, 0);
 }
@@ -58,23 +59,30 @@ let BudgetPeriodService = class BudgetPeriodService {
             });
         });
     }
-    async findAll(userId) {
-        return this.prisma.budgetPeriod.findMany({
-            where: {
-                userId,
-                deletedAt: null,
-            },
-            include: {
-                expenses: {
-                    where: { deletedAt: null },
-                    include: { category: true },
+    async findAll(userId, pagination) {
+        const where = {
+            userId,
+            deletedAt: null,
+        };
+        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(pagination);
+        const [items, totalCount] = await Promise.all([
+            this.prisma.budgetPeriod.findMany({
+                where,
+                include: {
+                    expenses: {
+                        where: { deletedAt: null },
+                        include: { category: true },
+                    },
+                    incomes: {
+                        where: { deletedAt: null },
+                    },
                 },
-                incomes: {
-                    where: { deletedAt: null },
-                },
-            },
-            orderBy: { startDate: 'desc' },
-        });
+                ...prismaArgs,
+                orderBy: { startDate: prismaArgs.orderBy.createdAt },
+            }),
+            this.prisma.budgetPeriod.count({ where }),
+        ]);
+        return (0, pagination_helper_1.buildPaginatedResponse)(items, pagination, totalCount);
     }
     async findOne(userId, budgetPeriodId) {
         const budgetPeriod = await this.prisma.budgetPeriod.findFirst({

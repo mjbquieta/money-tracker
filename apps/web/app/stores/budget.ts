@@ -1,8 +1,14 @@
 import { defineStore } from 'pinia';
-import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics, OverallMetrics, YearRangeMetrics, Income, CreateIncomePayload, UpdateIncomePayload } from '~/types';
+import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics, OverallMetrics, YearRangeMetrics, Income, CreateIncomePayload, UpdateIncomePayload, PaginationMeta } from '~/types';
+
+interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}
 
 export const useBudgetStore = defineStore('budget', () => {
   const budgetPeriods = ref<BudgetPeriod[]>([]);
+  const budgetPagination = ref<PaginationMeta | null>(null);
   const currentPeriod = ref<BudgetPeriod | null>(null);
   const currentSummary = ref<BudgetSummary | null>(null);
   const yearlyMetrics = ref<YearlyMetrics | null>(null);
@@ -11,16 +17,29 @@ export const useBudgetStore = defineStore('budget', () => {
   const loading = ref(false);
   const api = useApi();
 
-  async function fetchBudgetPeriods() {
+  async function fetchBudgetPeriods(loadMore = false) {
     loading.value = true;
-    const { data, error } = await api.get<BudgetPeriod[]>('/api/v1/budget-periods');
+
+    let url = '/api/v1/budget-periods?limit=20';
+    if (loadMore && budgetPagination.value?.nextCursor) {
+      url += `&cursor=${budgetPagination.value.nextCursor}`;
+    }
+
+    const { data, error } = await api.get<PaginatedResponse<BudgetPeriod>>(url);
     loading.value = false;
 
     if (error) {
       return { success: false, error };
     }
 
-    budgetPeriods.value = data ?? [];
+    if (data) {
+      if (loadMore) {
+        budgetPeriods.value = [...budgetPeriods.value, ...data.data];
+      } else {
+        budgetPeriods.value = data.data;
+      }
+      budgetPagination.value = data.pagination;
+    }
     return { success: true, error: null };
   }
 
@@ -191,6 +210,7 @@ export const useBudgetStore = defineStore('budget', () => {
 
   return {
     budgetPeriods,
+    budgetPagination,
     currentPeriod,
     currentSummary,
     yearlyMetrics,

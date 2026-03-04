@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginDto = exports.IsUsernameOrEmailProvidedConstraint = void 0;
 exports.IsUsernameOrEmailProvided = IsUsernameOrEmailProvided;
+const openapi = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 let IsUsernameOrEmailProvidedConstraint = class IsUsernameOrEmailProvidedConstraint {
     validate(value, args) {
@@ -25,6 +26,9 @@ let IsUsernameOrEmailProvidedConstraint = class IsUsernameOrEmailProvidedConstra
             return 'Provide either username or email, not both';
         }
         return 'Either username or email must be provided';
+    }
+    static _OPENAPI_METADATA_FACTORY() {
+        return {};
     }
 };
 exports.IsUsernameOrEmailProvidedConstraint = IsUsernameOrEmailProvidedConstraint;
@@ -46,6 +50,9 @@ class LoginDto {
     username;
     email;
     password;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { username: { required: false, type: () => String }, email: { required: false, type: () => String, format: "email" }, password: { required: true, type: () => String } };
+    }
 }
 exports.LoginDto = LoginDto;
 __decorate([

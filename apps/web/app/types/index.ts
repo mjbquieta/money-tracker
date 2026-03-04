@@ -243,6 +243,34 @@ export interface ApiError {
   error?: string;
 }
 
+export interface PaginationMeta {
+  hasMore: boolean;
+  nextCursor?: string | null;
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+}
+
+export interface ApiResponseMeta {
+  timestamp: string;
+  pagination?: PaginationMeta;
+}
+
+export interface ApiEnvelope<T = unknown> {
+  data: T;
+  meta: ApiResponseMeta;
+}
+
+export interface ApiErrorEnvelope {
+  error: ApiError;
+  meta: ApiResponseMeta;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
+}
+
 // Personal Budget types
 export interface PersonalBudget {
   id: string;

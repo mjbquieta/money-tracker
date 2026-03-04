@@ -13,6 +13,7 @@ exports.CategoryService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const category_dto_1 = require("./category.dto");
+const pagination_helper_1 = require("../common/helpers/pagination.helper");
 let CategoryService = class CategoryService {
     prisma;
     constructor(prisma) {
@@ -52,14 +53,21 @@ let CategoryService = class CategoryService {
             },
         });
     }
-    async findAll(userId) {
-        return this.prisma.category.findMany({
-            where: {
-                userId,
-                deletedAt: null,
-            },
-            orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
-        });
+    async findAll(userId, pagination) {
+        const where = {
+            userId,
+            deletedAt: null,
+        };
+        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(pagination);
+        const [items, totalCount] = await Promise.all([
+            this.prisma.category.findMany({
+                where,
+                ...prismaArgs,
+                orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+            }),
+            this.prisma.category.count({ where }),
+        ]);
+        return (0, pagination_helper_1.buildPaginatedResponse)(items, pagination, totalCount);
     }
     async findOne(userId, categoryId) {
         const category = await this.prisma.category.findFirst({

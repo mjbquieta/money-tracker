@@ -1,6 +1,7 @@
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto } from './expense.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 export declare class ExpenseService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -24,44 +25,47 @@ export declare class ExpenseService {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
-    findAll(userId: UUID, budgetPeriodId?: UUID): Promise<({
-        budgetPeriod: {
-            id: string;
-            name: string | null;
-            createdAt: Date;
-            updatedAt: Date | null;
-            deletedAt: Date | null;
-            userId: string;
-            startDate: Date;
-            endDate: Date;
-        };
-        category: {
+    findAll(userId: UUID, pagination: PaginationQueryDto, budgetPeriodId?: UUID): Promise<{
+        data: ({
+            budgetPeriod: {
+                id: string;
+                name: string | null;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                userId: string;
+                startDate: Date;
+                endDate: Date;
+            };
+            category: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                userId: string;
+                description: string | null;
+                isDefault: boolean;
+                defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
+            };
+        } & {
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            userId: string;
             description: string | null;
-            isDefault: boolean;
-            defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
-        };
-    } & {
-        id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date | null;
-        deletedAt: Date | null;
-        description: string | null;
-        amount: number;
-        budgetPeriodId: string;
-        categoryId: string;
-        expenseGroupId: string | null;
-    })[]>;
+            amount: number;
+            categoryId: string;
+            budgetPeriodId: string;
+            expenseGroupId: string | null;
+        })[];
+        pagination: import("../common/interfaces/api-response.interface").PaginationMeta;
+    }>;
     findOne(userId: UUID, expenseId: UUID): Promise<{
         budgetPeriod: {
             id: string;
@@ -92,8 +96,8 @@ export declare class ExpenseService {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
     update(userId: UUID, expenseId: UUID, payload: UpdateExpenseDto): Promise<{
@@ -116,8 +120,8 @@ export declare class ExpenseService {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
     delete(userId: UUID, expenseId: UUID): Promise<{
@@ -128,8 +132,8 @@ export declare class ExpenseService {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
     createBulk(userId: UUID, payload: CreateBulkExpenseDto): Promise<({
@@ -152,8 +156,8 @@ export declare class ExpenseService {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     })[]>;
 }

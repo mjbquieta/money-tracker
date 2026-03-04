@@ -13,18 +13,21 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BudgetPeriodController = void 0;
+const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const auth_guard_1 = require("../auth/auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const budget_period_service_1 = require("./budget-period.service");
 const budget_period_dto_1 = require("./budget-period.dto");
+const pagination_dto_1 = require("../common/dto/pagination.dto");
+const swagger_1 = require("@nestjs/swagger");
 let BudgetPeriodController = class BudgetPeriodController {
     budgetPeriodService;
     constructor(budgetPeriodService) {
         this.budgetPeriodService = budgetPeriodService;
     }
-    findAll(userId) {
-        return this.budgetPeriodService.findAll(userId);
+    findAll(userId, pagination) {
+        return this.budgetPeriodService.findAll(userId, pagination);
     }
     findOne(userId, id) {
         return this.budgetPeriodService.findOne(userId, id);
@@ -61,13 +64,16 @@ let BudgetPeriodController = class BudgetPeriodController {
 exports.BudgetPeriodController = BudgetPeriodController;
 __decorate([
     (0, common_1.Get)(),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, pagination_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], BudgetPeriodController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    openapi.ApiResponse({ status: 200, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -76,6 +82,7 @@ __decorate([
 ], BudgetPeriodController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('metrics/yearly'),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Query)('year')),
     __metadata("design:type", Function),
@@ -84,6 +91,7 @@ __decorate([
 ], BudgetPeriodController.prototype, "getYearlyMetrics", null);
 __decorate([
     (0, common_1.Get)('metrics/overall'),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -91,6 +99,7 @@ __decorate([
 ], BudgetPeriodController.prototype, "getOverallMetrics", null);
 __decorate([
     (0, common_1.Get)('metrics/year-range'),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Query)('startYear')),
     __param(2, (0, common_1.Query)('endYear')),
@@ -100,6 +109,7 @@ __decorate([
 ], BudgetPeriodController.prototype, "getYearRangeMetrics", null);
 __decorate([
     (0, common_1.Get)(':id/summary'),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -108,6 +118,7 @@ __decorate([
 ], BudgetPeriodController.prototype, "getSummary", null);
 __decorate([
     (0, common_1.Post)(),
+    openapi.ApiResponse({ status: 201, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -116,6 +127,7 @@ __decorate([
 ], BudgetPeriodController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)(':id/duplicate'),
+    openapi.ApiResponse({ status: 201, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __param(2, (0, common_1.Body)()),
@@ -125,6 +137,7 @@ __decorate([
 ], BudgetPeriodController.prototype, "duplicate", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    openapi.ApiResponse({ status: 200, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __param(2, (0, common_1.Body)()),
@@ -134,6 +147,7 @@ __decorate([
 ], BudgetPeriodController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -141,6 +155,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BudgetPeriodController.prototype, "delete", null);
 exports.BudgetPeriodController = BudgetPeriodController = __decorate([
+    (0, swagger_1.ApiTags)('Budget Periods'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('api/v1/budget-periods'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __metadata("design:paramtypes", [budget_period_service_1.BudgetPeriodService])

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpenseService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const pagination_helper_1 = require("../common/helpers/pagination.helper");
 let ExpenseService = class ExpenseService {
     prisma;
     constructor(prisma) {
@@ -62,7 +63,7 @@ let ExpenseService = class ExpenseService {
             include: { category: true },
         });
     }
-    async findAll(userId, budgetPeriodId) {
+    async findAll(userId, pagination, budgetPeriodId) {
         const where = {
             budgetPeriod: {
                 userId,
@@ -73,14 +74,19 @@ let ExpenseService = class ExpenseService {
         if (budgetPeriodId) {
             where.budgetPeriodId = budgetPeriodId;
         }
-        return this.prisma.expense.findMany({
-            where,
-            include: {
-                category: true,
-                budgetPeriod: true,
-            },
-            orderBy: { createdAt: 'desc' },
-        });
+        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(pagination);
+        const [items, totalCount] = await Promise.all([
+            this.prisma.expense.findMany({
+                where,
+                include: {
+                    category: true,
+                    budgetPeriod: true,
+                },
+                ...prismaArgs,
+            }),
+            this.prisma.expense.count({ where }),
+        ]);
+        return (0, pagination_helper_1.buildPaginatedResponse)(items, pagination, totalCount);
     }
     async findOne(userId, expenseId) {
         const expense = await this.prisma.expense.findFirst({

@@ -25,8 +25,8 @@ export declare class ExpenseGroupController {
             deletedAt: Date | null;
             description: string | null;
             amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -69,8 +69,8 @@ export declare class ExpenseGroupController {
             deletedAt: Date | null;
             description: string | null;
             amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -103,8 +103,8 @@ export declare class ExpenseGroupController {
             deletedAt: Date | null;
             description: string | null;
             amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -137,8 +137,8 @@ export declare class ExpenseGroupController {
             deletedAt: Date | null;
             description: string | null;
             amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -190,8 +190,8 @@ export declare class ExpenseGroupController {
             deletedAt: Date | null;
             description: string | null;
             amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -227,8 +227,8 @@ export declare class ExpenseGroupController {
         deletedAt: Date | null;
         description: string | null;
         amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
         expenseGroupId: string | null;
     }>;
 }

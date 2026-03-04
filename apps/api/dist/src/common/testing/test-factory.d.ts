@@ -1,0 +1,56 @@
+export declare function createTestUser(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    email: string;
+    name: string;
+    username: string;
+    password: string;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+};
+export declare function createTestCategory(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    name: string;
+    description: string;
+    isDefault: boolean;
+    defaultCategory: null;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+};
+export declare function createTestBudgetPeriod(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    name: string;
+    startDate: Date;
+    endDate: Date;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+    expenses: never[];
+    incomes: never[];
+};
+export declare function createTestExpense(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    name: string;
+    description: string;
+    amount: number;
+    categoryId: `${string}-${string}-${string}-${string}-${string}`;
+    budgetPeriodId: `${string}-${string}-${string}-${string}-${string}`;
+    expenseGroupId: null;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+};
+export declare function createTestIncome(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    name: string;
+    description: string;
+    amount: number;
+    budgetPeriodId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+};

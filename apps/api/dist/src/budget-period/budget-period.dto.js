@@ -10,12 +10,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DuplicateBudgetPeriodDto = exports.UpdateBudgetPeriodDto = exports.CreateBudgetPeriodDto = exports.IncomeItemDto = void 0;
+const openapi = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class IncomeItemDto {
     name;
     description;
     amount;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: true, type: () => String }, description: { required: false, type: () => String }, amount: { required: true, type: () => Number, minimum: 1 } };
+    }
 }
 exports.IncomeItemDto = IncomeItemDto;
 __decorate([
@@ -38,6 +42,9 @@ class CreateBudgetPeriodDto {
     startDate;
     endDate;
     incomes;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: false, type: () => String, maxLength: 100 }, startDate: { required: true, type: () => Date }, endDate: { required: true, type: () => Date }, incomes: { required: false, type: () => [require("./budget-period.dto").IncomeItemDto], minItems: 1 } };
+    }
 }
 exports.CreateBudgetPeriodDto = CreateBudgetPeriodDto;
 __decorate([
@@ -68,6 +75,9 @@ class UpdateBudgetPeriodDto {
     name;
     startDate;
     endDate;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: false, type: () => String, maxLength: 100 }, startDate: { required: false, type: () => Date }, endDate: { required: false, type: () => Date } };
+    }
 }
 exports.UpdateBudgetPeriodDto = UpdateBudgetPeriodDto;
 __decorate([
@@ -92,6 +102,9 @@ class DuplicateBudgetPeriodDto {
     name;
     startDate;
     endDate;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: false, type: () => String, maxLength: 100 }, startDate: { required: true, type: () => Date }, endDate: { required: true, type: () => Date } };
+    }
 }
 exports.DuplicateBudgetPeriodDto = DuplicateBudgetPeriodDto;
 __decorate([
