@@ -30,6 +30,14 @@ enum DefaultCategory {
   ENTERTAINMENT
 }
 
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  YEARLY
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -40,10 +48,12 @@ model User {
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
   deletedAt       DateTime?        @map("deleted_at")
-  settings        Settings?
-  budgetPeriods   BudgetPeriod[]
-  categories      Category[]
-  personalBudgets PersonalBudget[]
+  settings         Settings?
+  budgetPeriods    BudgetPeriod[]
+  categories       Category[]
+  personalBudgets  PersonalBudget[]
+  expenseTemplates  ExpenseTemplate[]
+  recurringExpenses RecurringExpense[]
 
   @@map("users")
 }
@@ -117,6 +127,7 @@ model Category {
   id              String           @id @default(uuid())
   name            String
   description     String?
+  spendingLimit   Float?           @map("spending_limit")
   isDefault       Boolean          @default(false) @map("is_default")
   defaultCategory DefaultCategory? @map("default_category") // Only set for system defaults
   createdAt       DateTime         @default(now()) @map("created_at")
@@ -124,9 +135,11 @@ model Category {
   deletedAt       DateTime?        @map("deleted_at")
 
   // Relations
-  userId   String
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expenses Expense[]
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses          Expense[]
+  expenseTemplates  ExpenseTemplate[]
+  recurringExpenses RecurringExpense[]
 
   // Each user can have only one category with the same name
   @@unique([userId, name])
@@ -183,4 +196,45 @@ model PersonalBudgetItem {
   personalBudget   PersonalBudget @relation(fields: [personalBudgetId], references: [id], onDelete: Cascade)
 
   @@map("personal_budget_items")
+}
+
+model ExpenseTemplate {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  amount      Float     @default(0)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expense_templates")
+}
+
+model RecurringExpense {
+  id                String              @id @default(uuid())
+  name              String
+  description       String?
+  amount            Float               @default(0)
+  frequency         RecurrenceFrequency
+  startDate         DateTime            @map("start_date")
+  endDate           DateTime?           @map("end_date")
+  isActive          Boolean             @default(true) @map("is_active")
+  lastProcessedDate DateTime?           @map("last_processed_date")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime?           @updatedAt @map("updated_at")
+  deletedAt         DateTime?           @map("deleted_at")
+
+  // Relations
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("recurring_expenses")
 }

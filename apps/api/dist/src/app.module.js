@@ -22,6 +22,8 @@ const expense_module_1 = require("./expense/expense.module");
 const expense_group_module_1 = require("./expense-group/expense-group.module");
 const income_module_1 = require("./income/income.module");
 const personal_budget_module_1 = require("./personal-budget/personal-budget.module");
+const expense_template_module_1 = require("./expense-template/expense-template.module");
+const recurring_expense_module_1 = require("./recurring-expense/recurring-expense.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -56,6 +58,8 @@ exports.AppModule = AppModule = __decorate([
             expense_group_module_1.ExpenseGroupModule,
             income_module_1.IncomeModule,
             personal_budget_module_1.PersonalBudgetModule,
+            expense_template_module_1.ExpenseTemplateModule,
+            recurring_expense_module_1.RecurringExpenseModule,
         ],
         providers: [
             {

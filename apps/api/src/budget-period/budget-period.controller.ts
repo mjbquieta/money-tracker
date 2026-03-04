@@ -67,9 +67,33 @@ export class BudgetPeriodController {
     return this.budgetPeriodService.getYearRangeMetrics(userId, start, end);
   }
 
+  @Get('analytics/category-comparison')
+  getCategoryComparison(
+    @CurrentUser('id') userId: UUID,
+    @Query('budgetPeriodIds') budgetPeriodIds: string,
+  ) {
+    const ids = budgetPeriodIds ? budgetPeriodIds.split(',') : [];
+    return this.budgetPeriodService.getCategoryComparison(userId, ids);
+  }
+
   @Get(':id/summary')
   getSummary(@CurrentUser('id') userId: UUID, @Param('id') id: UUID) {
     return this.budgetPeriodService.getSummary(userId, id);
+  }
+
+  @Get(':id/analytics/daily-average')
+  getDailyAverage(@CurrentUser('id') userId: UUID, @Param('id') id: UUID) {
+    return this.budgetPeriodService.getAverageDailySpending(userId, id);
+  }
+
+  @Get(':id/analytics/top-expenses')
+  getTopExpenses(
+    @CurrentUser('id') userId: UUID,
+    @Param('id') id: UUID,
+    @Query('limit') limit?: string,
+  ) {
+    const take = limit ? parseInt(limit, 10) : 5;
+    return this.budgetPeriodService.getTopExpenses(userId, id, take);
   }
 
   @Post()

@@ -63,7 +63,7 @@ let ExpenseService = class ExpenseService {
             include: { category: true },
         });
     }
-    async findAll(userId, pagination, budgetPeriodId) {
+    async findAll(userId, filters) {
         const where = {
             budgetPeriod: {
                 userId,
@@ -71,10 +71,30 @@ let ExpenseService = class ExpenseService {
             },
             deletedAt: null,
         };
-        if (budgetPeriodId) {
-            where.budgetPeriodId = budgetPeriodId;
+        if (filters.budgetPeriodId) {
+            where.budgetPeriodId = filters.budgetPeriodId;
         }
-        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(pagination);
+        if (filters.categoryId) {
+            where.categoryId = filters.categoryId;
+        }
+        if (filters.search) {
+            where.name = { contains: filters.search, mode: 'insensitive' };
+        }
+        if (filters.dateFrom || filters.dateTo) {
+            where.createdAt = {};
+            if (filters.dateFrom)
+                where.createdAt.gte = new Date(filters.dateFrom);
+            if (filters.dateTo)
+                where.createdAt.lte = new Date(filters.dateTo);
+        }
+        if (filters.amountMin !== undefined || filters.amountMax !== undefined) {
+            where.amount = {};
+            if (filters.amountMin !== undefined)
+                where.amount.gte = filters.amountMin;
+            if (filters.amountMax !== undefined)
+                where.amount.lte = filters.amountMax;
+        }
+        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(filters);
         const [items, totalCount] = await Promise.all([
             this.prisma.expense.findMany({
                 where,
@@ -86,7 +106,7 @@ let ExpenseService = class ExpenseService {
             }),
             this.prisma.expense.count({ where }),
         ]);
-        return (0, pagination_helper_1.buildPaginatedResponse)(items, pagination, totalCount);
+        return (0, pagination_helper_1.buildPaginatedResponse)(items, filters, totalCount);
     }
     async findOne(userId, expenseId) {
         const expense = await this.prisma.expense.findFirst({

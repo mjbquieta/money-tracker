@@ -15,6 +15,7 @@ export declare class CategoryService {
         deletedAt: Date | null;
         userId: string;
         description: string | null;
+        spendingLimit: number | null;
         isDefault: boolean;
         defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
     }>;
@@ -27,6 +28,7 @@ export declare class CategoryService {
             deletedAt: Date | null;
             userId: string;
             description: string | null;
+            spendingLimit: number | null;
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
@@ -40,6 +42,7 @@ export declare class CategoryService {
         deletedAt: Date | null;
         userId: string;
         description: string | null;
+        spendingLimit: number | null;
         isDefault: boolean;
         defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
     }>;
@@ -51,6 +54,7 @@ export declare class CategoryService {
         deletedAt: Date | null;
         userId: string;
         description: string | null;
+        spendingLimit: number | null;
         isDefault: boolean;
         defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
     }>;
@@ -62,7 +66,30 @@ export declare class CategoryService {
         deletedAt: Date | null;
         userId: string;
         description: string | null;
+        spendingLimit: number | null;
         isDefault: boolean;
         defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
     }>;
+    getSpendingStatus(userId: UUID, categoryId: UUID, budgetPeriodId: UUID): Promise<{
+        categoryId: `${string}-${string}-${string}-${string}-${string}`;
+        categoryName: string;
+        spendingLimit: number | null;
+        totalSpent: number;
+        remaining: number | null;
+        percentageUsed: number | null;
+        isOverLimit: boolean;
+        isApproachingLimit: boolean;
+        expenseCount: number;
+    }>;
+    getAllSpendingStatus(userId: UUID, budgetPeriodId: UUID): Promise<{
+        categoryId: string;
+        categoryName: string;
+        spendingLimit: number | null;
+        totalSpent: number;
+        remaining: number | null;
+        percentageUsed: number | null;
+        isOverLimit: boolean;
+        isApproachingLimit: boolean;
+        expenseCount: number;
+    }[]>;
 }

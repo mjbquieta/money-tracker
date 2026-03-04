@@ -11,6 +11,8 @@ function createMockModel() {
         update: jest.fn(),
         delete: jest.fn(),
         count: jest.fn(),
+        aggregate: jest.fn(),
+        groupBy: jest.fn(),
     };
 }
 function createMockPrismaService() {
@@ -24,6 +26,8 @@ function createMockPrismaService() {
         category: createMockModel(),
         personalBudget: createMockModel(),
         personalBudgetItem: createMockModel(),
+        expenseTemplate: createMockModel(),
+        recurringExpense: createMockModel(),
         $transaction: jest.fn((fn) => {
             if (typeof fn === 'function') {
                 return fn(createMockPrismaService());

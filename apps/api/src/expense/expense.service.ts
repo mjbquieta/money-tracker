@@ -6,7 +6,7 @@ import {
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExpenseDto, UpdateExpenseDto, CreateBulkExpenseDto } from './expense.dto';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { ExpenseFilterDto } from './expense-filter.dto';
 import { buildPrismaArgs, buildPaginatedResponse } from '../common/helpers/pagination.helper';
 
 @Injectable()
@@ -68,7 +68,7 @@ export class ExpenseService {
     });
   }
 
-  async findAll(userId: UUID, pagination: PaginationQueryDto, budgetPeriodId?: UUID) {
+  async findAll(userId: UUID, filters: ExpenseFilterDto) {
     const where: any = {
       budgetPeriod: {
         userId,
@@ -77,11 +77,31 @@ export class ExpenseService {
       deletedAt: null,
     };
 
-    if (budgetPeriodId) {
-      where.budgetPeriodId = budgetPeriodId;
+    if (filters.budgetPeriodId) {
+      where.budgetPeriodId = filters.budgetPeriodId;
     }
 
-    const prismaArgs = buildPrismaArgs(pagination);
+    if (filters.categoryId) {
+      where.categoryId = filters.categoryId;
+    }
+
+    if (filters.search) {
+      where.name = { contains: filters.search, mode: 'insensitive' };
+    }
+
+    if (filters.dateFrom || filters.dateTo) {
+      where.createdAt = {};
+      if (filters.dateFrom) where.createdAt.gte = new Date(filters.dateFrom);
+      if (filters.dateTo) where.createdAt.lte = new Date(filters.dateTo);
+    }
+
+    if (filters.amountMin !== undefined || filters.amountMax !== undefined) {
+      where.amount = {};
+      if (filters.amountMin !== undefined) where.amount.gte = filters.amountMin;
+      if (filters.amountMax !== undefined) where.amount.lte = filters.amountMax;
+    }
+
+    const prismaArgs = buildPrismaArgs(filters);
 
     const [items, totalCount] = await Promise.all([
       this.prisma.expense.findMany({
@@ -95,7 +115,7 @@ export class ExpenseService {
       this.prisma.expense.count({ where }),
     ]);
 
-    return buildPaginatedResponse(items, pagination, totalCount);
+    return buildPaginatedResponse(items, filters, totalCount);
   }
 
   async findOne(userId: UUID, expenseId: UUID) {

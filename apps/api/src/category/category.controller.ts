@@ -32,9 +32,26 @@ export class CategoryController {
     return this.categoryService.findAll(userId, pagination);
   }
 
+  @Get('spending-status')
+  getAllSpendingStatus(
+    @CurrentUser('id') userId: UUID,
+    @Query('budgetPeriodId') budgetPeriodId: UUID,
+  ) {
+    return this.categoryService.getAllSpendingStatus(userId, budgetPeriodId);
+  }
+
   @Get(':id')
   findOne(@CurrentUser('id') userId: UUID, @Param('id') id: UUID) {
     return this.categoryService.findOne(userId, id);
+  }
+
+  @Get(':id/spending-status')
+  getSpendingStatus(
+    @CurrentUser('id') userId: UUID,
+    @Param('id') id: UUID,
+    @Query('budgetPeriodId') budgetPeriodId: UUID,
+  ) {
+    return this.categoryService.getSpendingStatus(userId, id, budgetPeriodId);
   }
 
   @Post()

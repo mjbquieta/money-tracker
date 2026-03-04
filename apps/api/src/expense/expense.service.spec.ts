@@ -139,5 +139,108 @@ describe('ExpenseService', () => {
       expect(result.pagination).toBeDefined();
       expect(result.pagination.hasMore).toBe(false);
     });
+
+    it('should filter by budgetPeriodId', async () => {
+      const userId = 'user-1' as UUID;
+      prisma.expense.findMany.mockResolvedValue([]);
+      prisma.expense.count.mockResolvedValue(0);
+
+      await service.findAll(userId, { budgetPeriodId: 'bp-1', limit: 20, sortOrder: 'desc' as any });
+
+      expect(prisma.expense.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ budgetPeriodId: 'bp-1' }),
+        }),
+      );
+    });
+
+    it('should filter by categoryId', async () => {
+      const userId = 'user-1' as UUID;
+      prisma.expense.findMany.mockResolvedValue([]);
+      prisma.expense.count.mockResolvedValue(0);
+
+      await service.findAll(userId, { categoryId: 'cat-1', limit: 20, sortOrder: 'desc' as any });
+
+      expect(prisma.expense.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ categoryId: 'cat-1' }),
+        }),
+      );
+    });
+
+    it('should filter by search term (name contains)', async () => {
+      const userId = 'user-1' as UUID;
+      prisma.expense.findMany.mockResolvedValue([]);
+      prisma.expense.count.mockResolvedValue(0);
+
+      await service.findAll(userId, { search: 'grocery', limit: 20, sortOrder: 'desc' as any });
+
+      expect(prisma.expense.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            name: { contains: 'grocery', mode: 'insensitive' },
+          }),
+        }),
+      );
+    });
+
+    it('should filter by date range', async () => {
+      const userId = 'user-1' as UUID;
+      prisma.expense.findMany.mockResolvedValue([]);
+      prisma.expense.count.mockResolvedValue(0);
+
+      await service.findAll(userId, {
+        dateFrom: '2026-01-01',
+        dateTo: '2026-01-31',
+        limit: 20,
+        sortOrder: 'desc' as any,
+      });
+
+      expect(prisma.expense.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            createdAt: {
+              gte: new Date('2026-01-01'),
+              lte: new Date('2026-01-31'),
+            },
+          }),
+        }),
+      );
+    });
+
+    it('should filter by amount range', async () => {
+      const userId = 'user-1' as UUID;
+      prisma.expense.findMany.mockResolvedValue([]);
+      prisma.expense.count.mockResolvedValue(0);
+
+      await service.findAll(userId, { amountMin: 10, amountMax: 100, limit: 20, sortOrder: 'desc' as any });
+
+      expect(prisma.expense.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            amount: { gte: 10, lte: 100 },
+          }),
+        }),
+      );
+    });
+
+    it('should apply multiple filters together', async () => {
+      const userId = 'user-1' as UUID;
+      prisma.expense.findMany.mockResolvedValue([]);
+      prisma.expense.count.mockResolvedValue(0);
+
+      await service.findAll(userId, {
+        search: 'food',
+        categoryId: 'cat-1',
+        amountMin: 5,
+        limit: 20,
+        sortOrder: 'desc' as any,
+      });
+
+      const calledWith = prisma.expense.findMany.mock.calls[0][0];
+      expect(calledWith.where.name).toEqual({ contains: 'food', mode: 'insensitive' });
+      expect(calledWith.where.categoryId).toBe('cat-1');
+      expect(calledWith.where.amount).toEqual({ gte: 5 });
+    });
   });
 });

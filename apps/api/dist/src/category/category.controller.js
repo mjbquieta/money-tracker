@@ -29,8 +29,14 @@ let CategoryController = class CategoryController {
     findAll(userId, pagination) {
         return this.categoryService.findAll(userId, pagination);
     }
+    getAllSpendingStatus(userId, budgetPeriodId) {
+        return this.categoryService.getAllSpendingStatus(userId, budgetPeriodId);
+    }
     findOne(userId, id) {
         return this.categoryService.findOne(userId, id);
+    }
+    getSpendingStatus(userId, id, budgetPeriodId) {
+        return this.categoryService.getSpendingStatus(userId, id, budgetPeriodId);
     }
     create(userId, payload) {
         return this.categoryService.create(userId, payload);
@@ -53,6 +59,15 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CategoryController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('spending-status'),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Query)('budgetPeriodId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], CategoryController.prototype, "getAllSpendingStatus", null);
+__decorate([
     (0, common_1.Get)(':id'),
     openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
@@ -61,6 +76,16 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], CategoryController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)(':id/spending-status'),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Query)('budgetPeriodId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", void 0)
+], CategoryController.prototype, "getSpendingStatus", null);
 __decorate([
     (0, common_1.Post)(),
     openapi.ApiResponse({ status: 201 }),

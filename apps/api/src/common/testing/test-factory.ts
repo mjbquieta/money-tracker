@@ -20,6 +20,7 @@ export function createTestCategory(overrides: Record<string, unknown> = {}) {
     id: randomUUID(),
     name: `Category ${Date.now()}`,
     description: 'Test category description',
+    spendingLimit: null,
     isDefault: false,
     defaultCategory: null,
     userId: randomUUID(),
@@ -58,6 +59,41 @@ export function createTestExpense(overrides: Record<string, unknown> = {}) {
     categoryId: randomUUID(),
     budgetPeriodId: randomUUID(),
     expenseGroupId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestExpenseTemplate(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: 'Monthly Rent',
+    description: 'Apartment rent payment',
+    amount: 1500.0,
+    categoryId: randomUUID(),
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestRecurringExpense(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: 'Monthly Rent',
+    description: 'Apartment rent payment',
+    amount: 1500.0,
+    frequency: 'MONTHLY',
+    startDate: new Date('2025-01-01'),
+    endDate: null,
+    isActive: true,
+    lastProcessedDate: null,
+    categoryId: randomUUID(),
+    userId: randomUUID(),
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,

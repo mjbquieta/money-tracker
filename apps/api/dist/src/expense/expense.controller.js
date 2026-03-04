@@ -19,15 +19,15 @@ const auth_guard_1 = require("../auth/auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const expense_service_1 = require("./expense.service");
 const expense_dto_1 = require("./expense.dto");
-const pagination_dto_1 = require("../common/dto/pagination.dto");
+const expense_filter_dto_1 = require("./expense-filter.dto");
 const swagger_1 = require("@nestjs/swagger");
 let ExpenseController = class ExpenseController {
     expenseService;
     constructor(expenseService) {
         this.expenseService = expenseService;
     }
-    findAll(userId, budgetPeriodId, pagination) {
-        return this.expenseService.findAll(userId, pagination, budgetPeriodId);
+    findAll(userId, filters) {
+        return this.expenseService.findAll(userId, filters);
     }
     findOne(userId, id) {
         return this.expenseService.findOne(userId, id);
@@ -50,10 +50,9 @@ __decorate([
     (0, common_1.Get)(),
     openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
-    __param(1, (0, common_1.Query)('budgetPeriodId')),
-    __param(2, (0, common_1.Query)()),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, pagination_dto_1.PaginationQueryDto]),
+    __metadata("design:paramtypes", [String, expense_filter_dto_1.ExpenseFilterDto]),
     __metadata("design:returntype", void 0)
 ], ExpenseController.prototype, "findAll", null);
 __decorate([

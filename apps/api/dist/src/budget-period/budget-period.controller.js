@@ -45,8 +45,19 @@ let BudgetPeriodController = class BudgetPeriodController {
         const end = endYear ? parseInt(endYear, 10) : currentYear;
         return this.budgetPeriodService.getYearRangeMetrics(userId, start, end);
     }
+    getCategoryComparison(userId, budgetPeriodIds) {
+        const ids = budgetPeriodIds ? budgetPeriodIds.split(',') : [];
+        return this.budgetPeriodService.getCategoryComparison(userId, ids);
+    }
     getSummary(userId, id) {
         return this.budgetPeriodService.getSummary(userId, id);
+    }
+    getDailyAverage(userId, id) {
+        return this.budgetPeriodService.getAverageDailySpending(userId, id);
+    }
+    getTopExpenses(userId, id, limit) {
+        const take = limit ? parseInt(limit, 10) : 5;
+        return this.budgetPeriodService.getTopExpenses(userId, id, take);
     }
     create(userId, payload) {
         return this.budgetPeriodService.create(userId, payload);
@@ -108,6 +119,15 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BudgetPeriodController.prototype, "getYearRangeMetrics", null);
 __decorate([
+    (0, common_1.Get)('analytics/category-comparison'),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Query)('budgetPeriodIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], BudgetPeriodController.prototype, "getCategoryComparison", null);
+__decorate([
     (0, common_1.Get)(':id/summary'),
     openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
@@ -116,6 +136,25 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], BudgetPeriodController.prototype, "getSummary", null);
+__decorate([
+    (0, common_1.Get)(':id/analytics/daily-average'),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], BudgetPeriodController.prototype, "getDailyAverage", null);
+__decorate([
+    (0, common_1.Get)(':id/analytics/top-expenses'),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", void 0)
+], BudgetPeriodController.prototype, "getTopExpenses", null);
 __decorate([
     (0, common_1.Post)(),
     openapi.ApiResponse({ status: 201, type: Object }),

@@ -21,10 +21,23 @@ export interface Category {
   id: string;
   name: string;
   description: string | null;
+  spendingLimit: number | null;
   isDefault: boolean;
   defaultCategory: DefaultCategory | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CategorySpendingStatus {
+  categoryId: string;
+  categoryName: string;
+  spendingLimit: number | null;
+  totalSpent: number;
+  remaining: number | null;
+  percentageUsed: number | null;
+  isOverLimit: boolean;
+  isApproachingLimit: boolean;
+  expenseCount: number;
 }
 
 export type DefaultCategory = 'BILLS' | 'FOOD' | 'TRANSPORT' | 'SAVINGS' | 'ENTERTAINMENT';
@@ -148,6 +161,46 @@ export interface CreateBulkExpensePayload {
 export interface CreateCategoryPayload {
   name: string;
   description?: string;
+  spendingLimit?: number;
+}
+
+export interface UpdateCategoryPayload {
+  name?: string;
+  description?: string;
+  spendingLimit?: number | null;
+}
+
+export interface ExpenseTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  amount: number;
+  categoryId: string;
+  category: Category;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateExpenseTemplatePayload {
+  name: string;
+  description?: string;
+  amount: number;
+  categoryId: string;
+}
+
+export interface UpdateExpenseTemplatePayload {
+  name?: string;
+  description?: string;
+  amount?: number;
+  categoryId?: string;
+}
+
+export interface CreateExpenseFromTemplatePayload {
+  templateId: string;
+  budgetPeriodId: string;
+  expenseGroupId?: string;
+  amount?: number;
+  name?: string;
 }
 
 export interface CreateExpenseGroupPayload {
@@ -237,6 +290,60 @@ export interface YearRangeMetrics {
   budgetPeriodsCount: number;
 }
 
+export type RecurrenceFrequency = 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'YEARLY';
+
+export interface RecurringExpense {
+  id: string;
+  name: string;
+  description: string | null;
+  amount: number;
+  frequency: RecurrenceFrequency;
+  startDate: string;
+  endDate: string | null;
+  isActive: boolean;
+  lastProcessedDate: string | null;
+  categoryId: string;
+  category: Category;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateRecurringExpensePayload {
+  name: string;
+  description?: string;
+  amount: number;
+  categoryId: string;
+  frequency: RecurrenceFrequency;
+  startDate: string;
+  endDate?: string;
+}
+
+export interface UpdateRecurringExpensePayload {
+  name?: string;
+  description?: string;
+  amount?: number;
+  categoryId?: string;
+  frequency?: RecurrenceFrequency;
+  startDate?: string;
+  endDate?: string | null;
+  isActive?: boolean;
+}
+
+export interface GenerateRecurringExpensesResult {
+  generatedCount: number;
+  expenses: Expense[];
+}
+
+export interface ExpenseFilters {
+  search?: string;
+  budgetPeriodId?: string;
+  categoryId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  amountMin?: number;
+  amountMax?: number;
+}
+
 export interface ApiError {
   statusCode: number;
   message: string | string[];
@@ -323,4 +430,30 @@ export interface UpdatePersonalBudgetItemPayload {
 export interface PersonalBudgetSummary {
   total: number;
   itemCount: number;
+}
+
+// Analytics types
+export interface DailySpendingData {
+  totalExpenses: number;
+  totalDays: number;
+  dailyAverage: number;
+  dailyBreakdown: { date: string; amount: number }[];
+}
+
+export interface TopExpenseItem {
+  id: string;
+  name: string;
+  amount: number;
+  categoryName: string;
+  createdAt: string;
+}
+
+export interface CategoryComparisonPeriod {
+  budgetPeriodId: string;
+  name: string | null;
+  startDate: string;
+  endDate: string;
+  totalExpenses: number;
+  totalIncome: number;
+  expensesByCategory: Record<string, { total: number; count: number }>;
 }

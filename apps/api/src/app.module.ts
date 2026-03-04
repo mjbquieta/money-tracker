@@ -13,6 +13,8 @@ import { ExpenseModule } from './expense/expense.module';
 import { ExpenseGroupModule } from './expense-group/expense-group.module';
 import { IncomeModule } from './income/income.module';
 import { PersonalBudgetModule } from './personal-budget/personal-budget.module';
+import { ExpenseTemplateModule } from './expense-template/expense-template.module';
+import { RecurringExpenseModule } from './recurring-expense/recurring-expense.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { PersonalBudgetModule } from './personal-budget/personal-budget.module';
     ExpenseGroupModule,
     IncomeModule,
     PersonalBudgetModule,
+    ExpenseTemplateModule,
+    RecurringExpenseModule,
   ],
   providers: [
     {

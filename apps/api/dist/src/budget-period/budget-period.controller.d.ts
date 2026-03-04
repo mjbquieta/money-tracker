@@ -16,6 +16,7 @@ export declare class BudgetPeriodController {
                     deletedAt: Date | null;
                     userId: string;
                     description: string | null;
+                    spendingLimit: number | null;
                     isDefault: boolean;
                     defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
                 };
@@ -26,9 +27,9 @@ export declare class BudgetPeriodController {
                 updatedAt: Date | null;
                 deletedAt: Date | null;
                 description: string | null;
-                amount: number;
                 categoryId: string;
                 budgetPeriodId: string;
+                amount: number;
                 expenseGroupId: string | null;
             })[];
             incomes: {
@@ -38,8 +39,8 @@ export declare class BudgetPeriodController {
                 updatedAt: Date | null;
                 deletedAt: Date | null;
                 description: string | null;
-                amount: number;
                 budgetPeriodId: string;
+                amount: number;
             }[];
         } & {
             id: string;
@@ -63,6 +64,7 @@ export declare class BudgetPeriodController {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -73,9 +75,9 @@ export declare class BudgetPeriodController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             categoryId: string;
             budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
         incomes: {
@@ -85,8 +87,8 @@ export declare class BudgetPeriodController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             budgetPeriodId: string;
+            amount: number;
         }[];
     } & {
         id: string;
@@ -150,6 +152,18 @@ export declare class BudgetPeriodController {
         }[];
         budgetPeriodsCount: number;
     }>;
+    getCategoryComparison(userId: UUID, budgetPeriodIds: string): Promise<{
+        budgetPeriodId: string;
+        name: string | null;
+        startDate: Date;
+        endDate: Date;
+        totalExpenses: number;
+        totalIncome: number;
+        expensesByCategory: Record<string, {
+            total: number;
+            count: number;
+        }>;
+    }[]>;
     getSummary(userId: UUID, id: UUID): Promise<{
         income: number;
         totalExpenses: number;
@@ -159,6 +173,22 @@ export declare class BudgetPeriodController {
             count: number;
         }>;
     }>;
+    getDailyAverage(userId: UUID, id: UUID): Promise<{
+        totalExpenses: number;
+        totalDays: number;
+        dailyAverage: number;
+        dailyBreakdown: {
+            date: string;
+            amount: number;
+        }[];
+    }>;
+    getTopExpenses(userId: UUID, id: UUID, limit?: string): Promise<{
+        id: string;
+        name: string;
+        amount: number;
+        categoryName: string;
+        createdAt: Date;
+    }[]>;
     create(userId: UUID, payload: CreateBudgetPeriodDto): Promise<({
         expenses: ({
             category: {
@@ -169,6 +199,7 @@ export declare class BudgetPeriodController {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -179,9 +210,9 @@ export declare class BudgetPeriodController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             categoryId: string;
             budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
         incomes: {
@@ -191,8 +222,8 @@ export declare class BudgetPeriodController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             budgetPeriodId: string;
+            amount: number;
         }[];
     } & {
         id: string;
@@ -214,6 +245,7 @@ export declare class BudgetPeriodController {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -224,9 +256,9 @@ export declare class BudgetPeriodController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             categoryId: string;
             budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
         incomes: {
@@ -236,8 +268,8 @@ export declare class BudgetPeriodController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             budgetPeriodId: string;
+            amount: number;
         }[];
     } & {
         id: string;
@@ -259,6 +291,7 @@ export declare class BudgetPeriodController {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -269,9 +302,9 @@ export declare class BudgetPeriodController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             categoryId: string;
             budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
         incomes: {
@@ -281,8 +314,8 @@ export declare class BudgetPeriodController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             budgetPeriodId: string;
+            amount: number;
         }[];
     } & {
         id: string;

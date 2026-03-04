@@ -4,6 +4,8 @@ exports.createTestUser = createTestUser;
 exports.createTestCategory = createTestCategory;
 exports.createTestBudgetPeriod = createTestBudgetPeriod;
 exports.createTestExpense = createTestExpense;
+exports.createTestExpenseTemplate = createTestExpenseTemplate;
+exports.createTestRecurringExpense = createTestRecurringExpense;
 exports.createTestIncome = createTestIncome;
 const crypto_1 = require("crypto");
 function createTestUser(overrides = {}) {
@@ -25,6 +27,7 @@ function createTestCategory(overrides = {}) {
         id: (0, crypto_1.randomUUID)(),
         name: `Category ${Date.now()}`,
         description: 'Test category description',
+        spendingLimit: null,
         isDefault: false,
         defaultCategory: null,
         userId: (0, crypto_1.randomUUID)(),
@@ -60,6 +63,39 @@ function createTestExpense(overrides = {}) {
         categoryId: (0, crypto_1.randomUUID)(),
         budgetPeriodId: (0, crypto_1.randomUUID)(),
         expenseGroupId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestExpenseTemplate(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'Monthly Rent',
+        description: 'Apartment rent payment',
+        amount: 1500.0,
+        categoryId: (0, crypto_1.randomUUID)(),
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestRecurringExpense(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'Monthly Rent',
+        description: 'Apartment rent payment',
+        amount: 1500.0,
+        frequency: 'MONTHLY',
+        startDate: new Date('2025-01-01'),
+        endDate: null,
+        isActive: true,
+        lastProcessedDate: null,
+        categoryId: (0, crypto_1.randomUUID)(),
+        userId: (0, crypto_1.randomUUID)(),
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,

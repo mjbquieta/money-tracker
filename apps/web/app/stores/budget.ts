@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics, OverallMetrics, YearRangeMetrics, Income, CreateIncomePayload, UpdateIncomePayload, PaginationMeta } from '~/types';
+import type { BudgetPeriod, CreateBudgetPeriodPayload, BudgetSummary, YearlyMetrics, OverallMetrics, YearRangeMetrics, Income, CreateIncomePayload, UpdateIncomePayload, PaginationMeta, DailySpendingData, TopExpenseItem, CategoryComparisonPeriod } from '~/types';
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -208,6 +208,37 @@ export const useBudgetStore = defineStore('budget', () => {
     return { success: true, error: null };
   }
 
+  async function fetchDailySpending(budgetPeriodId: string) {
+    const { data, error } = await api.get<DailySpendingData>(`/api/v1/budget-periods/${budgetPeriodId}/analytics/daily-average`);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    return { success: true, error: null, data };
+  }
+
+  async function fetchTopExpenses(budgetPeriodId: string, limit = 5) {
+    const { data, error } = await api.get<TopExpenseItem[]>(`/api/v1/budget-periods/${budgetPeriodId}/analytics/top-expenses?limit=${limit}`);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    return { success: true, error: null, data };
+  }
+
+  async function fetchCategoryComparison(budgetPeriodIds: string[]) {
+    const ids = budgetPeriodIds.join(',');
+    const { data, error } = await api.get<CategoryComparisonPeriod[]>(`/api/v1/budget-periods/analytics/category-comparison?budgetPeriodIds=${ids}`);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    return { success: true, error: null, data };
+  }
+
   return {
     budgetPeriods,
     budgetPagination,
@@ -230,5 +261,8 @@ export const useBudgetStore = defineStore('budget', () => {
     createIncome,
     updateIncome,
     deleteIncome,
+    fetchDailySpending,
+    fetchTopExpenses,
+    fetchCategoryComparison,
   };
 });

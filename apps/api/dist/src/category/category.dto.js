@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultCategory = exports.UpdateCategoryDto = exports.CreateCategoryDto = void 0;
 const openapi = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 var DefaultCategory;
 (function (DefaultCategory) {
     DefaultCategory["BILLS"] = "BILLS";
@@ -23,8 +24,9 @@ var DefaultCategory;
 class CreateCategoryDto {
     name;
     description;
+    spendingLimit;
     static _OPENAPI_METADATA_FACTORY() {
-        return { name: { required: true, type: () => String, minLength: 2, maxLength: 50 }, description: { required: false, type: () => String, maxLength: 200 } };
+        return { name: { required: true, type: () => String, minLength: 2, maxLength: 50 }, description: { required: false, type: () => String, maxLength: 200 }, spendingLimit: { required: false, type: () => Number, minimum: 1 } };
     }
 }
 exports.CreateCategoryDto = CreateCategoryDto;
@@ -40,11 +42,19 @@ __decorate([
     (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], CreateCategoryDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], CreateCategoryDto.prototype, "spendingLimit", void 0);
 class UpdateCategoryDto {
     name;
     description;
+    spendingLimit;
     static _OPENAPI_METADATA_FACTORY() {
-        return { name: { required: false, type: () => String, minLength: 2, maxLength: 50 }, description: { required: false, type: () => String, maxLength: 200 } };
+        return { name: { required: false, type: () => String, minLength: 2, maxLength: 50 }, description: { required: false, type: () => String, maxLength: 200 }, spendingLimit: { required: false, type: () => Number, nullable: true, minimum: 0 } };
     }
 }
 exports.UpdateCategoryDto = UpdateCategoryDto;
@@ -61,4 +71,11 @@ __decorate([
     (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], UpdateCategoryDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Object)
+], UpdateCategoryDto.prototype, "spendingLimit", void 0);
 //# sourceMappingURL=category.dto.js.map

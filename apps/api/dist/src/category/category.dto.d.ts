@@ -8,9 +8,11 @@ declare enum DefaultCategory {
 declare class CreateCategoryDto {
     name: string;
     description?: string;
+    spendingLimit?: number;
 }
 declare class UpdateCategoryDto {
     name?: string;
     description?: string;
+    spendingLimit?: number | null;
 }
 export { CreateCategoryDto, UpdateCategoryDto, DefaultCategory };

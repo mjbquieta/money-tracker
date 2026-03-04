@@ -28,6 +28,7 @@ export declare class UserService {
             deletedAt: Date | null;
             userId: string;
             description: string | null;
+            spendingLimit: number | null;
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
@@ -78,6 +79,7 @@ export declare class UserService {
             deletedAt: Date | null;
             userId: string;
             description: string | null;
+            spendingLimit: number | null;
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
@@ -109,6 +111,7 @@ export declare class UserService {
             deletedAt: Date | null;
             userId: string;
             description: string | null;
+            spendingLimit: number | null;
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];

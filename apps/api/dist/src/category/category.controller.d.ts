@@ -14,11 +14,23 @@ export declare class CategoryController {
             deletedAt: Date | null;
             userId: string;
             description: string | null;
+            spendingLimit: number | null;
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         }[];
         pagination: import("../common/interfaces/api-response.interface").PaginationMeta;
     }>;
+    getAllSpendingStatus(userId: UUID, budgetPeriodId: UUID): Promise<{
+        categoryId: string;
+        categoryName: string;
+        spendingLimit: number | null;
+        totalSpent: number;
+        remaining: number | null;
+        percentageUsed: number | null;
+        isOverLimit: boolean;
+        isApproachingLimit: boolean;
+        expenseCount: number;
+    }[]>;
     findOne(userId: UUID, id: UUID): Promise<{
         id: string;
         name: string;
@@ -27,8 +39,20 @@ export declare class CategoryController {
         deletedAt: Date | null;
         userId: string;
         description: string | null;
+        spendingLimit: number | null;
         isDefault: boolean;
         defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
+    }>;
+    getSpendingStatus(userId: UUID, id: UUID, budgetPeriodId: UUID): Promise<{
+        categoryId: `${string}-${string}-${string}-${string}-${string}`;
+        categoryName: string;
+        spendingLimit: number | null;
+        totalSpent: number;
+        remaining: number | null;
+        percentageUsed: number | null;
+        isOverLimit: boolean;
+        isApproachingLimit: boolean;
+        expenseCount: number;
     }>;
     create(userId: UUID, payload: CreateCategoryDto): Promise<{
         id: string;
@@ -38,6 +62,7 @@ export declare class CategoryController {
         deletedAt: Date | null;
         userId: string;
         description: string | null;
+        spendingLimit: number | null;
         isDefault: boolean;
         defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
     }>;
@@ -49,6 +74,7 @@ export declare class CategoryController {
         deletedAt: Date | null;
         userId: string;
         description: string | null;
+        spendingLimit: number | null;
         isDefault: boolean;
         defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
     }>;
@@ -60,6 +86,7 @@ export declare class CategoryController {
         deletedAt: Date | null;
         userId: string;
         description: string | null;
+        spendingLimit: number | null;
         isDefault: boolean;
         defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
     }>;

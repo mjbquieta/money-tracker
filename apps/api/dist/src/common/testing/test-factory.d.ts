@@ -13,6 +13,7 @@ export declare function createTestCategory(overrides?: Record<string, unknown>):
     id: `${string}-${string}-${string}-${string}-${string}`;
     name: string;
     description: string;
+    spendingLimit: null;
     isDefault: boolean;
     defaultCategory: null;
     userId: `${string}-${string}-${string}-${string}-${string}`;
@@ -40,6 +41,33 @@ export declare function createTestExpense(overrides?: Record<string, unknown>): 
     categoryId: `${string}-${string}-${string}-${string}-${string}`;
     budgetPeriodId: `${string}-${string}-${string}-${string}-${string}`;
     expenseGroupId: null;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+};
+export declare function createTestExpenseTemplate(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    name: string;
+    description: string;
+    amount: number;
+    categoryId: `${string}-${string}-${string}-${string}-${string}`;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+};
+export declare function createTestRecurringExpense(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    name: string;
+    description: string;
+    amount: number;
+    frequency: string;
+    startDate: Date;
+    endDate: null;
+    isActive: boolean;
+    lastProcessedDate: null;
+    categoryId: `${string}-${string}-${string}-${string}-${string}`;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
     createdAt: Date;
     updatedAt: Date;
     deletedAt: null;

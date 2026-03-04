@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { CategoryComparisonPeriod } from '~/types';
 import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -13,6 +14,7 @@ import {
   RocketLaunchIcon,
   BanknotesIcon,
   ArrowRightIcon,
+  ArrowsRightLeftIcon,
 } from "@heroicons/vue/24/outline";
 
 definePageMeta({
@@ -27,6 +29,11 @@ const currentYear = new Date().getFullYear();
 const startYear = ref(currentYear - 1);
 const endYear = ref(currentYear);
 const loading = ref(true);
+
+// Category comparison
+const comparisonData = ref<CategoryComparisonPeriod[]>([]);
+const comparisonLoading = ref(false);
+const selectedComparisonIds = ref<string[]>([]);
 
 const availableYears = computed(() => {
   const years: number[] = [];
@@ -48,9 +55,34 @@ onMounted(async () => {
     budgetStore.fetchYearRangeMetrics(startYear.value, endYear.value),
     budgetStore.fetchOverallMetrics(),
     personalBudgetStore.fetchPersonalBudgets(),
+    budgetStore.fetchBudgetPeriods(),
   ]);
   loading.value = false;
 });
+
+async function loadCategoryComparison() {
+  if (selectedComparisonIds.value.length < 2) {
+    comparisonData.value = [];
+    return;
+  }
+  comparisonLoading.value = true;
+  const result = await budgetStore.fetchCategoryComparison(selectedComparisonIds.value);
+  comparisonLoading.value = false;
+
+  if (result.success && result.data) {
+    comparisonData.value = result.data;
+  }
+}
+
+function toggleComparisonPeriod(id: string) {
+  const idx = selectedComparisonIds.value.indexOf(id);
+  if (idx >= 0) {
+    selectedComparisonIds.value.splice(idx, 1);
+  } else {
+    selectedComparisonIds.value.push(id);
+  }
+  loadCategoryComparison();
+}
 
 watch([startYear, endYear], async ([newStart, newEnd]) => {
   if (newEnd < newStart) {
@@ -503,6 +535,57 @@ function getCategoryBarColor(category: string) {
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Category Comparison -->
+      <div
+        v-if="budgetStore.budgetPeriods.length >= 2"
+        class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 overflow-hidden"
+      >
+        <h2
+          class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-2 flex items-center gap-2"
+        >
+          <ArrowsRightLeftIcon class="w-5 h-5 text-primary-500" />
+          Category Comparison
+        </h2>
+        <p class="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
+          Compare spending across budget periods
+        </p>
+
+        <!-- Period selector -->
+        <div class="flex flex-wrap gap-2 mb-5">
+          <button
+            v-for="period in budgetStore.budgetPeriods.slice(0, 8)"
+            :key="period.id"
+            class="px-3 py-1.5 text-sm rounded-lg border transition-colors"
+            :class="selectedComparisonIds.includes(period.id)
+              ? 'bg-primary-500 text-white border-primary-500'
+              : 'bg-white dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 border-secondary-200 dark:border-secondary-600 hover:border-primary-300 dark:hover:border-primary-600'"
+            @click="toggleComparisonPeriod(period.id)"
+          >
+            {{ period.name || `${new Date(period.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}` }}
+          </button>
+        </div>
+
+        <div v-if="comparisonLoading" class="flex items-center justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
+        </div>
+
+        <div v-else-if="selectedComparisonIds.length < 2" class="text-center py-8">
+          <p class="text-secondary-400 dark:text-secondary-500 text-sm">Select at least 2 budget periods to compare</p>
+        </div>
+
+        <ClientOnly v-else>
+          <ChartsCategoryComparisonChart
+            :data="comparisonData"
+            :currency="currency"
+          />
+          <template #fallback>
+            <div class="h-80 flex items-center justify-center bg-secondary-50 dark:bg-secondary-900 rounded-xl">
+              <div class="w-8 h-8 border-3 border-primary-200 dark:border-primary-800 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin" />
+            </div>
+          </template>
+        </ClientOnly>
       </div>
 
       <!-- Quick Actions -->
