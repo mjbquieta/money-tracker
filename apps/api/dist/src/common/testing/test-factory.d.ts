@@ -117,6 +117,31 @@ export declare function createTestGoalContribution(overrides?: Record<string, un
     goalId: `${string}-${string}-${string}-${string}-${string}`;
     createdAt: Date;
 };
+export declare function createTestDebt(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    type: string;
+    counterparty: string;
+    description: string;
+    amount: number;
+    paidAmount: number;
+    dueDate: Date;
+    status: string;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: null;
+    payments: never[];
+    _count: {
+        payments: number;
+    };
+};
+export declare function createTestDebtPayment(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    amount: number;
+    note: string;
+    debtId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+};
 export declare function createTestIncome(overrides?: Record<string, unknown>): {
     id: `${string}-${string}-${string}-${string}-${string}`;
     name: string;

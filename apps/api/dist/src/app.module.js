@@ -26,6 +26,8 @@ const expense_template_module_1 = require("./expense-template/expense-template.m
 const recurring_expense_module_1 = require("./recurring-expense/recurring-expense.module");
 const tag_module_1 = require("./tag/tag.module");
 const financial_goal_module_1 = require("./financial-goal/financial-goal.module");
+const debt_module_1 = require("./debt/debt.module");
+const export_module_1 = require("./export/export.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -64,6 +66,8 @@ exports.AppModule = AppModule = __decorate([
             recurring_expense_module_1.RecurringExpenseModule,
             tag_module_1.TagModule,
             financial_goal_module_1.FinancialGoalModule,
+            debt_module_1.DebtModule,
+            export_module_1.ExportModule,
         ],
         providers: [
             {

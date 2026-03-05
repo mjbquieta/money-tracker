@@ -165,6 +165,37 @@ export function createTestGoalContribution(overrides: Record<string, unknown> = 
   };
 }
 
+export function createTestDebt(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    type: 'I_OWE',
+    counterparty: 'John Doe',
+    description: 'Borrowed for lunch',
+    amount: 100,
+    paidAmount: 0,
+    dueDate: new Date('2026-06-01'),
+    status: 'ACTIVE',
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    payments: [],
+    _count: { payments: 0 },
+    ...overrides,
+  };
+}
+
+export function createTestDebtPayment(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    amount: 50,
+    note: 'Partial payment',
+    debtId: randomUUID(),
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
 export function createTestIncome(overrides: Record<string, unknown> = {}) {
   return {
     id: randomUUID(),

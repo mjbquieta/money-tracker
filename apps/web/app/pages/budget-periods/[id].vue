@@ -101,6 +101,13 @@ const incomeForm = reactive({
   amount: 0,
 });
 
+// Import state
+const showImportModal = ref(false);
+const importCsvText = ref('');
+const importLoading = ref(false);
+const importError = ref<string | null>(null);
+const importResult = ref<{ importedCount: number; categoriesCreated: number } | null>(null);
+
 // Delete confirmation states
 const showDeleteExpenseConfirm = ref(false);
 const showDeleteIncomeConfirm = ref(false);
@@ -1053,6 +1060,67 @@ async function handleDuplicateSubmit() {
   }
 }
 
+async function handleImportCsv() {
+  importError.value = null;
+  importResult.value = null;
+
+  const lines = importCsvText.value.trim().split('\n');
+  if (lines.length < 2) {
+    importError.value = 'CSV must have a header row and at least one data row';
+    return;
+  }
+
+  const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const nameIdx = header.findIndex(h => h === 'name');
+  const amountIdx = header.findIndex(h => h === 'amount');
+  const categoryIdx = header.findIndex(h => h === 'category' || h === 'categoryname');
+  const descIdx = header.findIndex(h => h === 'description');
+
+  if (nameIdx === -1 || amountIdx === -1 || categoryIdx === -1) {
+    importError.value = 'CSV must have Name, Amount, and Category columns';
+    return;
+  }
+
+  const records = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',').map(c => c.trim());
+    if (!cols[nameIdx] || !cols[amountIdx] || !cols[categoryIdx]) continue;
+    const amount = parseFloat(cols[amountIdx]);
+    if (isNaN(amount) || amount <= 0) continue;
+
+    records.push({
+      name: cols[nameIdx],
+      description: descIdx !== -1 ? cols[descIdx] || undefined : undefined,
+      amount,
+      categoryName: cols[categoryIdx],
+    });
+  }
+
+  if (records.length === 0) {
+    importError.value = 'No valid records found in CSV';
+    return;
+  }
+
+  importLoading.value = true;
+  const api = useApi();
+  const { data, error: apiError } = await api.post<{ importedCount: number; categoriesCreated: number }>(
+    '/api/v1/import/expenses',
+    { budgetPeriodId, records },
+  );
+  importLoading.value = false;
+
+  if (apiError) {
+    importError.value = typeof apiError.message === 'string' ? apiError.message : apiError.message[0];
+    return;
+  }
+
+  importResult.value = data ?? null;
+
+  // Refresh the budget period data
+  await budgetStore.fetchBudgetPeriod(budgetPeriodId);
+  await expenseStore.fetchCategories();
+}
+
 function confirmDeleteExpense(expense: Expense) {
   expenseToDelete.value = expense;
   showDeleteExpenseConfirm.value = true;
@@ -1179,6 +1247,21 @@ function getCategoryStyle(categoryName: string) {
             >
               <DocumentDuplicateIcon class="w-4 h-4" />
               <span class="hidden sm:inline">Duplicate</span>
+            </button>
+            <a
+              :href="`/api/v1/export/budget-periods/${budgetPeriodId}/csv`"
+              target="_blank"
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
+            >
+              <ChevronDoubleDownIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Export</span>
+            </a>
+            <button
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
+              @click="showImportModal = true"
+            >
+              <ChevronDoubleUpIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Import</span>
             </button>
             <button
               class="flex items-center gap-2 px-4 py-2 text-danger-600 dark:text-danger-400 hover:text-danger-700 dark:hover:text-danger-300 hover:bg-danger-50 dark:hover:bg-danger-900/50 border border-danger-200 dark:border-danger-700 rounded-lg transition-colors"
@@ -2671,6 +2754,71 @@ function getCategoryStyle(categoryName: string) {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Import CSV Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showImportModal"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showImportModal = false"
+      >
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-lg w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/50 rounded-xl flex items-center justify-center">
+              <ChevronDoubleUpIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">Import Expenses from CSV</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Paste CSV data with Name, Amount, Category columns</p>
+            </div>
+          </div>
+
+          <div v-if="importError" class="mb-4 p-3 bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-800 rounded-lg text-sm text-danger-700 dark:text-danger-300">
+            {{ importError }}
+          </div>
+
+          <div v-if="importResult" class="mb-4 p-3 bg-success-50 dark:bg-success-900/30 border border-success-200 dark:border-success-800 rounded-lg text-sm text-success-700 dark:text-success-300">
+            Imported {{ importResult.importedCount }} expenses.
+            <span v-if="importResult.categoriesCreated > 0">Created {{ importResult.categoriesCreated }} new categories.</span>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">CSV Data</label>
+              <textarea
+                v-model="importCsvText"
+                rows="10"
+                placeholder="Name,Amount,Category,Description
+Groceries,50.00,Food,Weekly groceries
+Netflix,15.99,Entertainment,Monthly subscription"
+                class="w-full px-3 py-2 bg-white dark:bg-secondary-900 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none font-mono text-sm"
+              />
+            </div>
+
+            <p class="text-xs text-secondary-400 dark:text-secondary-500">
+              Required columns: Name, Amount, Category. Optional: Description. Categories that don't exist will be created automatically.
+            </p>
+
+            <div class="flex gap-3 pt-2">
+              <button
+                type="button"
+                class="flex-1 px-4 py-2 border border-secondary-200 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors"
+                @click="showImportModal = false; importCsvText = ''; importError = null; importResult = null"
+              >
+                Close
+              </button>
+              <button
+                :disabled="importLoading || !importCsvText.trim()"
+                class="flex-1 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all font-medium disabled:opacity-50"
+                @click="handleImportCsv"
+              >
+                {{ importLoading ? 'Importing...' : 'Import' }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </Teleport>

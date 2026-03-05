@@ -562,3 +562,79 @@ export interface CreateGoalContributionPayload {
   amount: number;
   note?: string;
 }
+
+// Debt types
+export type DebtType = 'I_OWE' | 'OWED_TO_ME';
+export type DebtStatus = 'ACTIVE' | 'SETTLED' | 'CANCELLED';
+
+export interface DebtPayment {
+  id: string;
+  amount: number;
+  note: string | null;
+  debtId: string;
+  createdAt: string;
+}
+
+export interface Debt {
+  id: string;
+  type: DebtType;
+  counterparty: string;
+  description: string | null;
+  amount: number;
+  paidAmount: number;
+  dueDate: string | null;
+  status: DebtStatus;
+  payments: DebtPayment[];
+  _count: { payments: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DebtSummary {
+  totalDebts: number;
+  activeDebts: number;
+  settledDebts: number;
+  totalIOwe: number;
+  totalOwedToMe: number;
+  iOweCount: number;
+  owedToMeCount: number;
+}
+
+export interface CreateDebtPayload {
+  type: DebtType;
+  counterparty: string;
+  description?: string;
+  amount: number;
+  dueDate?: string;
+}
+
+export interface UpdateDebtPayload {
+  counterparty?: string;
+  description?: string;
+  amount?: number;
+  dueDate?: string;
+  status?: DebtStatus;
+}
+
+export interface CreateDebtPaymentPayload {
+  amount: number;
+  note?: string;
+}
+
+// Export / Import types
+export interface ImportExpenseRecord {
+  name: string;
+  description?: string;
+  amount: number;
+  categoryName: string;
+}
+
+export interface ImportExpensesPayload {
+  budgetPeriodId: string;
+  records: ImportExpenseRecord[];
+}
+
+export interface ImportResult {
+  importedCount: number;
+  categoriesCreated: number;
+}

@@ -17,6 +17,8 @@ import { ExpenseTemplateModule } from './expense-template/expense-template.modul
 import { RecurringExpenseModule } from './recurring-expense/recurring-expense.module';
 import { TagModule } from './tag/tag.module';
 import { FinancialGoalModule } from './financial-goal/financial-goal.module';
+import { DebtModule } from './debt/debt.module';
+import { ExportModule } from './export/export.module';
 
 @Module({
   imports: [
@@ -53,6 +55,8 @@ import { FinancialGoalModule } from './financial-goal/financial-goal.module';
     RecurringExpenseModule,
     TagModule,
     FinancialGoalModule,
+    DebtModule,
+    ExportModule,
   ],
   providers: [
     {

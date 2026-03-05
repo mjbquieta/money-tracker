@@ -10,6 +10,8 @@ exports.createTestRefreshToken = createTestRefreshToken;
 exports.createTestTag = createTestTag;
 exports.createTestFinancialGoal = createTestFinancialGoal;
 exports.createTestGoalContribution = createTestGoalContribution;
+exports.createTestDebt = createTestDebt;
+exports.createTestDebtPayment = createTestDebtPayment;
 exports.createTestIncome = createTestIncome;
 const crypto_1 = require("crypto");
 function createTestUser(overrides = {}) {
@@ -161,6 +163,35 @@ function createTestGoalContribution(overrides = {}) {
         amount: 500,
         note: 'Monthly savings',
         goalId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        ...overrides,
+    };
+}
+function createTestDebt(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        type: 'I_OWE',
+        counterparty: 'John Doe',
+        description: 'Borrowed for lunch',
+        amount: 100,
+        paidAmount: 0,
+        dueDate: new Date('2026-06-01'),
+        status: 'ACTIVE',
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        payments: [],
+        _count: { payments: 0 },
+        ...overrides,
+    };
+}
+function createTestDebtPayment(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        amount: 50,
+        note: 'Partial payment',
+        debtId: (0, crypto_1.randomUUID)(),
         createdAt: new Date(),
         ...overrides,
     };

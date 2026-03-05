@@ -45,6 +45,17 @@ enum RecurrenceFrequency {
   YEARLY
 }
 
+enum DebtType {
+  I_OWE
+  OWED_TO_ME
+}
+
+enum DebtStatus {
+  ACTIVE
+  SETTLED
+  CANCELLED
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -66,6 +77,7 @@ model User {
   recurringExpenses     RecurringExpense[]
   tags                  Tag[]
   financialGoals        FinancialGoal[]
+  debts                 Debt[]
   refreshTokens         RefreshToken[]
   twoFactorBackupCodes  TwoFactorBackupCode[]
 
@@ -354,4 +366,39 @@ model GoalContribution {
 
   @@index([goalId])
   @@map("goal_contributions")
+}
+
+model Debt {
+  id           String     @id @default(uuid())
+  type         DebtType
+  counterparty String
+  description  String?
+  amount       Float
+  paidAmount   Float      @default(0) @map("paid_amount")
+  dueDate      DateTime?  @map("due_date")
+  status       DebtStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime?  @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
+
+  // Relations
+  userId   String
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments DebtPayment[]
+
+  @@map("debts")
+}
+
+model DebtPayment {
+  id        String   @id @default(uuid())
+  amount    Float
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  debtId String @map("debt_id")
+  debt   Debt   @relation(fields: [debtId], references: [id], onDelete: Cascade)
+
+  @@index([debtId])
+  @@map("debt_payments")
 }
