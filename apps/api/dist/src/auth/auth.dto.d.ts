@@ -9,4 +9,15 @@ declare class LoginDto {
     email?: string;
     password: string;
 }
+export declare class VerifyTwoFactorDto {
+    code: string;
+}
+export declare class DisableTwoFactorDto {
+    password: string;
+    code: string;
+}
+export declare class TwoFactorAuthenticateDto {
+    code: string;
+    isBackupCode?: boolean;
+}
 export { LoginDto };

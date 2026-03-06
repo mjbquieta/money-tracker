@@ -9,13 +9,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
-import { AuthGuard } from '../auth/auth.guard';
+import { TwoFactorAuthGuard } from '../auth/two-factor-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { IncomeService } from './income.service';
 import { CreateIncomeDto, UpdateIncomeDto } from './income.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Incomes')
+@ApiBearerAuth()
 @Controller('api/v1/incomes')
-@UseGuards(AuthGuard)
+@UseGuards(TwoFactorAuthGuard)
 export class IncomeController {
   constructor(private readonly incomeService: IncomeService) {}
 

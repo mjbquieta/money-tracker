@@ -7,6 +7,8 @@ import { Prisma } from '@prisma/client';
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCategoryDto, DefaultCategory, UpdateCategoryDto } from './category.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { buildPrismaArgs, buildPaginatedResponse } from '../common/helpers/pagination.helper';
 
 @Injectable()
 export class CategoryService {
@@ -55,19 +57,30 @@ export class CategoryService {
         userId,
         name: payload.name,
         description: payload.description,
+        spendingLimit: payload.spendingLimit,
         isDefault: false,
       },
     });
   }
 
-  async findAll(userId: UUID) {
-    return this.prisma.category.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-      },
-      orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
-    });
+  async findAll(userId: UUID, pagination: PaginationQueryDto) {
+    const where = {
+      userId,
+      deletedAt: null,
+    };
+
+    const prismaArgs = buildPrismaArgs(pagination);
+
+    const [items, totalCount] = await Promise.all([
+      this.prisma.category.findMany({
+        where,
+        ...prismaArgs,
+        orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+      }),
+      this.prisma.category.count({ where }),
+    ]);
+
+    return buildPaginatedResponse(items, pagination, totalCount);
   }
 
   async findOne(userId: UUID, categoryId: UUID) {
@@ -124,6 +137,72 @@ export class CategoryService {
     return this.prisma.category.update({
       where: { id: categoryId },
       data: { deletedAt: new Date() },
+    });
+  }
+
+  async getSpendingStatus(userId: UUID, categoryId: UUID, budgetPeriodId: UUID) {
+    const category = await this.findOne(userId, categoryId);
+
+    const result = await this.prisma.expense.aggregate({
+      where: {
+        categoryId,
+        budgetPeriodId,
+        deletedAt: null,
+        budgetPeriod: { userId, deletedAt: null },
+      },
+      _sum: { amount: true },
+      _count: true,
+    });
+
+    const totalSpent = result._sum.amount || 0;
+    const limit = category.spendingLimit;
+
+    return {
+      categoryId,
+      categoryName: category.name,
+      spendingLimit: limit,
+      totalSpent,
+      remaining: limit ? limit - totalSpent : null,
+      percentageUsed: limit ? (totalSpent / limit) * 100 : null,
+      isOverLimit: limit ? totalSpent > limit : false,
+      isApproachingLimit: limit ? totalSpent >= limit * 0.8 && totalSpent <= limit : false,
+      expenseCount: result._count,
+    };
+  }
+
+  async getAllSpendingStatus(userId: UUID, budgetPeriodId: UUID) {
+    const categories = await this.prisma.category.findMany({
+      where: { userId, deletedAt: null },
+    });
+
+    const expenses = await this.prisma.expense.groupBy({
+      by: ['categoryId'],
+      where: {
+        budgetPeriodId,
+        deletedAt: null,
+        budgetPeriod: { userId, deletedAt: null },
+      },
+      _sum: { amount: true },
+      _count: true,
+    });
+
+    const expenseMap = new Map(expenses.map((e) => [e.categoryId, e]));
+
+    return categories.map((cat) => {
+      const data = expenseMap.get(cat.id);
+      const totalSpent = data?._sum.amount || 0;
+      const limit = cat.spendingLimit;
+      return {
+        categoryId: cat.id,
+        categoryName: cat.name,
+        spendingLimit: limit,
+        totalSpent,
+        remaining: limit ? limit - totalSpent : null,
+        percentageUsed: limit ? (totalSpent / limit) * 100 : null,
+        isOverLimit: limit ? totalSpent > limit : false,
+        isApproachingLimit: limit ? totalSpent >= limit * 0.8 && totalSpent <= limit : false,
+        expenseCount: data?._count || 0,
+      };
     });
   }
 }

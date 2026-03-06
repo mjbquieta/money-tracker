@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BulkExpenseItemDto = exports.CreateBulkExpenseDto = exports.UpdateExpenseDto = exports.CreateExpenseDto = void 0;
+const openapi = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class CreateExpenseDto {
@@ -19,6 +20,9 @@ class CreateExpenseDto {
     categoryId;
     budgetPeriodId;
     expenseGroupId;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: true, type: () => String, minLength: 2, maxLength: 100 }, description: { required: false, type: () => String, maxLength: 500 }, amount: { required: true, type: () => Number, minimum: 1 }, categoryId: { required: true, type: () => String, format: "uuid" }, budgetPeriodId: { required: true, type: () => String, format: "uuid" }, expenseGroupId: { required: false, type: () => String, format: "uuid" } };
+    }
 }
 exports.CreateExpenseDto = CreateExpenseDto;
 __decorate([
@@ -57,6 +61,9 @@ class UpdateExpenseDto {
     amount;
     categoryId;
     expenseGroupId;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: false, type: () => String, minLength: 2, maxLength: 100 }, description: { required: false, type: () => String, maxLength: 500 }, amount: { required: false, type: () => Number, minimum: 1 }, categoryId: { required: false, type: () => String, format: "uuid" }, expenseGroupId: { required: false, type: () => String, nullable: true, format: "uuid" } };
+    }
 }
 exports.UpdateExpenseDto = UpdateExpenseDto;
 __decorate([
@@ -94,6 +101,9 @@ class BulkExpenseItemDto {
     amount;
     categoryId;
     expenseGroupId;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: true, type: () => String, minLength: 2, maxLength: 100 }, description: { required: false, type: () => String, maxLength: 500 }, amount: { required: true, type: () => Number, minimum: 1 }, categoryId: { required: true, type: () => String, format: "uuid" }, expenseGroupId: { required: false, type: () => String, format: "uuid" } };
+    }
 }
 exports.BulkExpenseItemDto = BulkExpenseItemDto;
 __decorate([
@@ -125,6 +135,9 @@ __decorate([
 class CreateBulkExpenseDto {
     budgetPeriodId;
     expenses;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { budgetPeriodId: { required: true, type: () => String, format: "uuid" }, expenses: { required: true, type: () => [require("./expense.dto").BulkExpenseItemDto], minItems: 1 } };
+    }
 }
 exports.CreateBulkExpenseDto = CreateBulkExpenseDto;
 __decorate([

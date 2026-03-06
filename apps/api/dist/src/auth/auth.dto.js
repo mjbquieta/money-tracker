@@ -9,8 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LoginDto = exports.IsUsernameOrEmailProvidedConstraint = void 0;
+exports.LoginDto = exports.TwoFactorAuthenticateDto = exports.DisableTwoFactorDto = exports.VerifyTwoFactorDto = exports.IsUsernameOrEmailProvidedConstraint = void 0;
 exports.IsUsernameOrEmailProvided = IsUsernameOrEmailProvided;
+const openapi = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 let IsUsernameOrEmailProvidedConstraint = class IsUsernameOrEmailProvidedConstraint {
     validate(value, args) {
@@ -25,6 +26,9 @@ let IsUsernameOrEmailProvidedConstraint = class IsUsernameOrEmailProvidedConstra
             return 'Provide either username or email, not both';
         }
         return 'Either username or email must be provided';
+    }
+    static _OPENAPI_METADATA_FACTORY() {
+        return {};
     }
 };
 exports.IsUsernameOrEmailProvidedConstraint = IsUsernameOrEmailProvidedConstraint;
@@ -46,6 +50,9 @@ class LoginDto {
     username;
     email;
     password;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { username: { required: false, type: () => String }, email: { required: false, type: () => String, format: "email" }, password: { required: true, type: () => String } };
+    }
 }
 exports.LoginDto = LoginDto;
 __decorate([
@@ -65,4 +72,54 @@ __decorate([
     IsUsernameOrEmailProvided(),
     __metadata("design:type", String)
 ], LoginDto.prototype, "password", void 0);
+class VerifyTwoFactorDto {
+    code;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { code: { required: true, type: () => String, minLength: 6, maxLength: 6 } };
+    }
+}
+exports.VerifyTwoFactorDto = VerifyTwoFactorDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Length)(6, 6),
+    __metadata("design:type", String)
+], VerifyTwoFactorDto.prototype, "code", void 0);
+class DisableTwoFactorDto {
+    password;
+    code;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { password: { required: true, type: () => String }, code: { required: true, type: () => String, minLength: 6, maxLength: 6 } };
+    }
+}
+exports.DisableTwoFactorDto = DisableTwoFactorDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], DisableTwoFactorDto.prototype, "password", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Length)(6, 6),
+    __metadata("design:type", String)
+], DisableTwoFactorDto.prototype, "code", void 0);
+class TwoFactorAuthenticateDto {
+    code;
+    isBackupCode;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { code: { required: true, type: () => String }, isBackupCode: { required: false, type: () => Boolean } };
+    }
+}
+exports.TwoFactorAuthenticateDto = TwoFactorAuthenticateDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], TwoFactorAuthenticateDto.prototype, "code", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TwoFactorAuthenticateDto.prototype, "isBackupCode", void 0);
 //# sourceMappingURL=auth.dto.js.map

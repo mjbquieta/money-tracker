@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Expense, BulkExpenseItem, ExpenseGroup, Income, IncomeItem } from '~/types';
+import type { Expense, BulkExpenseItem, ExpenseGroup, Income, IncomeItem, CategorySpendingStatus, GenerateRecurringExpensesResult, DailySpendingData, TopExpenseItem } from '~/types';
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -24,6 +24,9 @@ import {
   ChevronRightIcon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
+  FunnelIcon,
+  MagnifyingGlassIcon,
+  ArrowPathIcon,
 } from '@heroicons/vue/24/outline';
 
 definePageMeta({
@@ -36,6 +39,8 @@ const authStore = useAuthStore();
 const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
 const expenseGroupStore = useExpenseGroupStore();
+const recurringExpenseStore = useRecurringExpenseStore();
+const tagStore = useTagStore();
 
 const budgetPeriodId = route.params.id as string;
 
@@ -69,6 +74,7 @@ const expenseForm = reactive({
 const showNewGroupInput = ref(false);
 const newGroupName = ref('');
 const groupLoading = ref(false);
+const selectedTagIds = ref<string[]>([]);
 
 const editPeriodForm = reactive({
   name: '',
@@ -95,6 +101,13 @@ const incomeForm = reactive({
   amount: 0,
 });
 
+// Import state
+const showImportModal = ref(false);
+const importCsvText = ref('');
+const importLoading = ref(false);
+const importError = ref<string | null>(null);
+const importResult = ref<{ importedCount: number; categoriesCreated: number } | null>(null);
+
 // Delete confirmation states
 const showDeleteExpenseConfirm = ref(false);
 const showDeleteIncomeConfirm = ref(false);
@@ -103,6 +116,12 @@ const expenseToDelete = ref<Expense | null>(null);
 const incomeToDelete = ref<Income | null>(null);
 const groupToDelete = ref<ExpenseGroup | null>(null);
 const deleteLoading = ref(false);
+const generatingRecurring = ref(false);
+const recurringGenerateResult = ref<{ count: number; message: string } | null>(null);
+const showAnalytics = ref(false);
+const dailySpendingData = ref<DailySpendingData | null>(null);
+const topExpenses = ref<TopExpenseItem[]>([]);
+const analyticsLoading = ref(false);
 
 const bulkExpenses = ref<BulkExpenseItem[]>([
   { name: '', description: '', amount: 0, categoryId: '', expenseGroupId: '' },
@@ -254,6 +273,61 @@ async function handleBulkExpenseSubmit() {
 
   showBulkExpenseModal.value = false;
   resetBulkExpenseForm();
+}
+
+async function toggleAnalytics() {
+  showAnalytics.value = !showAnalytics.value;
+  if (showAnalytics.value && !dailySpendingData.value) {
+    analyticsLoading.value = true;
+    const [dailyResult, topResult] = await Promise.all([
+      budgetStore.fetchDailySpending(budgetPeriodId),
+      budgetStore.fetchTopExpenses(budgetPeriodId, 5),
+    ]);
+    analyticsLoading.value = false;
+
+    if (dailyResult.success && dailyResult.data) {
+      dailySpendingData.value = dailyResult.data;
+    }
+    if (topResult.success && topResult.data) {
+      topExpenses.value = topResult.data;
+    }
+  }
+}
+
+async function handleGenerateRecurring() {
+  generatingRecurring.value = true;
+  recurringGenerateResult.value = null;
+
+  const result = await recurringExpenseStore.generateForPeriod(budgetPeriodId);
+  generatingRecurring.value = false;
+
+  if (!result.success && result.error) {
+    error.value = typeof result.error.message === 'string'
+      ? result.error.message
+      : result.error.message[0];
+    return;
+  }
+
+  const count = result.data?.generatedCount ?? 0;
+  recurringGenerateResult.value = {
+    count,
+    message: count > 0
+      ? `Generated ${count} recurring expense${count > 1 ? 's' : ''}`
+      : 'No recurring expenses to generate for this period',
+  };
+
+  // Refresh data if expenses were generated
+  if (count > 0) {
+    await Promise.all([
+      budgetStore.fetchBudgetPeriod(budgetPeriodId),
+      budgetStore.fetchSummary(budgetPeriodId),
+    ]);
+  }
+
+  // Auto-hide the result after 5 seconds
+  setTimeout(() => {
+    recurringGenerateResult.value = null;
+  }, 5000);
 }
 
 const bulkExpensesTotal = computed(() => {
@@ -519,12 +593,80 @@ const ungroupedExpenses = computed(() => {
   return period.value.expenses.filter((e) => !e.expenseGroupId);
 });
 
+// Category spending status
+const spendingStatusMap = ref<Map<string, CategorySpendingStatus>>(new Map());
+
+async function fetchSpendingStatus() {
+  const result = await expenseStore.fetchAllSpendingStatus(budgetPeriodId);
+  if (result.success && result.data) {
+    const map = new Map<string, CategorySpendingStatus>();
+    result.data.forEach((s) => map.set(s.categoryName, s));
+    spendingStatusMap.value = map;
+  }
+}
+
+function getSpendingStatus(categoryName: string): CategorySpendingStatus | undefined {
+  return spendingStatusMap.value.get(categoryName);
+}
+
+// Expense filters
+const { filters: expenseFilters, activeFilterCount, hasActiveFilters, reset: resetFilters } = useExpenseFilters();
+const showFilterPanel = ref(false);
+const filterSearchDebounce = ref<ReturnType<typeof setTimeout>>();
+const filteredExpenseResults = ref<Expense[]>([]);
+const filterLoading = ref(false);
+const isFilterActive = computed(() => hasActiveFilters.value);
+
+const displayedExpenses = computed(() => {
+  if (isFilterActive.value) return filteredExpenseResults.value;
+  return period.value?.expenses ?? [];
+});
+
+const displayedUngroupedExpenses = computed(() => {
+  if (isFilterActive.value) return filteredExpenseResults.value.filter((e) => !e.expenseGroupId);
+  return ungroupedExpenses.value;
+});
+
+function onFilterSearchInput(value: string) {
+  clearTimeout(filterSearchDebounce.value);
+  filterSearchDebounce.value = setTimeout(() => {
+    expenseFilters.search = value || undefined;
+    applyFilters();
+  }, 300);
+}
+
+async function applyFilters() {
+  if (!hasActiveFilters.value) {
+    filteredExpenseResults.value = [];
+    return;
+  }
+
+  filterLoading.value = true;
+  const result = await expenseStore.searchExpenses({
+    ...expenseFilters,
+    budgetPeriodId,
+    limit: 100,
+  });
+  filterLoading.value = false;
+
+  if (result.success && result.data) {
+    filteredExpenseResults.value = result.data;
+  }
+}
+
+function clearFilters() {
+  resetFilters();
+  filteredExpenseResults.value = [];
+}
+
 onMounted(async () => {
   await Promise.all([
     budgetStore.fetchBudgetPeriod(budgetPeriodId),
     budgetStore.fetchBudgetSummary(budgetPeriodId),
     expenseStore.fetchCategories(),
     expenseGroupStore.fetchGroups(budgetPeriodId),
+    fetchSpendingStatus(),
+    tagStore.fetchTags(),
   ]);
 });
 
@@ -578,6 +720,7 @@ function resetExpenseForm() {
   newCategoryName.value = '';
   expenseForm.categoryId = '';
   expenseForm.expenseGroupId = '';
+  selectedTagIds.value = [];
   showNewGroupInput.value = false;
   newGroupName.value = '';
   editingExpense.value = null;
@@ -595,6 +738,7 @@ function openEditExpense(expense: Expense) {
   expenseForm.amount = expense.amount;
   expenseForm.categoryId = expense.categoryId;
   expenseForm.expenseGroupId = expense.expenseGroupId || '';
+  selectedTagIds.value = expense.expenseTags?.map((et) => et.tag.id) ?? [];
   showNewGroupInput.value = false;
   newGroupName.value = '';
   showExpenseModal.value = true;
@@ -716,6 +860,14 @@ async function handleExpenseSubmit() {
       return;
     }
 
+    // Update tags if changed
+    if (result.data && selectedTagIds.value.length >= 0) {
+      const tagResult = await tagStore.tagExpense(result.data.id, selectedTagIds.value);
+      if (tagResult.data) {
+        result.data = tagResult.data;
+      }
+    }
+
     // Update local state
     if (result.data && budgetStore.currentPeriod) {
       const index = budgetStore.currentPeriod.expenses.findIndex((e) => e.id === result.data!.id);
@@ -795,6 +947,14 @@ async function handleExpenseSubmit() {
         : result.error.message[0];
       loading.value = false;
       return;
+    }
+
+    // Set tags on the newly created expense
+    if (result.data && selectedTagIds.value.length > 0) {
+      const tagResult = await tagStore.tagExpense(result.data.id, selectedTagIds.value);
+      if (tagResult.data) {
+        result.data = tagResult.data;
+      }
     }
 
     // Update local state
@@ -898,6 +1058,67 @@ async function handleDuplicateSubmit() {
   if (result.data) {
     router.push(`/budget-periods/${result.data.id}`);
   }
+}
+
+async function handleImportCsv() {
+  importError.value = null;
+  importResult.value = null;
+
+  const lines = importCsvText.value.trim().split('\n');
+  if (lines.length < 2) {
+    importError.value = 'CSV must have a header row and at least one data row';
+    return;
+  }
+
+  const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const nameIdx = header.findIndex(h => h === 'name');
+  const amountIdx = header.findIndex(h => h === 'amount');
+  const categoryIdx = header.findIndex(h => h === 'category' || h === 'categoryname');
+  const descIdx = header.findIndex(h => h === 'description');
+
+  if (nameIdx === -1 || amountIdx === -1 || categoryIdx === -1) {
+    importError.value = 'CSV must have Name, Amount, and Category columns';
+    return;
+  }
+
+  const records = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',').map(c => c.trim());
+    if (!cols[nameIdx] || !cols[amountIdx] || !cols[categoryIdx]) continue;
+    const amount = parseFloat(cols[amountIdx]);
+    if (isNaN(amount) || amount <= 0) continue;
+
+    records.push({
+      name: cols[nameIdx],
+      description: descIdx !== -1 ? cols[descIdx] || undefined : undefined,
+      amount,
+      categoryName: cols[categoryIdx],
+    });
+  }
+
+  if (records.length === 0) {
+    importError.value = 'No valid records found in CSV';
+    return;
+  }
+
+  importLoading.value = true;
+  const api = useApi();
+  const { data, error: apiError } = await api.post<{ importedCount: number; categoriesCreated: number }>(
+    '/api/v1/import/expenses',
+    { budgetPeriodId, records },
+  );
+  importLoading.value = false;
+
+  if (apiError) {
+    importError.value = typeof apiError.message === 'string' ? apiError.message : apiError.message[0];
+    return;
+  }
+
+  importResult.value = data ?? null;
+
+  // Refresh the budget period data
+  await budgetStore.fetchBudgetPeriod(budgetPeriodId);
+  await expenseStore.fetchCategories();
 }
 
 function confirmDeleteExpense(expense: Expense) {
@@ -1026,6 +1247,21 @@ function getCategoryStyle(categoryName: string) {
             >
               <DocumentDuplicateIcon class="w-4 h-4" />
               <span class="hidden sm:inline">Duplicate</span>
+            </button>
+            <a
+              :href="`/api/v1/export/budget-periods/${budgetPeriodId}/csv`"
+              target="_blank"
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
+            >
+              <ChevronDoubleDownIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Export</span>
+            </a>
+            <button
+              class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
+              @click="showImportModal = true"
+            >
+              <ChevronDoubleUpIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Import</span>
             </button>
             <button
               class="flex items-center gap-2 px-4 py-2 text-danger-600 dark:text-danger-400 hover:text-danger-700 dark:hover:text-danger-300 hover:bg-danger-50 dark:hover:bg-danger-900/50 border border-danger-200 dark:border-danger-700 rounded-lg transition-colors"
@@ -1228,6 +1464,14 @@ function getCategoryStyle(categoryName: string) {
                 :style="{ width: `${(category.total / (summary?.totalExpenses || 1)) * 100}%` }"
               />
             </div>
+            <!-- Spending Limit Bar -->
+            <SpendingLimitBar
+              v-if="getSpendingStatus(category.name)?.spendingLimit"
+              :total-spent="getSpendingStatus(category.name)!.totalSpent"
+              :spending-limit="getSpendingStatus(category.name)!.spendingLimit!"
+              :category-name="category.name"
+              :format-currency="formatCurrency"
+            />
           </div>
         </div>
       </div>
@@ -1240,6 +1484,17 @@ function getCategoryStyle(categoryName: string) {
             Expenses
           </h2>
           <div class="flex gap-2">
+            <button
+              class="relative flex items-center gap-2 px-3 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors font-medium"
+              @click="showFilterPanel = !showFilterPanel"
+            >
+              <FunnelIcon class="w-5 h-5" />
+              <span class="hidden sm:inline">Filter</span>
+              <span
+                v-if="activeFilterCount > 0"
+                class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary-500 text-white text-xs rounded-full flex items-center justify-center"
+              >{{ activeFilterCount }}</span>
+            </button>
             <button
               v-if="expenseGroupStore.groups.length > 0"
               class="flex items-center gap-2 px-3 py-2 text-secondary-600 dark:text-secondary-400 hover:text-accent-600 dark:hover:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors font-medium"
@@ -1260,6 +1515,14 @@ function getCategoryStyle(categoryName: string) {
               <span class="hidden sm:inline">New Group</span>
             </button>
             <button
+              class="flex items-center gap-2 px-3 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors font-medium"
+              :disabled="generatingRecurring"
+              @click="handleGenerateRecurring"
+            >
+              <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': generatingRecurring }" />
+              <span class="hidden sm:inline">{{ generatingRecurring ? 'Generating...' : 'Recurring' }}</span>
+            </button>
+            <button
               class="flex items-center gap-2 px-3 py-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-primary-200 dark:border-primary-700 rounded-lg transition-colors font-medium"
               @click="openBulkExpenseModal"
             >
@@ -1276,8 +1539,112 @@ function getCategoryStyle(categoryName: string) {
           </div>
         </div>
 
+        <!-- Recurring Generate Result Banner -->
+        <div
+          v-if="recurringGenerateResult"
+          class="mb-4 p-3 rounded-lg flex items-center justify-between text-sm"
+          :class="recurringGenerateResult.count > 0 ? 'bg-success-50 dark:bg-success-900/30 border border-success-200 dark:border-success-800 text-success-700 dark:text-success-300' : 'bg-secondary-50 dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 text-secondary-600 dark:text-secondary-400'"
+        >
+          <span>{{ recurringGenerateResult.message }}</span>
+          <button class="p-1 hover:opacity-70" @click="recurringGenerateResult = null">
+            <XMarkIcon class="w-4 h-4" />
+          </button>
+        </div>
+
+        <!-- Filter Panel -->
+        <div v-if="showFilterPanel" class="mb-6 p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl border border-secondary-200 dark:border-secondary-600 space-y-4">
+          <!-- Search -->
+          <div>
+            <div class="relative">
+              <MagnifyingGlassIcon class="w-5 h-5 text-secondary-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search expenses by name..."
+                class="w-full pl-10 pr-4 py-2 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                :value="expenseFilters.search || ''"
+                @input="onFilterSearchInput(($event.target as HTMLInputElement).value)"
+              />
+            </div>
+          </div>
+
+          <!-- Filter Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Category -->
+            <div>
+              <label class="block text-xs font-medium text-secondary-500 dark:text-secondary-400 mb-1">Category</label>
+              <select
+                v-model="expenseFilters.categoryId"
+                class="w-full px-3 py-2 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                @change="applyFilters()"
+              >
+                <option :value="undefined">All categories</option>
+                <option v-for="cat in expenseStore.categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              </select>
+            </div>
+
+            <!-- Date From -->
+            <div>
+              <label class="block text-xs font-medium text-secondary-500 dark:text-secondary-400 mb-1">Date from</label>
+              <input
+                v-model="expenseFilters.dateFrom"
+                type="date"
+                class="w-full px-3 py-2 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                @change="applyFilters()"
+              />
+            </div>
+
+            <!-- Date To -->
+            <div>
+              <label class="block text-xs font-medium text-secondary-500 dark:text-secondary-400 mb-1">Date to</label>
+              <input
+                v-model="expenseFilters.dateTo"
+                type="date"
+                class="w-full px-3 py-2 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                @change="applyFilters()"
+              />
+            </div>
+
+            <!-- Amount Range -->
+            <div>
+              <label class="block text-xs font-medium text-secondary-500 dark:text-secondary-400 mb-1">Amount range</label>
+              <div class="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  min="0"
+                  class="w-1/2 px-3 py-2 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  :value="expenseFilters.amountMin"
+                  @change="expenseFilters.amountMin = ($event.target as HTMLInputElement).value ? Number(($event.target as HTMLInputElement).value) : undefined; applyFilters()"
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  min="0"
+                  class="w-1/2 px-3 py-2 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  :value="expenseFilters.amountMax"
+                  @change="expenseFilters.amountMax = ($event.target as HTMLInputElement).value ? Number(($event.target as HTMLInputElement).value) : undefined; applyFilters()"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Clear Filters -->
+          <div v-if="hasActiveFilters" class="flex items-center justify-between">
+            <p class="text-sm text-secondary-500 dark:text-secondary-400">
+              <span v-if="filterLoading">Searching...</span>
+              <span v-else>{{ filteredExpenseResults.length }} result{{ filteredExpenseResults.length !== 1 ? 's' : '' }} found</span>
+            </p>
+            <button
+              class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+              @click="clearFilters()"
+            >
+              Clear all filters
+            </button>
+          </div>
+        </div>
+
         <!-- Empty State -->
-        <div v-if="period.expenses.length === 0" class="text-center py-12">
+        <div v-if="displayedExpenses.length === 0 && !isFilterActive" class="text-center py-12">
           <div class="w-16 h-16 bg-secondary-50 dark:bg-secondary-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <BanknotesIcon class="w-8 h-8 text-secondary-400 dark:text-secondary-500" />
           </div>
@@ -1300,10 +1667,21 @@ function getCategoryStyle(categoryName: string) {
           </div>
         </div>
 
+        <!-- No Results for Filter -->
+        <div v-else-if="isFilterActive && displayedExpenses.length === 0 && !filterLoading" class="text-center py-8">
+          <p class="text-secondary-500 dark:text-secondary-400">No expenses match your filters.</p>
+          <button
+            class="mt-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+            @click="clearFilters()"
+          >
+            Clear filters
+          </button>
+        </div>
+
         <!-- Expenses Content -->
         <div v-else class="space-y-4">
           <!-- Expense Groups -->
-          <div v-if="expenseGroupStore.groups.length > 0" class="space-y-3">
+          <div v-if="expenseGroupStore.groups.length > 0 && !isFilterActive" class="space-y-3">
             <div
               v-for="group in expenseGroupStore.groups"
               :key="group.id"
@@ -1369,6 +1747,14 @@ function getCategoryStyle(categoryName: string) {
                         </span>
                       </div>
                       <p v-if="expense.description" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">{{ expense.description }}</p>
+                      <div v-if="expense.expenseTags?.length" class="flex flex-wrap gap-1 mt-1">
+                        <UiTagBadge
+                          v-for="et in expense.expenseTags"
+                          :key="et.id"
+                          :name="et.tag.name"
+                          :color="et.tag.color"
+                        />
+                      </div>
                     </div>
                     <div class="flex items-center gap-4">
                       <p class="font-bold text-danger-600 dark:text-danger-400">{{ formatCurrency(expense.amount) }}</p>
@@ -1401,12 +1787,12 @@ function getCategoryStyle(categoryName: string) {
           </div>
 
           <!-- Ungrouped Expenses -->
-          <div v-if="ungroupedExpenses.length > 0" class="space-y-3">
+          <div v-if="displayedUngroupedExpenses.length > 0" class="space-y-3">
             <p v-if="expenseGroupStore.groups.length > 0" class="text-sm font-medium text-secondary-500 dark:text-secondary-400 mt-4">
               Ungrouped Expenses
             </p>
             <div
-              v-for="expense in ungroupedExpenses"
+              v-for="expense in displayedUngroupedExpenses"
               :key="expense.id"
               class="flex justify-between items-center p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors group"
             >
@@ -1421,6 +1807,14 @@ function getCategoryStyle(categoryName: string) {
                   </span>
                 </div>
                 <p v-if="expense.description" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">{{ expense.description }}</p>
+                <div v-if="expense.expenseTags?.length" class="flex flex-wrap gap-1 mt-1">
+                  <UiTagBadge
+                    v-for="et in expense.expenseTags"
+                    :key="et.id"
+                    :name="et.tag.name"
+                    :color="et.tag.color"
+                  />
+                </div>
               </div>
               <div class="flex items-center gap-4">
                 <p class="font-bold text-danger-600 dark:text-danger-400 text-lg">{{ formatCurrency(expense.amount) }}</p>
@@ -1450,6 +1844,66 @@ function getCategoryStyle(categoryName: string) {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-card border border-secondary-100 dark:border-secondary-700 overflow-hidden">
+      <button
+        class="w-full flex items-center justify-between p-6 text-left hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors"
+        @click="toggleAnalytics"
+      >
+        <div class="flex items-center gap-3">
+          <ChartPieIcon class="w-6 h-6 text-primary-500" />
+          <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Analytics</h2>
+        </div>
+        <ChevronDownIcon
+          class="w-5 h-5 text-secondary-400 transition-transform"
+          :class="{ 'rotate-180': showAnalytics }"
+        />
+      </button>
+
+      <div v-if="showAnalytics" class="px-6 pb-6 space-y-6">
+        <div v-if="analyticsLoading" class="flex items-center justify-center py-12">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
+        </div>
+
+        <template v-else>
+          <!-- Daily Average Card -->
+          <div v-if="dailySpendingData" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl">
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Total Expenses</p>
+              <p class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ formatCurrency(dailySpendingData.totalExpenses) }}</p>
+            </div>
+            <div class="p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl">
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Daily Average</p>
+              <p class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ formatCurrency(dailySpendingData.dailyAverage) }}</p>
+            </div>
+            <div class="p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl">
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Period Length</p>
+              <p class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ dailySpendingData.totalDays }} days</p>
+            </div>
+          </div>
+
+          <!-- Daily Spending Chart -->
+          <div v-if="dailySpendingData && dailySpendingData.dailyBreakdown.length > 0">
+            <h3 class="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-3">Daily Spending</h3>
+            <DailySpendingChart
+              :data="dailySpendingData.dailyBreakdown"
+              :daily-average="dailySpendingData.dailyAverage"
+              :currency="authStore.user?.settings?.currency"
+            />
+          </div>
+
+          <!-- Top Expenses Chart -->
+          <div v-if="topExpenses.length > 0">
+            <h3 class="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-3">Top 5 Expenses</h3>
+            <TopExpensesChart
+              :data="topExpenses"
+              :currency="authStore.user?.settings?.currency"
+            />
+          </div>
+        </template>
       </div>
     </div>
 
@@ -1609,6 +2063,15 @@ function getCategoryStyle(categoryName: string) {
                 <FolderPlusIcon class="w-4 h-4" />
                 Create new group
               </button>
+            </div>
+
+            <!-- Tags (Optional) -->
+            <div v-if="tagStore.tags.length > 0" class="space-y-2">
+              <label class="text-sm font-medium text-secondary-700 dark:text-secondary-300">Tags (Optional)</label>
+              <UiTagPicker
+                v-model="selectedTagIds"
+                :tags="tagStore.tags"
+              />
             </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t border-secondary-100 dark:border-secondary-700">
@@ -2291,6 +2754,71 @@ function getCategoryStyle(categoryName: string) {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Import CSV Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showImportModal"
+        class="fixed inset-0 bg-secondary-900/50 dark:bg-secondary-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        @click.self="showImportModal = false"
+      >
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-elevated max-w-lg w-full p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/50 rounded-xl flex items-center justify-center">
+              <ChevronDoubleUpIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-secondary-100">Import Expenses from CSV</h2>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">Paste CSV data with Name, Amount, Category columns</p>
+            </div>
+          </div>
+
+          <div v-if="importError" class="mb-4 p-3 bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-800 rounded-lg text-sm text-danger-700 dark:text-danger-300">
+            {{ importError }}
+          </div>
+
+          <div v-if="importResult" class="mb-4 p-3 bg-success-50 dark:bg-success-900/30 border border-success-200 dark:border-success-800 rounded-lg text-sm text-success-700 dark:text-success-300">
+            Imported {{ importResult.importedCount }} expenses.
+            <span v-if="importResult.categoriesCreated > 0">Created {{ importResult.categoriesCreated }} new categories.</span>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">CSV Data</label>
+              <textarea
+                v-model="importCsvText"
+                rows="10"
+                placeholder="Name,Amount,Category,Description
+Groceries,50.00,Food,Weekly groceries
+Netflix,15.99,Entertainment,Monthly subscription"
+                class="w-full px-3 py-2 bg-white dark:bg-secondary-900 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none font-mono text-sm"
+              />
+            </div>
+
+            <p class="text-xs text-secondary-400 dark:text-secondary-500">
+              Required columns: Name, Amount, Category. Optional: Description. Categories that don't exist will be created automatically.
+            </p>
+
+            <div class="flex gap-3 pt-2">
+              <button
+                type="button"
+                class="flex-1 px-4 py-2 border border-secondary-200 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors"
+                @click="showImportModal = false; importCsvText = ''; importError = null; importResult = null"
+              >
+                Close
+              </button>
+              <button
+                :disabled="importLoading || !importCsvText.trim()"
+                class="flex-1 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all font-medium disabled:opacity-50"
+                @click="handleImportCsv"
+              >
+                {{ importLoading ? 'Importing...' : 'Import' }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </Teleport>

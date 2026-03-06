@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpenseService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const pagination_helper_1 = require("../common/helpers/pagination.helper");
 let ExpenseService = class ExpenseService {
     prisma;
     constructor(prisma) {
@@ -59,10 +60,13 @@ let ExpenseService = class ExpenseService {
                 budgetPeriodId: payload.budgetPeriodId,
                 expenseGroupId: payload.expenseGroupId,
             },
-            include: { category: true },
+            include: {
+                category: true,
+                expenseTags: { include: { tag: true } },
+            },
         });
     }
-    async findAll(userId, budgetPeriodId) {
+    async findAll(userId, filters) {
         const where = {
             budgetPeriod: {
                 userId,
@@ -70,17 +74,48 @@ let ExpenseService = class ExpenseService {
             },
             deletedAt: null,
         };
-        if (budgetPeriodId) {
-            where.budgetPeriodId = budgetPeriodId;
+        if (filters.budgetPeriodId) {
+            where.budgetPeriodId = filters.budgetPeriodId;
         }
-        return this.prisma.expense.findMany({
-            where,
-            include: {
-                category: true,
-                budgetPeriod: true,
-            },
-            orderBy: { createdAt: 'desc' },
-        });
+        if (filters.categoryId) {
+            where.categoryId = filters.categoryId;
+        }
+        if (filters.search) {
+            where.name = { contains: filters.search, mode: 'insensitive' };
+        }
+        if (filters.dateFrom || filters.dateTo) {
+            where.createdAt = {};
+            if (filters.dateFrom)
+                where.createdAt.gte = new Date(filters.dateFrom);
+            if (filters.dateTo)
+                where.createdAt.lte = new Date(filters.dateTo);
+        }
+        if (filters.amountMin !== undefined || filters.amountMax !== undefined) {
+            where.amount = {};
+            if (filters.amountMin !== undefined)
+                where.amount.gte = filters.amountMin;
+            if (filters.amountMax !== undefined)
+                where.amount.lte = filters.amountMax;
+        }
+        if (filters.tagIds?.length) {
+            where.expenseTags = {
+                some: { tagId: { in: filters.tagIds } },
+            };
+        }
+        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(filters);
+        const [items, totalCount] = await Promise.all([
+            this.prisma.expense.findMany({
+                where,
+                include: {
+                    category: true,
+                    budgetPeriod: true,
+                    expenseTags: { include: { tag: true } },
+                },
+                ...prismaArgs,
+            }),
+            this.prisma.expense.count({ where }),
+        ]);
+        return (0, pagination_helper_1.buildPaginatedResponse)(items, filters, totalCount);
     }
     async findOne(userId, expenseId) {
         const expense = await this.prisma.expense.findFirst({
@@ -95,6 +130,7 @@ let ExpenseService = class ExpenseService {
             include: {
                 category: true,
                 budgetPeriod: true,
+                expenseTags: { include: { tag: true } },
             },
         });
         if (!expense) {
@@ -131,7 +167,10 @@ let ExpenseService = class ExpenseService {
         return this.prisma.expense.update({
             where: { id: expenseId },
             data: payload,
-            include: { category: true },
+            include: {
+                category: true,
+                expenseTags: { include: { tag: true } },
+            },
         });
     }
     async delete(userId, expenseId) {

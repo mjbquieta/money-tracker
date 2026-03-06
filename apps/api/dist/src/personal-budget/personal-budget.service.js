@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonalBudgetService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const pagination_helper_1 = require("../common/helpers/pagination.helper");
 let PersonalBudgetService = class PersonalBudgetService {
     prisma;
     constructor(prisma) {
@@ -47,20 +48,26 @@ let PersonalBudgetService = class PersonalBudgetService {
             });
         });
     }
-    async findAll(userId) {
-        return this.prisma.personalBudget.findMany({
-            where: {
-                userId,
-                deletedAt: null,
-            },
-            include: {
-                items: {
-                    where: { deletedAt: null },
-                    orderBy: { createdAt: 'desc' },
+    async findAll(userId, pagination) {
+        const where = {
+            userId,
+            deletedAt: null,
+        };
+        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(pagination);
+        const [items, totalCount] = await Promise.all([
+            this.prisma.personalBudget.findMany({
+                where,
+                include: {
+                    items: {
+                        where: { deletedAt: null },
+                        orderBy: { createdAt: 'desc' },
+                    },
                 },
-            },
-            orderBy: { createdAt: 'desc' },
-        });
+                ...prismaArgs,
+            }),
+            this.prisma.personalBudget.count({ where }),
+        ]);
+        return (0, pagination_helper_1.buildPaginatedResponse)(items, pagination, totalCount);
     }
     async findOne(userId, personalBudgetId) {
         const personalBudget = await this.prisma.personalBudget.findFirst({

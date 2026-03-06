@@ -14,6 +14,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
   XMarkIcon,
+  AcademicCapIcon,
 } from '@heroicons/vue/24/outline';
 
 definePageMeta({
@@ -22,6 +23,13 @@ definePageMeta({
 
 const authStore = useAuthStore();
 const expenseStore = useExpenseStore();
+const { startTour, resetOnboarding } = useOnboarding();
+
+function handleRestartTour() {
+  resetOnboarding();
+  navigateTo('/dashboard');
+  nextTick(() => startTour());
+}
 
 const loading = ref(false);
 const categoryLoading = ref(false);
@@ -301,7 +309,7 @@ function formatDate(dateString: string | undefined) {
     <UiBaseAlert v-if="error" type="error" :message="error" class="mb-6" />
     <div
       v-if="success"
-      class="mb-6 flex items-center gap-3 p-4 bg-success-50 border border-success-200 text-success-700 rounded-xl"
+      class="mb-6 flex items-center gap-3 p-4 bg-success-50 dark:bg-success-900/30 border border-success-200 dark:border-success-800 text-success-700 dark:text-success-300 rounded-xl"
     >
       <CheckCircleIcon class="w-5 h-5 flex-shrink-0" />
       <span class="text-sm font-medium">{{ success }}</span>
@@ -418,7 +426,7 @@ function formatDate(dateString: string | undefined) {
         </div>
         <button
           v-if="!showPasswordForm"
-          class="flex items-center gap-2 px-4 py-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
+          class="flex items-center gap-2 px-4 py-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-primary-200 dark:border-primary-700 rounded-lg transition-colors font-medium"
           @click="showPasswordForm = true"
         >
           <PencilIcon class="w-4 h-4" />
@@ -427,26 +435,26 @@ function formatDate(dateString: string | undefined) {
       </div>
 
       <div v-if="!showPasswordForm" class="py-4">
-        <div class="flex items-center gap-2 text-secondary-500">
+        <div class="flex items-center gap-2 text-secondary-500 dark:text-secondary-400">
           <span>Password last updated:</span>
-          <span class="font-medium text-secondary-900">{{ formatDate(authStore.user?.updatedAt) }}</span>
+          <span class="font-medium text-secondary-900 dark:text-secondary-100">{{ formatDate(authStore.user?.updatedAt) }}</span>
         </div>
       </div>
 
       <!-- Password Change Form -->
       <div v-else class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Current Password</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Current Password</label>
           <div class="relative">
             <input
               v-model="passwordForm.currentPassword"
               :type="showCurrentPassword ? 'text' : 'password'"
-              class="w-full px-4 py-2.5 pr-12 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              class="w-full px-4 py-2.5 pr-12 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Enter your current password"
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300"
               @click="showCurrentPassword = !showCurrentPassword"
             >
               <EyeSlashIcon v-if="showCurrentPassword" class="w-5 h-5" />
@@ -455,37 +463,37 @@ function formatDate(dateString: string | undefined) {
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">New Password</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">New Password</label>
           <div class="relative">
             <input
               v-model="passwordForm.newPassword"
               :type="showNewPassword ? 'text' : 'password'"
-              class="w-full px-4 py-2.5 pr-12 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              class="w-full px-4 py-2.5 pr-12 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Enter your new password"
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300"
               @click="showNewPassword = !showNewPassword"
             >
               <EyeSlashIcon v-if="showNewPassword" class="w-5 h-5" />
               <EyeIcon v-else class="w-5 h-5" />
             </button>
           </div>
-          <p class="text-xs text-secondary-400 mt-1">Must be at least 4 characters with 1 uppercase, 1 lowercase, 1 number, and 1 symbol.</p>
+          <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-1">Must be at least 4 characters with 1 uppercase, 1 lowercase, 1 number, and 1 symbol.</p>
         </div>
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Confirm New Password</label>
+          <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Confirm New Password</label>
           <div class="relative">
             <input
               v-model="passwordForm.confirmPassword"
               :type="showConfirmPassword ? 'text' : 'password'"
-              class="w-full px-4 py-2.5 pr-12 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              class="w-full px-4 py-2.5 pr-12 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Confirm your new password"
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300"
               @click="showConfirmPassword = !showConfirmPassword"
             >
               <EyeSlashIcon v-if="showConfirmPassword" class="w-5 h-5" />
@@ -504,13 +512,23 @@ function formatDate(dateString: string | undefined) {
             Update Password
           </button>
           <button
-            class="px-5 py-2.5 text-secondary-600 hover:bg-secondary-100 border border-secondary-200 rounded-lg transition-colors font-medium"
+            class="px-5 py-2.5 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-100 dark:hover:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors font-medium"
             @click="resetPasswordForm"
           >
             Cancel
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Two-Factor Authentication -->
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
+      <SettingsTwoFactorSetup />
+    </div>
+
+    <!-- Active Sessions -->
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
+      <SettingsActiveSessions />
     </div>
 
     <!-- Currency Settings -->
@@ -553,6 +571,11 @@ function formatDate(dateString: string | undefined) {
       </p>
     </div>
 
+    <!-- Tags -->
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
+      <SettingsTagManager />
+    </div>
+
     <!-- Categories Settings -->
     <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6">
       <div class="flex justify-between items-start mb-5">
@@ -567,7 +590,7 @@ function formatDate(dateString: string | undefined) {
         </div>
         <button
           v-if="!showNewCategoryInput"
-          class="flex items-center gap-2 px-4 py-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 border border-primary-200 rounded-lg transition-colors font-medium"
+          class="flex items-center gap-2 px-4 py-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/50 border border-primary-200 dark:border-primary-700 rounded-lg transition-colors font-medium"
           @click="showNewCategoryInput = true"
         >
           <PlusIcon class="w-4 h-4" />
@@ -576,14 +599,14 @@ function formatDate(dateString: string | undefined) {
       </div>
 
       <!-- New Category Input -->
-      <div v-if="showNewCategoryInput" class="mb-6 p-4 bg-secondary-50 rounded-xl">
-        <label class="block text-sm font-medium text-secondary-700 mb-2">New Category Name</label>
+      <div v-if="showNewCategoryInput" class="mb-6 p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl">
+        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">New Category Name</label>
         <div class="flex gap-2">
           <input
             v-model="newCategoryName"
             type="text"
             placeholder="e.g., Healthcare, Education"
-            class="flex-1 px-4 py-2.5 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            class="flex-1 px-4 py-2.5 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             @keyup.enter="handleCreateCategory"
           />
           <button
@@ -596,7 +619,7 @@ function formatDate(dateString: string | undefined) {
             Add
           </button>
           <button
-            class="px-4 py-2.5 text-secondary-600 hover:bg-secondary-100 border border-secondary-200 rounded-lg transition-colors"
+            class="px-4 py-2.5 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-100 dark:hover:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg transition-colors"
             @click="showNewCategoryInput = false; newCategoryName = ''"
           >
             Cancel
@@ -606,7 +629,7 @@ function formatDate(dateString: string | undefined) {
 
       <!-- Default Categories -->
       <div class="mb-6">
-        <h3 class="text-sm font-semibold text-secondary-700 mb-3 flex items-center gap-2">
+        <h3 class="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-3 flex items-center gap-2">
           <ShieldCheckIcon class="w-4 h-4 text-secondary-400" />
           Default Categories
         </h3>
@@ -614,29 +637,29 @@ function formatDate(dateString: string | undefined) {
           <div
             v-for="category in defaultCategories"
             :key="category.id"
-            class="flex items-center justify-between p-4 bg-secondary-50 rounded-xl"
+            class="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl"
           >
             <div class="flex items-center gap-3">
-              <span class="font-medium text-secondary-900">{{ category.name }}</span>
-              <span class="text-xs text-secondary-500 bg-secondary-200 px-2 py-0.5 rounded-full">Default</span>
+              <span class="font-medium text-secondary-900 dark:text-secondary-100">{{ category.name }}</span>
+              <span class="text-xs text-secondary-500 dark:text-secondary-400 bg-secondary-200 dark:bg-secondary-700 px-2 py-0.5 rounded-full">Default</span>
             </div>
           </div>
         </div>
-        <p class="text-xs text-secondary-400 mt-3">Default categories cannot be deleted or renamed.</p>
+        <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-3">Default categories cannot be deleted or renamed.</p>
       </div>
 
       <!-- Custom Categories -->
       <div>
-        <h3 class="text-sm font-semibold text-secondary-700 mb-3">
+        <h3 class="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-3">
           Custom Categories
           <span class="text-secondary-400 font-normal ml-1">({{ customCategories.length }})</span>
         </h3>
 
-        <div v-if="customCategories.length === 0" class="text-center py-8 bg-secondary-50 rounded-xl">
-          <div class="w-12 h-12 bg-secondary-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+        <div v-if="customCategories.length === 0" class="text-center py-8 bg-secondary-50 dark:bg-secondary-900 rounded-xl">
+          <div class="w-12 h-12 bg-secondary-100 dark:bg-secondary-700 rounded-xl flex items-center justify-center mx-auto mb-3">
             <TagIcon class="w-6 h-6 text-secondary-400" />
           </div>
-          <p class="text-secondary-500 mb-3">No custom categories yet.</p>
+          <p class="text-secondary-500 dark:text-secondary-400 mb-3">No custom categories yet.</p>
           <button
             class="text-primary-600 hover:text-primary-700 text-sm font-medium"
             @click="showNewCategoryInput = true"
@@ -649,16 +672,16 @@ function formatDate(dateString: string | undefined) {
           <div
             v-for="category in customCategories"
             :key="category.id"
-            class="flex items-center justify-between p-4 bg-secondary-50 rounded-xl hover:bg-secondary-100 transition-colors group"
+            class="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-900 rounded-xl hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors group"
           >
             <div class="flex items-center gap-3">
-              <span class="font-medium text-secondary-900">{{ category.name }}</span>
-              <span v-if="category.description" class="text-sm text-secondary-500">
+              <span class="font-medium text-secondary-900 dark:text-secondary-100">{{ category.name }}</span>
+              <span v-if="category.description" class="text-sm text-secondary-500 dark:text-secondary-400">
                 {{ category.description }}
               </span>
             </div>
             <button
-              class="flex items-center gap-1 px-3 py-1.5 text-danger-600 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors text-sm font-medium opacity-0 group-hover:opacity-100"
+              class="flex items-center gap-1 px-3 py-1.5 text-danger-600 dark:text-danger-400 hover:text-danger-700 dark:hover:text-danger-300 hover:bg-danger-50 dark:hover:bg-danger-900/50 rounded-lg transition-colors text-sm font-medium opacity-0 group-hover:opacity-100"
               @click="confirmDeleteCategory(category.id, category.name)"
             >
               <TrashIcon class="w-4 h-4" />
@@ -666,6 +689,27 @@ function formatDate(dateString: string | undefined) {
             </button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Onboarding -->
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
+            <AcademicCapIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">App Tour</h2>
+            <p class="text-sm text-secondary-500 dark:text-secondary-400">Take a guided tour of Prospera's features</p>
+          </div>
+        </div>
+        <button
+          class="px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
+          @click="handleRestartTour"
+        >
+          Restart Tour
+        </button>
       </div>
     </div>
 

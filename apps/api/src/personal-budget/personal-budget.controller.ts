@@ -6,10 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
-import { AuthGuard } from '../auth/auth.guard';
+import { TwoFactorAuthGuard } from '../auth/two-factor-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { PersonalBudgetService } from './personal-budget.service';
 import {
@@ -18,15 +19,22 @@ import {
   UpdatePersonalBudgetDto,
   UpdatePersonalBudgetItemDto,
 } from './personal-budget.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Personal Budgets')
+@ApiBearerAuth()
 @Controller('api/v1/personal-budgets')
-@UseGuards(AuthGuard)
+@UseGuards(TwoFactorAuthGuard)
 export class PersonalBudgetController {
   constructor(private readonly personalBudgetService: PersonalBudgetService) {}
 
   @Get()
-  findAll(@CurrentUser('id') userId: UUID) {
-    return this.personalBudgetService.findAll(userId);
+  findAll(
+    @CurrentUser('id') userId: UUID,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    return this.personalBudgetService.findAll(userId, pagination);
   }
 
   @Get(':id')

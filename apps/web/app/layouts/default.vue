@@ -9,12 +9,17 @@ import {
   XMarkIcon,
   ChevronDownIcon,
   ClipboardDocumentListIcon,
+  FlagIcon,
+  CurrencyDollarIcon,
 } from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
 const mounted = ref(false);
 const mobileMenuOpen = ref(false);
 const accountMenuOpen = ref(false);
+
+// Initialize keyboard shortcuts
+useKeyboardShortcuts();
 
 // Close menus on route change
 const route = useRoute();
@@ -70,6 +75,7 @@ onUnmounted(() => {
             <template v-if="authStore.isAuthenticated">
               <NuxtLink
                 to="/dashboard"
+                data-tour="dashboard"
                 class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                 active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
               >
@@ -78,6 +84,7 @@ onUnmounted(() => {
               </NuxtLink>
               <NuxtLink
                 to="/budget-periods"
+                data-tour="budget-periods"
                 class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                 active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
               >
@@ -86,13 +93,37 @@ onUnmounted(() => {
               </NuxtLink>
               <NuxtLink
                 to="/personal-budgets"
+                data-tour="personal-budgets"
                 class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
                 active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
               >
                 <ClipboardDocumentListIcon class="w-5 h-5" />
                 <span>Personal Budgets</span>
               </NuxtLink>
-              <UiThemeToggle size="md" />
+              <NuxtLink
+                to="/financial-goals"
+                data-tour="goals"
+                class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
+                active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
+              >
+                <FlagIcon class="w-5 h-5" />
+                <span>Goals</span>
+              </NuxtLink>
+              <NuxtLink
+                to="/debts"
+                data-tour="debts"
+                class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
+                active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
+              >
+                <CurrencyDollarIcon class="w-5 h-5" />
+                <span>Debts</span>
+              </NuxtLink>
+              <div data-tour="notifications">
+                <UiNotificationBell />
+              </div>
+              <div data-tour="theme-toggle">
+                <UiThemeToggle size="md" />
+              </div>
               <div class="w-px h-8 bg-secondary-200 dark:bg-secondary-700 mx-2" />
 
               <!-- Account Dropdown -->
@@ -199,6 +230,7 @@ onUnmounted(() => {
               </NuxtLink>
             </template>
             <template v-else>
+              <UiNotificationBell />
               <UiThemeToggle size="sm" />
               <button
                 class="p-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
@@ -267,6 +299,22 @@ onUnmounted(() => {
               <span>Personal Budgets</span>
             </NuxtLink>
             <NuxtLink
+              to="/financial-goals"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
+              active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
+            >
+              <FlagIcon class="w-5 h-5" />
+              <span>Goals</span>
+            </NuxtLink>
+            <NuxtLink
+              to="/debts"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
+              active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
+            >
+              <CurrencyDollarIcon class="w-5 h-5" />
+              <span>Debts</span>
+            </NuxtLink>
+            <NuxtLink
               to="/settings"
               class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
               active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
@@ -311,5 +359,10 @@ onUnmounted(() => {
         </div>
       </div>
     </footer>
+
+    <!-- Global overlays -->
+    <UiSessionExpiredModal />
+    <UiCommandPalette />
+    <UiShortcutsHelp />
   </div>
 </template>

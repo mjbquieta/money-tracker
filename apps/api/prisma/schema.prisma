@@ -30,6 +30,42 @@ enum DefaultCategory {
   ENTERTAINMENT
 }
 
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  CANCELLED
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum DebtType {
+  I_OWE
+  OWED_TO_ME
+}
+
+enum DebtStatus {
+  ACTIVE
+  SETTLED
+  CANCELLED
+}
+
+enum NotificationType {
+  BUDGET_LIMIT_EXCEEDED
+  BUDGET_LIMIT_APPROACHING
+  GOAL_MILESTONE
+  GOAL_COMPLETED
+  DEBT_DUE_SOON
+  DEBT_OVERDUE
+  SYSTEM
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -40,12 +76,41 @@ model User {
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
   deletedAt       DateTime?        @map("deleted_at")
-  settings        Settings?
-  budgetPeriods   BudgetPeriod[]
-  categories      Category[]
-  personalBudgets PersonalBudget[]
+  twoFactorSecret    String?  @map("two_factor_secret")
+  isTwoFactorEnabled Boolean  @default(false) @map("is_two_factor_enabled")
+
+  settings              Settings?
+  budgetPeriods         BudgetPeriod[]
+  categories            Category[]
+  personalBudgets       PersonalBudget[]
+  expenseTemplates      ExpenseTemplate[]
+  recurringExpenses     RecurringExpense[]
+  tags                  Tag[]
+  financialGoals        FinancialGoal[]
+  debts                 Debt[]
+  refreshTokens         RefreshToken[]
+  twoFactorBackupCodes  TwoFactorBackupCode[]
+  notifications         Notification[]
 
   @@map("users")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false) @map("is_read")
+  data      Json?
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@map("notifications")
 }
 
 model Settings {
@@ -117,6 +182,7 @@ model Category {
   id              String           @id @default(uuid())
   name            String
   description     String?
+  spendingLimit   Float?           @map("spending_limit")
   isDefault       Boolean          @default(false) @map("is_default")
   defaultCategory DefaultCategory? @map("default_category") // Only set for system defaults
   createdAt       DateTime         @default(now()) @map("created_at")
@@ -124,9 +190,11 @@ model Category {
   deletedAt       DateTime?        @map("deleted_at")
 
   // Relations
-  userId   String
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expenses Expense[]
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses          Expense[]
+  expenseTemplates  ExpenseTemplate[]
+  recurringExpenses RecurringExpense[]
 
   // Each user can have only one category with the same name
   @@unique([userId, name])
@@ -149,8 +217,43 @@ model Expense {
   budgetPeriod   BudgetPeriod  @relation(fields: [budgetPeriodId], references: [id], onDelete: Cascade)
   expenseGroupId String?       @map("expense_group_id")
   expenseGroup   ExpenseGroup? @relation(fields: [expenseGroupId], references: [id], onDelete: SetNull)
+  expenseTags    ExpenseTag[]
 
   @@map("expenses")
+}
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String
+  color     String    @default("#6B7280") // Gray default
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenseTags ExpenseTag[]
+
+  // Each user can have only one tag with the same name
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+model ExpenseTag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  expenseId String  @map("expense_id")
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  tagId     String  @map("tag_id")
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, tagId])
+  @@index([expenseId])
+  @@index([tagId])
+  @@map("expense_tags")
 }
 
 model PersonalBudget {
@@ -183,4 +286,148 @@ model PersonalBudgetItem {
   personalBudget   PersonalBudget @relation(fields: [personalBudgetId], references: [id], onDelete: Cascade)
 
   @@map("personal_budget_items")
+}
+
+model ExpenseTemplate {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  amount      Float     @default(0)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expense_templates")
+}
+
+model RecurringExpense {
+  id                String              @id @default(uuid())
+  name              String
+  description       String?
+  amount            Float               @default(0)
+  frequency         RecurrenceFrequency
+  startDate         DateTime            @map("start_date")
+  endDate           DateTime?           @map("end_date")
+  isActive          Boolean             @default(true) @map("is_active")
+  lastProcessedDate DateTime?           @map("last_processed_date")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime?           @updatedAt @map("updated_at")
+  deletedAt         DateTime?           @map("deleted_at")
+
+  // Relations
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("recurring_expenses")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  tokenHash  String    @map("token_hash")
+  userAgent  String?   @map("user_agent")
+  ipAddress  String?   @map("ip_address")
+  isRevoked  Boolean   @default(false) @map("is_revoked")
+  expiresAt  DateTime  @map("expires_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model TwoFactorBackupCode {
+  id       String    @id @default(uuid())
+  codeHash String    @map("code_hash")
+  isUsed   Boolean   @default(false) @map("is_used")
+  usedAt   DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("two_factor_backup_codes")
+}
+
+model FinancialGoal {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  targetAmount Float     @map("target_amount")
+  currentAmount Float    @default(0) @map("current_amount")
+  targetDate  DateTime?  @map("target_date")
+  status      GoalStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime?  @updatedAt @map("updated_at")
+  deletedAt   DateTime?  @map("deleted_at")
+
+  // Relations
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions GoalContribution[]
+
+  @@map("financial_goals")
+}
+
+model GoalContribution {
+  id        String   @id @default(uuid())
+  amount    Float
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  goalId String         @map("goal_id")
+  goal   FinancialGoal  @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@map("goal_contributions")
+}
+
+model Debt {
+  id           String     @id @default(uuid())
+  type         DebtType
+  counterparty String
+  description  String?
+  amount       Float
+  paidAmount   Float      @default(0) @map("paid_amount")
+  dueDate      DateTime?  @map("due_date")
+  status       DebtStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime?  @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
+
+  // Relations
+  userId   String
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments DebtPayment[]
+
+  @@map("debts")
+}
+
+model DebtPayment {
+  id        String   @id @default(uuid())
+  amount    Float
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  debtId String @map("debt_id")
+  debt   Debt   @relation(fields: [debtId], references: [id], onDelete: Cascade)
+
+  @@index([debtId])
+  @@map("debt_payments")
 }

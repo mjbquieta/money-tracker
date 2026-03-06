@@ -1,0 +1,225 @@
+import { randomUUID, createHash } from 'crypto';
+
+export function createTestUser(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    email: `user-${Date.now()}@test.com`,
+    name: 'Test User',
+    username: `testuser_${Date.now()}`,
+    password: 'StrongP@ss123',
+    status: 'ACTIVE',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestCategory(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: `Category ${Date.now()}`,
+    description: 'Test category description',
+    spendingLimit: null,
+    isDefault: false,
+    defaultCategory: null,
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestBudgetPeriod(overrides: Record<string, unknown> = {}) {
+  const startDate = new Date('2025-01-01');
+  const endDate = new Date('2025-01-31');
+
+  return {
+    id: randomUUID(),
+    name: 'January 2025',
+    startDate,
+    endDate,
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    expenses: [],
+    incomes: [],
+    ...overrides,
+  };
+}
+
+export function createTestExpense(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: 'Test Expense',
+    description: 'Test expense description',
+    amount: 50.0,
+    categoryId: randomUUID(),
+    budgetPeriodId: randomUUID(),
+    expenseGroupId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestExpenseTemplate(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: 'Monthly Rent',
+    description: 'Apartment rent payment',
+    amount: 1500.0,
+    categoryId: randomUUID(),
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestRecurringExpense(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: 'Monthly Rent',
+    description: 'Apartment rent payment',
+    amount: 1500.0,
+    frequency: 'MONTHLY',
+    startDate: new Date('2025-01-01'),
+    endDate: null,
+    isActive: true,
+    lastProcessedDate: null,
+    categoryId: randomUUID(),
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestRefreshToken(overrides: Record<string, unknown> = {}) {
+  const rawToken = randomUUID();
+  const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  return {
+    id: randomUUID(),
+    tokenHash,
+    rawToken,
+    userId: randomUUID(),
+    userAgent: 'Mozilla/5.0 Test',
+    ipAddress: '127.0.0.1',
+    isRevoked: false,
+    expiresAt,
+    lastUsedAt: null,
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
+export function createTestTag(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: `Tag ${Date.now()}`,
+    color: '#6B7280',
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+export function createTestFinancialGoal(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: 'Emergency Fund',
+    description: '6 months of expenses',
+    targetAmount: 10000,
+    currentAmount: 0,
+    targetDate: new Date('2026-12-31'),
+    status: 'ACTIVE',
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    contributions: [],
+    _count: { contributions: 0 },
+    ...overrides,
+  };
+}
+
+export function createTestGoalContribution(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    amount: 500,
+    note: 'Monthly savings',
+    goalId: randomUUID(),
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
+export function createTestDebt(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    type: 'I_OWE',
+    counterparty: 'John Doe',
+    description: 'Borrowed for lunch',
+    amount: 100,
+    paidAmount: 0,
+    dueDate: new Date('2026-06-01'),
+    status: 'ACTIVE',
+    userId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    payments: [],
+    _count: { payments: 0 },
+    ...overrides,
+  };
+}
+
+export function createTestDebtPayment(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    amount: 50,
+    note: 'Partial payment',
+    debtId: randomUUID(),
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
+export function createTestNotification(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    type: 'SYSTEM',
+    title: 'Test Notification',
+    message: 'This is a test notification',
+    isRead: false,
+    data: null,
+    userId: randomUUID(),
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
+export function createTestIncome(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    name: 'Main Job',
+    description: 'Monthly salary',
+    amount: 3000.0,
+    budgetPeriodId: randomUUID(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
+}

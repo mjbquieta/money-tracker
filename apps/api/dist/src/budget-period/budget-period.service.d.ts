@@ -1,6 +1,7 @@
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBudgetPeriodDto, DuplicateBudgetPeriodDto, UpdateBudgetPeriodDto } from './budget-period.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 export declare class BudgetPeriodService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -14,6 +15,7 @@ export declare class BudgetPeriodService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -24,9 +26,9 @@ export declare class BudgetPeriodService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
         incomes: {
@@ -36,8 +38,8 @@ export declare class BudgetPeriodService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             budgetPeriodId: string;
+            amount: number;
         }[];
     } & {
         id: string;
@@ -49,51 +51,55 @@ export declare class BudgetPeriodService {
         startDate: Date;
         endDate: Date;
     }) | null>;
-    findAll(userId: UUID): Promise<({
-        expenses: ({
-            category: {
+    findAll(userId: UUID, pagination: PaginationQueryDto): Promise<{
+        data: ({
+            expenses: ({
+                category: {
+                    id: string;
+                    name: string;
+                    createdAt: Date;
+                    updatedAt: Date | null;
+                    deletedAt: Date | null;
+                    userId: string;
+                    description: string | null;
+                    spendingLimit: number | null;
+                    isDefault: boolean;
+                    defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
+                };
+            } & {
                 id: string;
                 name: string;
                 createdAt: Date;
                 updatedAt: Date | null;
                 deletedAt: Date | null;
-                userId: string;
                 description: string | null;
-                isDefault: boolean;
-                defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
-            };
+                categoryId: string;
+                budgetPeriodId: string;
+                amount: number;
+                expenseGroupId: string | null;
+            })[];
+            incomes: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                description: string | null;
+                budgetPeriodId: string;
+                amount: number;
+            }[];
         } & {
             id: string;
-            name: string;
+            name: string | null;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            description: string | null;
-            amount: number;
-            budgetPeriodId: string;
-            categoryId: string;
-            expenseGroupId: string | null;
+            userId: string;
+            startDate: Date;
+            endDate: Date;
         })[];
-        incomes: {
-            id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date | null;
-            deletedAt: Date | null;
-            description: string | null;
-            amount: number;
-            budgetPeriodId: string;
-        }[];
-    } & {
-        id: string;
-        name: string | null;
-        createdAt: Date;
-        updatedAt: Date | null;
-        deletedAt: Date | null;
-        userId: string;
-        startDate: Date;
-        endDate: Date;
-    })[]>;
+        pagination: import("../common/interfaces/api-response.interface").PaginationMeta;
+    }>;
     findOne(userId: UUID, budgetPeriodId: UUID): Promise<{
         expenses: ({
             category: {
@@ -104,6 +110,7 @@ export declare class BudgetPeriodService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -114,9 +121,9 @@ export declare class BudgetPeriodService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
         incomes: {
@@ -126,8 +133,8 @@ export declare class BudgetPeriodService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             budgetPeriodId: string;
+            amount: number;
         }[];
     } & {
         id: string;
@@ -149,6 +156,7 @@ export declare class BudgetPeriodService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -159,9 +167,9 @@ export declare class BudgetPeriodService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
         incomes: {
@@ -171,8 +179,8 @@ export declare class BudgetPeriodService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             budgetPeriodId: string;
+            amount: number;
         }[];
     } & {
         id: string;
@@ -204,6 +212,7 @@ export declare class BudgetPeriodService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -214,9 +223,9 @@ export declare class BudgetPeriodService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
         incomes: {
@@ -226,8 +235,8 @@ export declare class BudgetPeriodService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
             budgetPeriodId: string;
+            amount: number;
         }[];
     } & {
         id: string;
@@ -276,6 +285,34 @@ export declare class BudgetPeriodService {
         }>;
         budgetPeriodsCount: number;
     }>;
+    getAverageDailySpending(userId: UUID, budgetPeriodId: UUID): Promise<{
+        totalExpenses: number;
+        totalDays: number;
+        dailyAverage: number;
+        dailyBreakdown: {
+            date: string;
+            amount: number;
+        }[];
+    }>;
+    getTopExpenses(userId: UUID, budgetPeriodId: UUID, limit?: number): Promise<{
+        id: string;
+        name: string;
+        amount: number;
+        categoryName: string;
+        createdAt: Date;
+    }[]>;
+    getCategoryComparison(userId: UUID, budgetPeriodIds: string[]): Promise<{
+        budgetPeriodId: string;
+        name: string | null;
+        startDate: Date;
+        endDate: Date;
+        totalExpenses: number;
+        totalIncome: number;
+        expensesByCategory: Record<string, {
+            total: number;
+            count: number;
+        }>;
+    }[]>;
     getYearRangeMetrics(userId: UUID, startYear: number, endYear: number): Promise<{
         startYear: number;
         endYear: number;

@@ -14,6 +14,7 @@ export declare class ExpenseGroupService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -24,9 +25,9 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -48,6 +49,7 @@ export declare class ExpenseGroupService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -58,9 +60,9 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -92,6 +94,7 @@ export declare class ExpenseGroupService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -102,9 +105,9 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -126,6 +129,7 @@ export declare class ExpenseGroupService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -136,9 +140,9 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -179,6 +183,7 @@ export declare class ExpenseGroupService {
                 deletedAt: Date | null;
                 userId: string;
                 description: string | null;
+                spendingLimit: number | null;
                 isDefault: boolean;
                 defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
             };
@@ -189,9 +194,9 @@ export declare class ExpenseGroupService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             description: string | null;
-            amount: number;
-            budgetPeriodId: string;
             categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
             expenseGroupId: string | null;
         })[];
     } & {
@@ -216,6 +221,7 @@ export declare class ExpenseGroupService {
             deletedAt: Date | null;
             userId: string;
             description: string | null;
+            spendingLimit: number | null;
             isDefault: boolean;
             defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
         };
@@ -226,9 +232,9 @@ export declare class ExpenseGroupService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        amount: number;
-        budgetPeriodId: string;
         categoryId: string;
+        budgetPeriodId: string;
+        amount: number;
         expenseGroupId: string | null;
     }>;
 }

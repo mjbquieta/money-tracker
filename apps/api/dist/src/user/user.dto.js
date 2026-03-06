@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChangePasswordDto = exports.UpdateProfileDto = exports.UserPartialDto = exports.BaseUserDto = exports.CreateUserWithSettingsDto = void 0;
+const openapi = require("@nestjs/swagger");
 const mapped_types_1 = require("@nestjs/mapped-types");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
@@ -21,6 +22,9 @@ class BaseUserDto {
     name;
     username;
     password;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { email: { required: true, type: () => String, format: "email" }, name: { required: true, type: () => String, maxLength: 40 }, username: { required: true, type: () => String }, password: { required: true, type: () => String } };
+    }
 }
 exports.BaseUserDto = BaseUserDto;
 __decorate([
@@ -50,6 +54,9 @@ __decorate([
 ], BaseUserDto.prototype, "password", void 0);
 class CreateUserWithSettingsDto extends BaseUserDto {
     settings;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { settings: { required: true, type: () => require("../settings/settings.dto").SettingsDto } };
+    }
 }
 exports.CreateUserWithSettingsDto = CreateUserWithSettingsDto;
 __decorate([
@@ -59,11 +66,17 @@ __decorate([
     __metadata("design:type", settings_dto_1.SettingsDto)
 ], CreateUserWithSettingsDto.prototype, "settings", void 0);
 class UserPartialDto extends (0, mapped_types_1.PartialType)(BaseUserDto) {
+    static _OPENAPI_METADATA_FACTORY() {
+        return {};
+    }
 }
 exports.UserPartialDto = UserPartialDto;
 class UpdateProfileDto {
     name;
     username;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: false, type: () => String, maxLength: 40 }, username: { required: false, type: () => String } };
+    }
 }
 exports.UpdateProfileDto = UpdateProfileDto;
 __decorate([
@@ -81,6 +94,9 @@ __decorate([
 class ChangePasswordDto {
     currentPassword;
     newPassword;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { currentPassword: { required: true, type: () => String }, newPassword: { required: true, type: () => String } };
+    }
 }
 exports.ChangePasswordDto = ChangePasswordDto;
 __decorate([

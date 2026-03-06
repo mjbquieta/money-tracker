@@ -9,6 +9,8 @@ const props = defineProps<{
   currency?: string;
 }>();
 
+const { isDark } = useTheme();
+
 const categoryColors: Record<string, string> = {
   Bills: '#ef4444',
   Food: '#f97316',
@@ -32,7 +34,7 @@ const chartData = computed(() => {
         data: values,
         backgroundColor: colors,
         borderWidth: 2,
-        borderColor: '#ffffff',
+        borderColor: isDark.value ? '#1e293b' : '#ffffff',
       },
     ],
   };
@@ -44,6 +46,7 @@ const chartOptions = computed(() => ({
   plugins: {
     legend: {
       position: 'right' as const,
+      labels: { color: isDark.value ? '#94a3b8' : '#64748b' },
     },
     tooltip: {
       callbacks: {
@@ -65,7 +68,7 @@ const chartOptions = computed(() => ({
 <template>
   <div class="h-80">
     <Pie v-if="Object.keys(data).length > 0" :data="chartData" :options="chartOptions" />
-    <div v-else class="h-full flex items-center justify-center text-gray-500">
+    <div v-else class="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
       No expense data available
     </div>
   </div>

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BudgetPeriodService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const pagination_helper_1 = require("../common/helpers/pagination.helper");
 function computeIncome(budgetPeriod) {
     return budgetPeriod.incomes.reduce((sum, inc) => sum + inc.amount, 0);
 }
@@ -58,23 +59,30 @@ let BudgetPeriodService = class BudgetPeriodService {
             });
         });
     }
-    async findAll(userId) {
-        return this.prisma.budgetPeriod.findMany({
-            where: {
-                userId,
-                deletedAt: null,
-            },
-            include: {
-                expenses: {
-                    where: { deletedAt: null },
-                    include: { category: true },
+    async findAll(userId, pagination) {
+        const where = {
+            userId,
+            deletedAt: null,
+        };
+        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(pagination);
+        const [items, totalCount] = await Promise.all([
+            this.prisma.budgetPeriod.findMany({
+                where,
+                include: {
+                    expenses: {
+                        where: { deletedAt: null },
+                        include: { category: true },
+                    },
+                    incomes: {
+                        where: { deletedAt: null },
+                    },
                 },
-                incomes: {
-                    where: { deletedAt: null },
-                },
-            },
-            orderBy: { startDate: 'desc' },
-        });
+                ...prismaArgs,
+                orderBy: { startDate: prismaArgs.orderBy.createdAt },
+            }),
+            this.prisma.budgetPeriod.count({ where }),
+        ]);
+        return (0, pagination_helper_1.buildPaginatedResponse)(items, pagination, totalCount);
     }
     async findOne(userId, budgetPeriodId) {
         const budgetPeriod = await this.prisma.budgetPeriod.findFirst({
@@ -345,6 +353,93 @@ let BudgetPeriodService = class BudgetPeriodService {
             expensesByCategory,
             budgetPeriodsCount: budgetPeriods.length,
         };
+    }
+    async getAverageDailySpending(userId, budgetPeriodId) {
+        const budgetPeriod = await this.findOne(userId, budgetPeriodId);
+        const totalExpenses = budgetPeriod.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+        const startDate = new Date(budgetPeriod.startDate);
+        const endDate = new Date(budgetPeriod.endDate);
+        const totalDays = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+        const dailyAverage = totalExpenses / totalDays;
+        const dailyBreakdown = [];
+        const expensesByDate = new Map();
+        for (const expense of budgetPeriod.expenses) {
+            const dateKey = new Date(expense.createdAt).toISOString().split('T')[0];
+            expensesByDate.set(dateKey, (expensesByDate.get(dateKey) || 0) + expense.amount);
+        }
+        const current = new Date(startDate);
+        while (current <= endDate) {
+            const dateKey = current.toISOString().split('T')[0];
+            dailyBreakdown.push({
+                date: dateKey,
+                amount: expensesByDate.get(dateKey) || 0,
+            });
+            current.setDate(current.getDate() + 1);
+        }
+        return {
+            totalExpenses,
+            totalDays,
+            dailyAverage,
+            dailyBreakdown,
+        };
+    }
+    async getTopExpenses(userId, budgetPeriodId, limit = 5) {
+        await this.findOne(userId, budgetPeriodId);
+        const expenses = await this.prisma.expense.findMany({
+            where: {
+                budgetPeriodId,
+                deletedAt: null,
+            },
+            include: { category: true },
+            orderBy: { amount: 'desc' },
+            take: limit,
+        });
+        return expenses.map((expense) => ({
+            id: expense.id,
+            name: expense.name,
+            amount: expense.amount,
+            categoryName: expense.category.name,
+            createdAt: expense.createdAt,
+        }));
+    }
+    async getCategoryComparison(userId, budgetPeriodIds) {
+        const periods = await this.prisma.budgetPeriod.findMany({
+            where: {
+                id: { in: budgetPeriodIds },
+                userId,
+                deletedAt: null,
+            },
+            include: {
+                expenses: {
+                    where: { deletedAt: null },
+                    include: { category: true },
+                },
+                incomes: {
+                    where: { deletedAt: null },
+                },
+            },
+            orderBy: { startDate: 'asc' },
+        });
+        return periods.map((period) => {
+            const expensesByCategory = period.expenses.reduce((acc, expense) => {
+                const categoryName = expense.category.name;
+                if (!acc[categoryName]) {
+                    acc[categoryName] = { total: 0, count: 0 };
+                }
+                acc[categoryName].total += expense.amount;
+                acc[categoryName].count += 1;
+                return acc;
+            }, {});
+            return {
+                budgetPeriodId: period.id,
+                name: period.name,
+                startDate: period.startDate,
+                endDate: period.endDate,
+                totalExpenses: period.expenses.reduce((sum, e) => sum + e.amount, 0),
+                totalIncome: computeIncome(period),
+                expensesByCategory,
+            };
+        });
     }
     async getYearRangeMetrics(userId, startYear, endYear) {
         const startOfRange = new Date(startYear, 0, 1);

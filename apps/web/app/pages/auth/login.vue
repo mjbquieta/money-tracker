@@ -11,6 +11,11 @@ definePageMeta({
 
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
+const redirectPath = computed(() => {
+  const r = route.query.redirect as string | undefined;
+  return r && r.startsWith('/') ? r : '/dashboard';
+});
 
 const form = reactive({
   email: "",
@@ -33,7 +38,12 @@ async function handleSubmit() {
     return;
   }
 
-  router.push("/dashboard");
+  if (result.requiresTwoFactor) {
+    router.push("/auth/two-factor");
+    return;
+  }
+
+  router.push(redirectPath.value);
 }
 </script>
 

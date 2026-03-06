@@ -1,0 +1,226 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createTestUser = createTestUser;
+exports.createTestCategory = createTestCategory;
+exports.createTestBudgetPeriod = createTestBudgetPeriod;
+exports.createTestExpense = createTestExpense;
+exports.createTestExpenseTemplate = createTestExpenseTemplate;
+exports.createTestRecurringExpense = createTestRecurringExpense;
+exports.createTestRefreshToken = createTestRefreshToken;
+exports.createTestTag = createTestTag;
+exports.createTestFinancialGoal = createTestFinancialGoal;
+exports.createTestGoalContribution = createTestGoalContribution;
+exports.createTestDebt = createTestDebt;
+exports.createTestDebtPayment = createTestDebtPayment;
+exports.createTestNotification = createTestNotification;
+exports.createTestIncome = createTestIncome;
+const crypto_1 = require("crypto");
+function createTestUser(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        email: `user-${Date.now()}@test.com`,
+        name: 'Test User',
+        username: `testuser_${Date.now()}`,
+        password: 'StrongP@ss123',
+        status: 'ACTIVE',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestCategory(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: `Category ${Date.now()}`,
+        description: 'Test category description',
+        spendingLimit: null,
+        isDefault: false,
+        defaultCategory: null,
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestBudgetPeriod(overrides = {}) {
+    const startDate = new Date('2025-01-01');
+    const endDate = new Date('2025-01-31');
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'January 2025',
+        startDate,
+        endDate,
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        expenses: [],
+        incomes: [],
+        ...overrides,
+    };
+}
+function createTestExpense(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'Test Expense',
+        description: 'Test expense description',
+        amount: 50.0,
+        categoryId: (0, crypto_1.randomUUID)(),
+        budgetPeriodId: (0, crypto_1.randomUUID)(),
+        expenseGroupId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestExpenseTemplate(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'Monthly Rent',
+        description: 'Apartment rent payment',
+        amount: 1500.0,
+        categoryId: (0, crypto_1.randomUUID)(),
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestRecurringExpense(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'Monthly Rent',
+        description: 'Apartment rent payment',
+        amount: 1500.0,
+        frequency: 'MONTHLY',
+        startDate: new Date('2025-01-01'),
+        endDate: null,
+        isActive: true,
+        lastProcessedDate: null,
+        categoryId: (0, crypto_1.randomUUID)(),
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestRefreshToken(overrides = {}) {
+    const rawToken = (0, crypto_1.randomUUID)();
+    const tokenHash = (0, crypto_1.createHash)('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        tokenHash,
+        rawToken,
+        userId: (0, crypto_1.randomUUID)(),
+        userAgent: 'Mozilla/5.0 Test',
+        ipAddress: '127.0.0.1',
+        isRevoked: false,
+        expiresAt,
+        lastUsedAt: null,
+        createdAt: new Date(),
+        ...overrides,
+    };
+}
+function createTestTag(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: `Tag ${Date.now()}`,
+        color: '#6B7280',
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+function createTestFinancialGoal(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'Emergency Fund',
+        description: '6 months of expenses',
+        targetAmount: 10000,
+        currentAmount: 0,
+        targetDate: new Date('2026-12-31'),
+        status: 'ACTIVE',
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        contributions: [],
+        _count: { contributions: 0 },
+        ...overrides,
+    };
+}
+function createTestGoalContribution(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        amount: 500,
+        note: 'Monthly savings',
+        goalId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        ...overrides,
+    };
+}
+function createTestDebt(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        type: 'I_OWE',
+        counterparty: 'John Doe',
+        description: 'Borrowed for lunch',
+        amount: 100,
+        paidAmount: 0,
+        dueDate: new Date('2026-06-01'),
+        status: 'ACTIVE',
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        payments: [],
+        _count: { payments: 0 },
+        ...overrides,
+    };
+}
+function createTestDebtPayment(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        amount: 50,
+        note: 'Partial payment',
+        debtId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        ...overrides,
+    };
+}
+function createTestNotification(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        type: 'SYSTEM',
+        title: 'Test Notification',
+        message: 'This is a test notification',
+        isRead: false,
+        data: null,
+        userId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        ...overrides,
+    };
+}
+function createTestIncome(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        name: 'Main Job',
+        description: 'Monthly salary',
+        amount: 3000.0,
+        budgetPeriodId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...overrides,
+    };
+}
+//# sourceMappingURL=test-factory.js.map

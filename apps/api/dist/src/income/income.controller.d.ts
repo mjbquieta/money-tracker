@@ -11,8 +11,8 @@ export declare class IncomeController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        amount: number;
         budgetPeriodId: string;
+        amount: number;
     }>;
     findAllByBudgetPeriod(userId: UUID, budgetPeriodId: UUID): Promise<{
         id: string;
@@ -21,8 +21,8 @@ export declare class IncomeController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        amount: number;
         budgetPeriodId: string;
+        amount: number;
     }[]>;
     findOne(userId: UUID, id: UUID): Promise<{
         budgetPeriod: {
@@ -42,8 +42,8 @@ export declare class IncomeController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        amount: number;
         budgetPeriodId: string;
+        amount: number;
     }>;
     update(userId: UUID, id: UUID, payload: UpdateIncomeDto): Promise<{
         id: string;
@@ -52,8 +52,8 @@ export declare class IncomeController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         description: string | null;
-        amount: number;
         budgetPeriodId: string;
+        amount: number;
     }>;
     delete(userId: UUID, id: UUID): Promise<{
         success: boolean;

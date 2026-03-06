@@ -10,12 +10,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdatePersonalBudgetItemDto = exports.CreatePersonalBudgetItemDto = exports.UpdatePersonalBudgetDto = exports.CreatePersonalBudgetDto = exports.PersonalBudgetItemDto = void 0;
+const openapi = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class PersonalBudgetItemDto {
     name;
     description;
     amount;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: true, type: () => String }, description: { required: false, type: () => String }, amount: { required: true, type: () => Number, minimum: 1 } };
+    }
 }
 exports.PersonalBudgetItemDto = PersonalBudgetItemDto;
 __decorate([
@@ -37,6 +41,9 @@ class CreatePersonalBudgetDto {
     name;
     description;
     items;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: true, type: () => String, maxLength: 100 }, description: { required: false, type: () => String, maxLength: 500 }, items: { required: false, type: () => [require("./personal-budget.dto").PersonalBudgetItemDto], minItems: 1 } };
+    }
 }
 exports.CreatePersonalBudgetDto = CreatePersonalBudgetDto;
 __decorate([
@@ -62,6 +69,9 @@ __decorate([
 class UpdatePersonalBudgetDto {
     name;
     description;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: false, type: () => String, maxLength: 100 }, description: { required: false, type: () => String, maxLength: 500 } };
+    }
 }
 exports.UpdatePersonalBudgetDto = UpdatePersonalBudgetDto;
 __decorate([
@@ -80,6 +90,9 @@ class CreatePersonalBudgetItemDto {
     name;
     description;
     amount;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: true, type: () => String }, description: { required: false, type: () => String }, amount: { required: true, type: () => Number, minimum: 1 } };
+    }
 }
 exports.CreatePersonalBudgetItemDto = CreatePersonalBudgetItemDto;
 __decorate([
@@ -101,6 +114,9 @@ class UpdatePersonalBudgetItemDto {
     name;
     description;
     amount;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: false, type: () => String }, description: { required: false, type: () => String }, amount: { required: false, type: () => Number, minimum: 1 } };
+    }
 }
 exports.UpdatePersonalBudgetItemDto = UpdatePersonalBudgetItemDto;
 __decorate([

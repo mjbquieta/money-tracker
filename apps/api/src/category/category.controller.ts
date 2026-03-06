@@ -6,27 +6,52 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
-import { AuthGuard } from '../auth/auth.guard';
+import { TwoFactorAuthGuard } from '../auth/two-factor-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './category.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Categories')
+@ApiBearerAuth()
 @Controller('api/v1/categories')
-@UseGuards(AuthGuard)
+@UseGuards(TwoFactorAuthGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
-  findAll(@CurrentUser('id') userId: UUID) {
-    return this.categoryService.findAll(userId);
+  findAll(
+    @CurrentUser('id') userId: UUID,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    return this.categoryService.findAll(userId, pagination);
+  }
+
+  @Get('spending-status')
+  getAllSpendingStatus(
+    @CurrentUser('id') userId: UUID,
+    @Query('budgetPeriodId') budgetPeriodId: UUID,
+  ) {
+    return this.categoryService.getAllSpendingStatus(userId, budgetPeriodId);
   }
 
   @Get(':id')
   findOne(@CurrentUser('id') userId: UUID, @Param('id') id: UUID) {
     return this.categoryService.findOne(userId, id);
+  }
+
+  @Get(':id/spending-status')
+  getSpendingStatus(
+    @CurrentUser('id') userId: UUID,
+    @Param('id') id: UUID,
+    @Query('budgetPeriodId') budgetPeriodId: UUID,
+  ) {
+    return this.categoryService.getSpendingStatus(userId, id, budgetPeriodId);
   }
 
   @Post()

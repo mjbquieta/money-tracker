@@ -12,10 +12,13 @@ import {
   UpdateProfileDto,
   ChangePasswordDto,
 } from './user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { TwoFactorAuthGuard } from 'src/auth/two-factor-auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { UUID } from 'crypto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
+@ApiBearerAuth()
 @Controller('api/v1/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -28,7 +31,7 @@ export class UserController {
     return this.userService.createUser(body);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   @Patch('profile')
   async updateProfile(
     @CurrentUser('id') userId: UUID,
@@ -38,7 +41,7 @@ export class UserController {
     return this.userService.updateProfile(userId, body);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   @Patch('password')
   async changePassword(
     @CurrentUser('id') userId: UUID,

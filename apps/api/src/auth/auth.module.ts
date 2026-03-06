@@ -7,6 +7,9 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { UserModule } from '../user/user.module';
 import { AuthGuard } from './auth.guard';
+import { RefreshTokenService } from './refresh-token.service';
+import { TwoFactorService } from './two-factor.service';
+import { TwoFactorAuthGuard } from './two-factor-auth.guard';
 
 @Module({
   imports: [
@@ -17,13 +20,27 @@ import { AuthGuard } from './auth.guard';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '7d' },
+        signOptions: { expiresIn: '1h' },
       }),
       inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, AuthGuard],
-  exports: [AuthService, AuthGuard, JwtModule],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    AuthGuard,
+    TwoFactorAuthGuard,
+    RefreshTokenService,
+    TwoFactorService,
+  ],
+  exports: [
+    AuthService,
+    AuthGuard,
+    TwoFactorAuthGuard,
+    JwtModule,
+    RefreshTokenService,
+    TwoFactorService,
+  ],
 })
 export class AuthModule {}

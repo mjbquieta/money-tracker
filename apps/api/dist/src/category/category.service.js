@@ -13,6 +13,7 @@ exports.CategoryService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const category_dto_1 = require("./category.dto");
+const pagination_helper_1 = require("../common/helpers/pagination.helper");
 let CategoryService = class CategoryService {
     prisma;
     constructor(prisma) {
@@ -48,18 +49,26 @@ let CategoryService = class CategoryService {
                 userId,
                 name: payload.name,
                 description: payload.description,
+                spendingLimit: payload.spendingLimit,
                 isDefault: false,
             },
         });
     }
-    async findAll(userId) {
-        return this.prisma.category.findMany({
-            where: {
-                userId,
-                deletedAt: null,
-            },
-            orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
-        });
+    async findAll(userId, pagination) {
+        const where = {
+            userId,
+            deletedAt: null,
+        };
+        const prismaArgs = (0, pagination_helper_1.buildPrismaArgs)(pagination);
+        const [items, totalCount] = await Promise.all([
+            this.prisma.category.findMany({
+                where,
+                ...prismaArgs,
+                orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+            }),
+            this.prisma.category.count({ where }),
+        ]);
+        return (0, pagination_helper_1.buildPaginatedResponse)(items, pagination, totalCount);
     }
     async findOne(userId, categoryId) {
         const category = await this.prisma.category.findFirst({
@@ -105,6 +114,64 @@ let CategoryService = class CategoryService {
         return this.prisma.category.update({
             where: { id: categoryId },
             data: { deletedAt: new Date() },
+        });
+    }
+    async getSpendingStatus(userId, categoryId, budgetPeriodId) {
+        const category = await this.findOne(userId, categoryId);
+        const result = await this.prisma.expense.aggregate({
+            where: {
+                categoryId,
+                budgetPeriodId,
+                deletedAt: null,
+                budgetPeriod: { userId, deletedAt: null },
+            },
+            _sum: { amount: true },
+            _count: true,
+        });
+        const totalSpent = result._sum.amount || 0;
+        const limit = category.spendingLimit;
+        return {
+            categoryId,
+            categoryName: category.name,
+            spendingLimit: limit,
+            totalSpent,
+            remaining: limit ? limit - totalSpent : null,
+            percentageUsed: limit ? (totalSpent / limit) * 100 : null,
+            isOverLimit: limit ? totalSpent > limit : false,
+            isApproachingLimit: limit ? totalSpent >= limit * 0.8 && totalSpent <= limit : false,
+            expenseCount: result._count,
+        };
+    }
+    async getAllSpendingStatus(userId, budgetPeriodId) {
+        const categories = await this.prisma.category.findMany({
+            where: { userId, deletedAt: null },
+        });
+        const expenses = await this.prisma.expense.groupBy({
+            by: ['categoryId'],
+            where: {
+                budgetPeriodId,
+                deletedAt: null,
+                budgetPeriod: { userId, deletedAt: null },
+            },
+            _sum: { amount: true },
+            _count: true,
+        });
+        const expenseMap = new Map(expenses.map((e) => [e.categoryId, e]));
+        return categories.map((cat) => {
+            const data = expenseMap.get(cat.id);
+            const totalSpent = data?._sum.amount || 0;
+            const limit = cat.spendingLimit;
+            return {
+                categoryId: cat.id,
+                categoryName: cat.name,
+                spendingLimit: limit,
+                totalSpent,
+                remaining: limit ? limit - totalSpent : null,
+                percentageUsed: limit ? (totalSpent / limit) * 100 : null,
+                isOverLimit: limit ? totalSpent > limit : false,
+                isApproachingLimit: limit ? totalSpent >= limit * 0.8 && totalSpent <= limit : false,
+                expenseCount: data?._count || 0,
+            };
         });
     }
 };

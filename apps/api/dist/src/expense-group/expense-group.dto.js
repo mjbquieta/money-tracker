@@ -10,11 +10,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MoveExpensesToGroupDto = exports.AddExpensesToGroupDto = exports.UpdateExpenseGroupDto = exports.CreateExpenseGroupDto = void 0;
+const openapi = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateExpenseGroupDto {
     name;
     description;
     budgetPeriodId;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: true, type: () => String, minLength: 2, maxLength: 100 }, description: { required: false, type: () => String, maxLength: 500 }, budgetPeriodId: { required: true, type: () => String, format: "uuid" } };
+    }
 }
 exports.CreateExpenseGroupDto = CreateExpenseGroupDto;
 __decorate([
@@ -36,6 +40,9 @@ __decorate([
 class UpdateExpenseGroupDto {
     name;
     description;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { name: { required: false, type: () => String, minLength: 2, maxLength: 100 }, description: { required: false, type: () => String, maxLength: 500 } };
+    }
 }
 exports.UpdateExpenseGroupDto = UpdateExpenseGroupDto;
 __decorate([
@@ -53,6 +60,9 @@ __decorate([
 ], UpdateExpenseGroupDto.prototype, "description", void 0);
 class AddExpensesToGroupDto {
     expenseIds;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { expenseIds: { required: true, type: () => [String], format: "uuid" } };
+    }
 }
 exports.AddExpensesToGroupDto = AddExpensesToGroupDto;
 __decorate([
@@ -63,6 +73,9 @@ __decorate([
 class MoveExpensesToGroupDto {
     expenseIds;
     targetGroupId;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { expenseIds: { required: true, type: () => [String], format: "uuid" }, targetGroupId: { required: false, type: () => String, nullable: true, format: "uuid" } };
+    }
 }
 exports.MoveExpensesToGroupDto = MoveExpensesToGroupDto;
 __decorate([

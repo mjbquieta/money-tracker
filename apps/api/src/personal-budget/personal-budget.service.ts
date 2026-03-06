@@ -7,6 +7,8 @@ import {
   UpdatePersonalBudgetDto,
   UpdatePersonalBudgetItemDto,
 } from './personal-budget.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { buildPrismaArgs, buildPaginatedResponse } from '../common/helpers/pagination.helper';
 
 @Injectable()
 export class PersonalBudgetService {
@@ -45,20 +47,29 @@ export class PersonalBudgetService {
     });
   }
 
-  async findAll(userId: UUID) {
-    return this.prisma.personalBudget.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-      },
-      include: {
-        items: {
-          where: { deletedAt: null },
-          orderBy: { createdAt: 'desc' },
+  async findAll(userId: UUID, pagination: PaginationQueryDto) {
+    const where = {
+      userId,
+      deletedAt: null,
+    };
+
+    const prismaArgs = buildPrismaArgs(pagination);
+
+    const [items, totalCount] = await Promise.all([
+      this.prisma.personalBudget.findMany({
+        where,
+        include: {
+          items: {
+            where: { deletedAt: null },
+            orderBy: { createdAt: 'desc' },
+          },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        ...prismaArgs,
+      }),
+      this.prisma.personalBudget.count({ where }),
+    ]);
+
+    return buildPaginatedResponse(items, pagination, totalCount);
   }
 
   async findOne(userId: UUID, personalBudgetId: UUID) {
