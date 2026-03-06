@@ -64,6 +64,9 @@ export declare class DebtController {
         paidAmount: number;
     }>;
     create(userId: UUID, payload: CreateDebtDto): Promise<{
+        _count: {
+            payments: number;
+        };
         payments: {
             id: string;
             createdAt: Date;
@@ -86,6 +89,9 @@ export declare class DebtController {
         paidAmount: number;
     }>;
     update(userId: UUID, id: UUID, payload: UpdateDebtDto): Promise<{
+        _count: {
+            payments: number;
+        };
         payments: {
             id: string;
             createdAt: Date;

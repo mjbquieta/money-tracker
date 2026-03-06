@@ -24,7 +24,10 @@ export class FinancialGoalService {
         targetDate: payload.targetDate ? new Date(payload.targetDate) : undefined,
         userId,
       },
-      include: { contributions: { orderBy: { createdAt: 'desc' }, take: 5 } },
+      include: {
+        contributions: { orderBy: { createdAt: 'desc' }, take: 5 },
+        _count: { select: { contributions: true } },
+      },
     });
   }
 
@@ -66,7 +69,10 @@ export class FinancialGoalService {
     return this.prisma.financialGoal.update({
       where: { id: goalId },
       data,
-      include: { contributions: { orderBy: { createdAt: 'desc' }, take: 5 } },
+      include: {
+        contributions: { orderBy: { createdAt: 'desc' }, take: 5 },
+        _count: { select: { contributions: true } },
+      },
     });
   }
 

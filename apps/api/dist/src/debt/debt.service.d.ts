@@ -5,6 +5,9 @@ export declare class DebtService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(userId: UUID, payload: CreateDebtDto): Promise<{
+        _count: {
+            payments: number;
+        };
         payments: {
             id: string;
             createdAt: Date;
@@ -77,6 +80,9 @@ export declare class DebtService {
         paidAmount: number;
     }>;
     update(userId: UUID, debtId: UUID, payload: UpdateDebtDto): Promise<{
+        _count: {
+            payments: number;
+        };
         payments: {
             id: string;
             createdAt: Date;

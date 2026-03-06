@@ -621,6 +621,26 @@ export interface CreateDebtPaymentPayload {
   note?: string;
 }
 
+// Notification types
+export type NotificationType =
+  | 'BUDGET_LIMIT_EXCEEDED'
+  | 'BUDGET_LIMIT_APPROACHING'
+  | 'GOAL_MILESTONE'
+  | 'GOAL_COMPLETED'
+  | 'DEBT_DUE_SOON'
+  | 'DEBT_OVERDUE'
+  | 'SYSTEM';
+
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  data: Record<string, unknown> | null;
+  createdAt: string;
+}
+
 // Export / Import types
 export interface ImportExpenseRecord {
   name: string;

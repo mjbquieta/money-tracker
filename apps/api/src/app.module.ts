@@ -19,6 +19,7 @@ import { TagModule } from './tag/tag.module';
 import { FinancialGoalModule } from './financial-goal/financial-goal.module';
 import { DebtModule } from './debt/debt.module';
 import { ExportModule } from './export/export.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ExportModule } from './export/export.module';
     FinancialGoalModule,
     DebtModule,
     ExportModule,
+    NotificationModule,
   ],
   providers: [
     {

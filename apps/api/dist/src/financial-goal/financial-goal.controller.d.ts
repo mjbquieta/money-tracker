@@ -61,6 +61,9 @@ export declare class FinancialGoalController {
         currentAmount: number;
     }>;
     create(userId: UUID, payload: CreateFinancialGoalDto): Promise<{
+        _count: {
+            contributions: number;
+        };
         contributions: {
             id: string;
             createdAt: Date;
@@ -82,6 +85,9 @@ export declare class FinancialGoalController {
         currentAmount: number;
     }>;
     update(userId: UUID, id: UUID, payload: UpdateFinancialGoalDto): Promise<{
+        _count: {
+            contributions: number;
+        };
         contributions: {
             id: string;
             createdAt: Date;

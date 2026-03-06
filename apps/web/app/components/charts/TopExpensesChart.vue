@@ -18,6 +18,8 @@ const props = defineProps<{
   currency?: string;
 }>();
 
+const { isDark } = useTheme();
+
 const categoryColors: Record<string, string> = {
   Bills: '#ef4444',
   Food: '#f97316',
@@ -40,44 +42,55 @@ const chartData = computed(() => ({
   ],
 }));
 
-const chartOptions = computed(() => ({
-  indexAxis: 'y' as const,
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false,
-    },
-    tooltip: {
-      callbacks: {
-        label: (context: { parsed: { x: number } }) => {
-          const value = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: props.currency || 'USD',
-          }).format(context.parsed.x);
-          return value;
-        },
-        afterLabel: (context: { dataIndex: number }) => {
-          return props.data[context.dataIndex]?.categoryName || '';
+const chartOptions = computed(() => {
+  const textColor = isDark.value ? '#94a3b8' : '#64748b';
+  const gridColor = isDark.value ? '#334155' : '#e2e8f0';
+
+  return {
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: { parsed: { x: number } }) => {
+            const value = new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: props.currency || 'USD',
+            }).format(context.parsed.x);
+            return value;
+          },
+          afterLabel: (context: { dataIndex: number }) => {
+            return props.data[context.dataIndex]?.categoryName || '';
+          },
         },
       },
     },
-  },
-  scales: {
-    x: {
-      beginAtZero: true,
-      ticks: {
-        callback: (value: number) => {
-          return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: props.currency || 'USD',
-            notation: 'compact',
-          }).format(value);
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: {
+          color: textColor,
+          callback: (value: number) => {
+            return new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: props.currency || 'USD',
+              notation: 'compact',
+            }).format(value);
+          },
         },
+        grid: { color: gridColor },
+      },
+      y: {
+        ticks: { color: textColor },
+        grid: { color: gridColor },
       },
     },
-  },
-}));
+  };
+});
 </script>
 
 <template>

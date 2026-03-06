@@ -5,6 +5,9 @@ export declare class FinancialGoalService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(userId: UUID, payload: CreateFinancialGoalDto): Promise<{
+        _count: {
+            contributions: number;
+        };
         contributions: {
             id: string;
             createdAt: Date;
@@ -74,6 +77,9 @@ export declare class FinancialGoalService {
         currentAmount: number;
     }>;
     update(userId: UUID, goalId: UUID, payload: UpdateFinancialGoalDto): Promise<{
+        _count: {
+            contributions: number;
+        };
         contributions: {
             id: string;
             createdAt: Date;

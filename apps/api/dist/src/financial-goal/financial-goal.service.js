@@ -26,7 +26,10 @@ let FinancialGoalService = class FinancialGoalService {
                 targetDate: payload.targetDate ? new Date(payload.targetDate) : undefined,
                 userId,
             },
-            include: { contributions: { orderBy: { createdAt: 'desc' }, take: 5 } },
+            include: {
+                contributions: { orderBy: { createdAt: 'desc' }, take: 5 },
+                _count: { select: { contributions: true } },
+            },
         });
     }
     async findAll(userId) {
@@ -61,7 +64,10 @@ let FinancialGoalService = class FinancialGoalService {
         return this.prisma.financialGoal.update({
             where: { id: goalId },
             data,
-            include: { contributions: { orderBy: { createdAt: 'desc' }, take: 5 } },
+            include: {
+                contributions: { orderBy: { createdAt: 'desc' }, take: 5 },
+                _count: { select: { contributions: true } },
+            },
         });
     }
     async delete(userId, goalId) {

@@ -142,6 +142,16 @@ export declare function createTestDebtPayment(overrides?: Record<string, unknown
     debtId: `${string}-${string}-${string}-${string}-${string}`;
     createdAt: Date;
 };
+export declare function createTestNotification(overrides?: Record<string, unknown>): {
+    id: `${string}-${string}-${string}-${string}-${string}`;
+    type: string;
+    title: string;
+    message: string;
+    isRead: boolean;
+    data: null;
+    userId: `${string}-${string}-${string}-${string}-${string}`;
+    createdAt: Date;
+};
 export declare function createTestIncome(overrides?: Record<string, unknown>): {
     id: `${string}-${string}-${string}-${string}-${string}`;
     name: string;

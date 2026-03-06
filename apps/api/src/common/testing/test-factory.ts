@@ -196,6 +196,20 @@ export function createTestDebtPayment(overrides: Record<string, unknown> = {}) {
   };
 }
 
+export function createTestNotification(overrides: Record<string, unknown> = {}) {
+  return {
+    id: randomUUID(),
+    type: 'SYSTEM',
+    title: 'Test Notification',
+    message: 'This is a test notification',
+    isRead: false,
+    data: null,
+    userId: randomUUID(),
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
 export function createTestIncome(overrides: Record<string, unknown> = {}) {
   return {
     id: randomUUID(),

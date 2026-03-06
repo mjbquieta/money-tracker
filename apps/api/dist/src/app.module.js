@@ -28,6 +28,7 @@ const tag_module_1 = require("./tag/tag.module");
 const financial_goal_module_1 = require("./financial-goal/financial-goal.module");
 const debt_module_1 = require("./debt/debt.module");
 const export_module_1 = require("./export/export.module");
+const notification_module_1 = require("./notification/notification.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -68,6 +69,7 @@ exports.AppModule = AppModule = __decorate([
             financial_goal_module_1.FinancialGoalModule,
             debt_module_1.DebtModule,
             export_module_1.ExportModule,
+            notification_module_1.NotificationModule,
         ],
         providers: [
             {

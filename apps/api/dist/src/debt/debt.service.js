@@ -27,7 +27,10 @@ let DebtService = class DebtService {
                 dueDate: payload.dueDate ? new Date(payload.dueDate) : undefined,
                 userId,
             },
-            include: { payments: { orderBy: { createdAt: 'desc' }, take: 5 } },
+            include: {
+                payments: { orderBy: { createdAt: 'desc' }, take: 5 },
+                _count: { select: { payments: true } },
+            },
         });
     }
     async findAll(userId) {
@@ -62,7 +65,10 @@ let DebtService = class DebtService {
         return this.prisma.debt.update({
             where: { id: debtId },
             data,
-            include: { payments: { orderBy: { createdAt: 'desc' }, take: 5 } },
+            include: {
+                payments: { orderBy: { createdAt: 'desc' }, take: 5 },
+                _count: { select: { payments: true } },
+            },
         });
     }
     async delete(userId, debtId) {

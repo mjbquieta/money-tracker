@@ -93,7 +93,7 @@ function toggleBackupCode() {
           :maxlength="useBackupCode ? 8 : 6"
           required
           autocomplete="one-time-code"
-          class="w-full px-4 py-3 border border-secondary-200 dark:border-secondary-600 rounded-xl bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 text-center text-2xl tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+          class="w-full px-4 py-3 border border-secondary-200 dark:border-secondary-600 rounded-xl bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 text-center text-2xl tracking-widest font-mono placeholder:text-sm placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
         />
       </div>
 

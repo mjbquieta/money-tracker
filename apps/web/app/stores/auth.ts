@@ -170,5 +170,6 @@ export const useAuthStore = defineStore('auth', () => {
     updateSettings,
     updateProfile,
     changePassword,
+    clearAuth,
   };
 });

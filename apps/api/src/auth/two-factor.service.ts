@@ -144,7 +144,7 @@ export class TwoFactorService {
     const isValid = result.valid;
 
     if (!isValid) {
-      throw new UnauthorizedException('Invalid verification code');
+      throw new BadRequestException('Invalid verification code');
     }
 
     return true;
@@ -187,7 +187,7 @@ export class TwoFactorService {
     });
 
     if (!backupCode) {
-      throw new UnauthorizedException('Invalid backup code');
+      throw new BadRequestException('Invalid backup code');
     }
 
     await this.prisma.twoFactorBackupCode.update({

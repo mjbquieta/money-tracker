@@ -154,7 +154,7 @@ let TwoFactorService = class TwoFactorService {
         });
         const isValid = result.valid;
         if (!isValid) {
-            throw new common_1.UnauthorizedException('Invalid verification code');
+            throw new common_1.BadRequestException('Invalid verification code');
         }
         return true;
     }
@@ -187,7 +187,7 @@ let TwoFactorService = class TwoFactorService {
             },
         });
         if (!backupCode) {
-            throw new common_1.UnauthorizedException('Invalid backup code');
+            throw new common_1.BadRequestException('Invalid backup code');
         }
         await this.prisma.twoFactorBackupCode.update({
             where: { id: backupCode.id },

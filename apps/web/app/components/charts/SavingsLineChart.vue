@@ -27,6 +27,8 @@ const props = defineProps<{
   currency?: string;
 }>();
 
+const { isDark } = useTheme();
+
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const metricDescriptions = {
@@ -61,39 +63,50 @@ const chartData = computed(() => {
   };
 });
 
-const chartOptions = computed(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false,
-    },
-    tooltip: {
-      callbacks: {
-        label: (context: { dataset: { label: string }; parsed: { y: number } }) => {
-          const value = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: props.currency || 'USD',
-          }).format(context.parsed.y);
-          return `${context.dataset.label}: ${value}`;
+const chartOptions = computed(() => {
+  const textColor = isDark.value ? '#94a3b8' : '#64748b';
+  const gridColor = isDark.value ? '#334155' : '#e2e8f0';
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: { dataset: { label: string }; parsed: { y: number } }) => {
+            const value = new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: props.currency || 'USD',
+            }).format(context.parsed.y);
+            return `${context.dataset.label}: ${value}`;
+          },
         },
       },
     },
-  },
-  scales: {
-    y: {
-      ticks: {
-        callback: (value: number) => {
-          return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: props.currency || 'USD',
-            notation: 'compact',
-          }).format(value);
+    scales: {
+      x: {
+        ticks: { color: textColor },
+        grid: { color: gridColor },
+      },
+      y: {
+        ticks: {
+          color: textColor,
+          callback: (value: number) => {
+            return new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: props.currency || 'USD',
+              notation: 'compact',
+            }).format(value);
+          },
         },
+        grid: { color: gridColor },
       },
     },
-  },
-}));
+  };
+});
 </script>
 
 <template>

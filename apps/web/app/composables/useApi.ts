@@ -3,7 +3,7 @@ import type { ApiError, ApiEnvelope, ApiErrorEnvelope, ApiResponseMeta } from '~
 export function useApi() {
   const config = useRuntimeConfig();
   const baseUrl = config.public.apiBaseUrl;
-  const { getAccessToken, refreshAccessToken, clearAccessToken } = useAuthInterceptor();
+  const { getAccessToken, refreshAccessToken, clearAccessToken, isTokenExpired, sessionExpired } = useAuthInterceptor();
 
   function parseResponse<T>(
     json: any,
@@ -25,12 +25,38 @@ export function useApi() {
     return { data: json as T, error: null, meta: null };
   }
 
+  // Endpoints that don't require authentication — skip token refresh for these
+  const publicEndpoints = [
+    '/api/v1/auth/login',
+    '/api/v1/auth/refresh',
+    '/api/v1/auth/2fa/authenticate',
+    '/api/v1/users/register',
+  ];
+
   async function request<T>(
     endpoint: string,
     options: RequestInit = {},
   ): Promise<{ data: T | null; error: ApiError | null; meta: ApiResponseMeta | null }> {
     try {
-      const token = getAccessToken();
+      let token = getAccessToken();
+      const isPublic = publicEndpoints.some((p) => endpoint.startsWith(p));
+
+      // If token is missing or expired, try to refresh before making the request
+      // Skip for public endpoints that don't need authentication
+      if (!isPublic && (!token || isTokenExpired())) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          token = refreshed;
+        } else if (!sessionExpired.value) {
+          // Refresh failed on fresh page load (no modal shown) — redirect to login
+          if (import.meta.client && localStorage.getItem('user')) {
+            localStorage.removeItem('user');
+            navigateTo('/auth/login', { replace: true });
+          }
+          return { data: null, error: { statusCode: 401, message: 'Please log in.' }, meta: null };
+        }
+      }
+
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         ...(options.headers as Record<string, string>),
@@ -47,7 +73,7 @@ export function useApi() {
       });
 
       // On 401, attempt token refresh and retry once
-      if (response.status === 401 && token) {
+      if (response.status === 401) {
         const newToken = await refreshAccessToken();
 
         if (newToken) {
@@ -63,13 +89,12 @@ export function useApi() {
           return parseResponse<T>(retryJson, retryResponse.ok);
         }
 
-        // Refresh failed — redirect to login
-        if (import.meta.client) {
-          clearAccessToken();
+        // Refresh failed — modal shows if user had active session,
+        // otherwise redirect to login for fresh page load
+        if (!sessionExpired.value && import.meta.client) {
           localStorage.removeItem('user');
           navigateTo('/auth/login', { replace: true });
         }
-
         return {
           data: null,
           error: { statusCode: 401, message: 'Session expired. Please log in again.' },

@@ -12,6 +12,7 @@ exports.createTestFinancialGoal = createTestFinancialGoal;
 exports.createTestGoalContribution = createTestGoalContribution;
 exports.createTestDebt = createTestDebt;
 exports.createTestDebtPayment = createTestDebtPayment;
+exports.createTestNotification = createTestNotification;
 exports.createTestIncome = createTestIncome;
 const crypto_1 = require("crypto");
 function createTestUser(overrides = {}) {
@@ -192,6 +193,19 @@ function createTestDebtPayment(overrides = {}) {
         amount: 50,
         note: 'Partial payment',
         debtId: (0, crypto_1.randomUUID)(),
+        createdAt: new Date(),
+        ...overrides,
+    };
+}
+function createTestNotification(overrides = {}) {
+    return {
+        id: (0, crypto_1.randomUUID)(),
+        type: 'SYSTEM',
+        title: 'Test Notification',
+        message: 'This is a test notification',
+        isRead: false,
+        data: null,
+        userId: (0, crypto_1.randomUUID)(),
         createdAt: new Date(),
         ...overrides,
     };
