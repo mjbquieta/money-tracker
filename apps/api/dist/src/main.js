@@ -19,7 +19,7 @@ async function bootstrap() {
     app.useLogger(app.get(nestjs_pino_1.Logger));
     app.use((0, cookie_parser_1.default)());
     app.enableCors({
-        origin: true,
+        origin: configService.get('CORS_ORIGIN') || true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true,
     });
