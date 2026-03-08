@@ -15,6 +15,7 @@ import {
   EyeSlashIcon,
   XMarkIcon,
   AcademicCapIcon,
+  TruckIcon,
 } from '@heroicons/vue/24/outline';
 
 definePageMeta({
@@ -75,6 +76,7 @@ const currencies = [
 ];
 
 const selectedCurrency = ref(authStore.user?.settings?.currency || 'USD');
+const includeVehicleExpenses = ref(authStore.user?.settings?.includeVehicleExpenses ?? false);
 
 onMounted(async () => {
   await expenseStore.fetchCategories();
@@ -118,6 +120,30 @@ async function handleCurrencyChange() {
   }
 
   success.value = 'Currency updated successfully!';
+  setTimeout(() => {
+    success.value = null;
+  }, 3000);
+}
+
+async function handleToggleVehicleExpenses() {
+  error.value = null;
+  success.value = null;
+
+  const result = await authStore.updateSettings({
+    includeVehicleExpenses: includeVehicleExpenses.value,
+  });
+
+  if (!result.success && result.error) {
+    includeVehicleExpenses.value = !includeVehicleExpenses.value;
+    error.value = typeof result.error.message === 'string'
+      ? result.error.message
+      : result.error.message[0];
+    return;
+  }
+
+  success.value = includeVehicleExpenses.value
+    ? 'Vehicle expenses will now appear in budget periods.'
+    : 'Vehicle expenses removed from budget periods.';
   setTimeout(() => {
     success.value = null;
   }, 3000);
@@ -568,6 +594,38 @@ function formatDate(dateString: string | undefined) {
 
       <p v-if="authStore.user?.settings?.currency" class="text-xs text-secondary-400 mt-3">
         Current: {{ getCurrencySymbol(authStore.user.settings.currency) }} {{ authStore.user.settings.currency }}
+      </p>
+    </div>
+
+    <!-- Vehicle Expense Integration -->
+    <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
+            <TruckIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Vehicle Expense Integration</h2>
+            <p class="text-sm text-secondary-500 dark:text-secondary-400">
+              Include vehicle expenses in budget period calculations and dashboard metrics
+            </p>
+          </div>
+        </div>
+        <button
+          role="switch"
+          :aria-checked="includeVehicleExpenses"
+          class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-secondary-800"
+          :class="includeVehicleExpenses ? 'bg-primary-500' : 'bg-secondary-300 dark:bg-secondary-600'"
+          @click="includeVehicleExpenses = !includeVehicleExpenses; handleToggleVehicleExpenses()"
+        >
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+            :class="includeVehicleExpenses ? 'translate-x-5' : 'translate-x-0'"
+          />
+        </button>
+      </div>
+      <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-3 ml-[52px]">
+        When enabled, vehicle expenses whose dates fall within a budget period will appear as read-only entries and count toward your total expenses.
       </p>
     </div>
 

@@ -7,18 +7,18 @@ export declare class VehicleService {
     createVehicle(userId: UUID, payload: CreateVehicleDto): Promise<{
         expenses: {
             id: string;
-            notes: string | null;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            date: Date;
-            type: import("@prisma/client").$Enums.VehicleExpenseType;
-            amount: number;
             description: string | null;
+            amount: number;
+            type: import("@prisma/client").$Enums.VehicleExpenseType;
+            date: Date;
             odometer: number | null;
             fuelLiters: number | null;
             fuelPricePerLiter: number | null;
             isFullTank: boolean | null;
+            notes: string | null;
             vehicleId: string;
         }[];
         _count: {
@@ -27,31 +27,31 @@ export declare class VehicleService {
     } & {
         id: string;
         name: string;
-        make: string | null;
-        model: string | null;
-        year: number | null;
-        licensePlate: string | null;
-        notes: string | null;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        year: number | null;
+        notes: string | null;
+        make: string | null;
+        model: string | null;
+        licensePlate: string | null;
     }>;
     findAllVehicles(userId: UUID): Promise<({
         expenses: {
             id: string;
-            notes: string | null;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            date: Date;
-            type: import("@prisma/client").$Enums.VehicleExpenseType;
-            amount: number;
             description: string | null;
+            amount: number;
+            type: import("@prisma/client").$Enums.VehicleExpenseType;
+            date: Date;
             odometer: number | null;
             fuelLiters: number | null;
             fuelPricePerLiter: number | null;
             isFullTank: boolean | null;
+            notes: string | null;
             vehicleId: string;
         }[];
         _count: {
@@ -60,31 +60,31 @@ export declare class VehicleService {
     } & {
         id: string;
         name: string;
-        make: string | null;
-        model: string | null;
-        year: number | null;
-        licensePlate: string | null;
-        notes: string | null;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        year: number | null;
+        notes: string | null;
+        make: string | null;
+        model: string | null;
+        licensePlate: string | null;
     })[]>;
     findOneVehicle(userId: UUID, vehicleId: UUID): Promise<{
         expenses: {
             id: string;
-            notes: string | null;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            date: Date;
-            type: import("@prisma/client").$Enums.VehicleExpenseType;
-            amount: number;
             description: string | null;
+            amount: number;
+            type: import("@prisma/client").$Enums.VehicleExpenseType;
+            date: Date;
             odometer: number | null;
             fuelLiters: number | null;
             fuelPricePerLiter: number | null;
             isFullTank: boolean | null;
+            notes: string | null;
             vehicleId: string;
         }[];
         _count: {
@@ -93,31 +93,31 @@ export declare class VehicleService {
     } & {
         id: string;
         name: string;
-        make: string | null;
-        model: string | null;
-        year: number | null;
-        licensePlate: string | null;
-        notes: string | null;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        year: number | null;
+        notes: string | null;
+        make: string | null;
+        model: string | null;
+        licensePlate: string | null;
     }>;
     updateVehicle(userId: UUID, vehicleId: UUID, payload: UpdateVehicleDto): Promise<{
         expenses: {
             id: string;
-            notes: string | null;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            date: Date;
-            type: import("@prisma/client").$Enums.VehicleExpenseType;
-            amount: number;
             description: string | null;
+            amount: number;
+            type: import("@prisma/client").$Enums.VehicleExpenseType;
+            date: Date;
             odometer: number | null;
             fuelLiters: number | null;
             fuelPricePerLiter: number | null;
             isFullTank: boolean | null;
+            notes: string | null;
             vehicleId: string;
         }[];
         _count: {
@@ -126,44 +126,44 @@ export declare class VehicleService {
     } & {
         id: string;
         name: string;
-        make: string | null;
-        model: string | null;
-        year: number | null;
-        licensePlate: string | null;
-        notes: string | null;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        year: number | null;
+        notes: string | null;
+        make: string | null;
+        model: string | null;
+        licensePlate: string | null;
     }>;
     deleteVehicle(userId: UUID, vehicleId: UUID): Promise<{
         id: string;
         name: string;
-        make: string | null;
-        model: string | null;
-        year: number | null;
-        licensePlate: string | null;
-        notes: string | null;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        year: number | null;
+        notes: string | null;
+        make: string | null;
+        model: string | null;
+        licensePlate: string | null;
     }>;
     addExpense(userId: UUID, vehicleId: UUID, payload: CreateVehicleExpenseDto): Promise<{
         expenses: {
             id: string;
-            notes: string | null;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            date: Date;
-            type: import("@prisma/client").$Enums.VehicleExpenseType;
-            amount: number;
             description: string | null;
+            amount: number;
+            type: import("@prisma/client").$Enums.VehicleExpenseType;
+            date: Date;
             odometer: number | null;
             fuelLiters: number | null;
             fuelPricePerLiter: number | null;
             isFullTank: boolean | null;
+            notes: string | null;
             vehicleId: string;
         }[];
         _count: {
@@ -172,31 +172,31 @@ export declare class VehicleService {
     } & {
         id: string;
         name: string;
-        make: string | null;
-        model: string | null;
-        year: number | null;
-        licensePlate: string | null;
-        notes: string | null;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        year: number | null;
+        notes: string | null;
+        make: string | null;
+        model: string | null;
+        licensePlate: string | null;
     }>;
     updateExpense(userId: UUID, vehicleId: UUID, expenseId: UUID, payload: UpdateVehicleExpenseDto): Promise<{
         expenses: {
             id: string;
-            notes: string | null;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            date: Date;
-            type: import("@prisma/client").$Enums.VehicleExpenseType;
-            amount: number;
             description: string | null;
+            amount: number;
+            type: import("@prisma/client").$Enums.VehicleExpenseType;
+            date: Date;
             odometer: number | null;
             fuelLiters: number | null;
             fuelPricePerLiter: number | null;
             isFullTank: boolean | null;
+            notes: string | null;
             vehicleId: string;
         }[];
         _count: {
@@ -205,31 +205,31 @@ export declare class VehicleService {
     } & {
         id: string;
         name: string;
-        make: string | null;
-        model: string | null;
-        year: number | null;
-        licensePlate: string | null;
-        notes: string | null;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        year: number | null;
+        notes: string | null;
+        make: string | null;
+        model: string | null;
+        licensePlate: string | null;
     }>;
     deleteExpense(userId: UUID, vehicleId: UUID, expenseId: UUID): Promise<{
         expenses: {
             id: string;
-            notes: string | null;
             createdAt: Date;
             updatedAt: Date | null;
             deletedAt: Date | null;
-            date: Date;
-            type: import("@prisma/client").$Enums.VehicleExpenseType;
-            amount: number;
             description: string | null;
+            amount: number;
+            type: import("@prisma/client").$Enums.VehicleExpenseType;
+            date: Date;
             odometer: number | null;
             fuelLiters: number | null;
             fuelPricePerLiter: number | null;
             isFullTank: boolean | null;
+            notes: string | null;
             vehicleId: string;
         }[];
         _count: {
@@ -238,15 +238,15 @@ export declare class VehicleService {
     } & {
         id: string;
         name: string;
-        make: string | null;
-        model: string | null;
-        year: number | null;
-        licensePlate: string | null;
-        notes: string | null;
         createdAt: Date;
         updatedAt: Date | null;
         deletedAt: Date | null;
         userId: string;
+        year: number | null;
+        notes: string | null;
+        make: string | null;
+        model: string | null;
+        licensePlate: string | null;
     }>;
     getAnalytics(userId: UUID): Promise<{
         fuelConsumption: {

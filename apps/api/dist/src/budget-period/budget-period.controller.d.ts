@@ -54,7 +54,7 @@ export declare class BudgetPeriodController {
         })[];
         pagination: import("../common/interfaces/api-response.interface").PaginationMeta;
     }>;
-    findOne(userId: UUID, id: UUID): Promise<{
+    findOne(userId: UUID, id: UUID): Promise<({
         expenses: ({
             category: {
                 id: string;
@@ -91,6 +91,60 @@ export declare class BudgetPeriodController {
             amount: number;
         }[];
     } & {
+        id: string;
+        name: string | null;
+        createdAt: Date;
+        updatedAt: Date | null;
+        deletedAt: Date | null;
+        userId: string;
+        startDate: Date;
+        endDate: Date;
+    }) | {
+        vehicleExpenses: {
+            id: string;
+            type: import("@prisma/client").$Enums.VehicleExpenseType;
+            amount: number;
+            description: string | null;
+            date: Date;
+            vehicleId: string;
+            vehicleName: string;
+            isReadOnly: true;
+        }[];
+        expenses: ({
+            category: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                userId: string;
+                description: string | null;
+                spendingLimit: number | null;
+                isDefault: boolean;
+                defaultCategory: import("@prisma/client").$Enums.DefaultCategory | null;
+            };
+        } & {
+            id: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date | null;
+            deletedAt: Date | null;
+            description: string | null;
+            categoryId: string;
+            budgetPeriodId: string;
+            amount: number;
+            expenseGroupId: string | null;
+        })[];
+        incomes: {
+            id: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date | null;
+            deletedAt: Date | null;
+            description: string | null;
+            budgetPeriodId: string;
+            amount: number;
+        }[];
         id: string;
         name: string | null;
         createdAt: Date;
@@ -172,6 +226,7 @@ export declare class BudgetPeriodController {
             total: number;
             count: number;
         }>;
+        vehicleExpensesTotal: number;
     }>;
     getDailyAverage(userId: UUID, id: UUID): Promise<{
         totalExpenses: number;

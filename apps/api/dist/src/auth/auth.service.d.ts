@@ -20,6 +20,7 @@ export declare class AuthService {
                 updatedAt: Date | null;
                 deletedAt: Date | null;
                 currency: string;
+                includeVehicleExpenses: boolean;
                 userId: string;
             } | null;
         } & {
@@ -53,6 +54,7 @@ export declare class AuthService {
                 updatedAt: Date | null;
                 deletedAt: Date | null;
                 currency: string;
+                includeVehicleExpenses: boolean;
                 userId: string;
             } | null;
             categories: {

@@ -37,6 +37,7 @@ import {
   FunnelIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
+  TruckIcon,
 } from "@heroicons/vue/24/outline";
 
 definePageMeta({
@@ -1806,6 +1807,58 @@ function getCategoryStyle(categoryName: string) {
               :category-name="category.name"
               :format-currency="formatCurrency"
             />
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehicle Expenses (Read-Only) -->
+      <div
+        v-if="period?.vehicleExpenses && period.vehicleExpenses.length > 0"
+        class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 mb-8"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 flex items-center gap-2">
+            <TruckIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" />
+            Vehicle Expenses
+          </h2>
+          <span class="text-xs font-medium text-secondary-400 dark:text-secondary-500 bg-secondary-100 dark:bg-secondary-700 px-2.5 py-1 rounded-full">
+            Read-only
+          </span>
+        </div>
+
+        <div v-if="summary?.vehicleExpensesTotal" class="mb-4 p-3 bg-secondary-50 dark:bg-secondary-900 rounded-lg flex justify-between items-center">
+          <span class="text-sm text-secondary-500 dark:text-secondary-400">Total from vehicles</span>
+          <span class="text-sm font-semibold text-danger-600 dark:text-danger-400">
+            {{ formatCurrency(summary.vehicleExpensesTotal) }}
+          </span>
+        </div>
+
+        <div class="space-y-2">
+          <div
+            v-for="ve in period.vehicleExpenses"
+            :key="ve.id"
+            class="flex items-center justify-between p-4 bg-secondary-50/50 dark:bg-secondary-900/50 rounded-xl"
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-9 h-9 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <TruckIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate">
+                  {{ ve.description || ve.type.charAt(0) + ve.type.slice(1).toLowerCase() }}
+                </p>
+                <p class="text-xs text-secondary-400 dark:text-secondary-500">
+                  {{ ve.vehicleName }}
+                  <span class="mx-1">&middot;</span>
+                  {{ ve.type.charAt(0) + ve.type.slice(1).toLowerCase() }}
+                  <span class="mx-1">&middot;</span>
+                  {{ new Date(ve.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
+                </p>
+              </div>
+            </div>
+            <span class="text-sm font-semibold text-danger-600 dark:text-danger-400 flex-shrink-0 ml-3">
+              -{{ formatCurrency(ve.amount) }}
+            </span>
           </div>
         </div>
       </div>

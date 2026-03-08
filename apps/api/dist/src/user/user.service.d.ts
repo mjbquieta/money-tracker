@@ -18,6 +18,7 @@ export declare class UserService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {
@@ -51,6 +52,7 @@ export declare class UserService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
     } & {
@@ -73,6 +75,7 @@ export declare class UserService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {
@@ -107,6 +110,7 @@ export declare class UserService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {

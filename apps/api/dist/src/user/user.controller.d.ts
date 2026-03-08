@@ -11,6 +11,7 @@ export declare class UserController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {
@@ -44,6 +45,7 @@ export declare class UserController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {

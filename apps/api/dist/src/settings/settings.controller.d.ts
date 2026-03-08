@@ -10,6 +10,7 @@ export declare class SettingsController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         currency: string;
+        includeVehicleExpenses: boolean;
         userId: string;
     }>;
     update(userId: UUID, payload: UpdateSettingsDto): Promise<{
@@ -18,6 +19,7 @@ export declare class SettingsController {
         updatedAt: Date | null;
         deletedAt: Date | null;
         currency: string;
+        includeVehicleExpenses: boolean;
         userId: string;
     }>;
 }

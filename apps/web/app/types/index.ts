@@ -13,6 +13,7 @@ export interface User {
 export interface Settings {
   id: string;
   currency: string;
+  includeVehicleExpenses: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,6 +43,17 @@ export interface CategorySpendingStatus {
 
 export type DefaultCategory = 'BILLS' | 'FOOD' | 'TRANSPORT' | 'SAVINGS' | 'ENTERTAINMENT';
 
+export interface BudgetPeriodVehicleExpense {
+  id: string;
+  type: VehicleExpenseType;
+  amount: number;
+  description: string | null;
+  date: string;
+  vehicleId: string;
+  vehicleName: string;
+  isReadOnly: true;
+}
+
 export interface BudgetPeriod {
   id: string;
   name: string | null;
@@ -51,6 +63,7 @@ export interface BudgetPeriod {
   updatedAt: string;
   expenses: Expense[];
   incomes: Income[];
+  vehicleExpenses?: BudgetPeriodVehicleExpense[];
 }
 
 export interface Expense {
@@ -226,6 +239,7 @@ export interface MoveExpensesToGroupPayload {
 
 export interface UpdateSettingsPayload {
   currency?: string;
+  includeVehicleExpenses?: boolean;
 }
 
 export interface UpdateProfilePayload {
@@ -243,6 +257,7 @@ export interface BudgetSummary {
   totalExpenses: number;
   remaining: number;
   expensesByCategory: Record<string, { total: number; count: number }>;
+  vehicleExpensesTotal?: number;
 }
 
 export interface MonthlyBreakdown {
