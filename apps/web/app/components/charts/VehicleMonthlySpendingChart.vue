@@ -9,45 +9,38 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-interface MonthlyDataItem {
-  month: number;
-  income: number;
-  expenses: number;
-  label?: string;
-}
+import type { VehicleMonthlySpending } from '~/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const props = defineProps<{
-  data: MonthlyDataItem[];
+  data: VehicleMonthlySpending[];
   currency?: string;
 }>();
 
 const { isDark } = useTheme();
 
-const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const chartData = computed(() => {
+  const labels = props.data.map((d) => {
+    const [year, month] = d.month.split('-');
+    const date = new Date(Number(year), Number(month) - 1);
+    return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  });
 
-const chartData = computed(() => ({
-  labels: props.data.map((m) => m.label || monthNames[m.month - 1]),
-  datasets: [
-    {
-      label: 'Income',
-      backgroundColor: isDark.value ? 'rgba(34, 197, 94, 0.7)' : 'rgba(34, 197, 94, 0.8)',
-      borderColor: '#22c55e',
-      borderWidth: 1,
-      borderRadius: 4,
-      data: props.data.map((m) => m.income),
-    },
-    {
-      label: 'Expenses',
-      backgroundColor: isDark.value ? 'rgba(239, 68, 68, 0.7)' : 'rgba(239, 68, 68, 0.8)',
-      borderColor: '#ef4444',
-      borderWidth: 1,
-      borderRadius: 4,
-      data: props.data.map((m) => m.expenses),
-    },
-  ],
-}));
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Monthly Spending',
+        data: props.data.map((d) => d.total),
+        backgroundColor: isDark.value ? 'rgba(99, 102, 241, 0.7)' : 'rgba(99, 102, 241, 0.8)',
+        borderColor: '#6366f1',
+        borderWidth: 1,
+        borderRadius: 4,
+      },
+    ],
+  };
+});
 
 const chartOptions = computed(() => {
   const textColor = isDark.value ? '#94a3b8' : '#64748b';
@@ -57,18 +50,19 @@ const chartOptions = computed(() => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'top' as const,
-        labels: { color: textColor },
-      },
+      legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (context: { dataset: { label: string }; parsed: { y: number } }) => {
+          label: (context: { parsed: { y: number } }) => {
             const value = new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: props.currency || 'USD',
             }).format(context.parsed.y);
-            return `${context.dataset.label}: ${value}`;
+            return `Spent: ${value}`;
+          },
+          afterLabel: (_context: { dataIndex: number }) => {
+            const point = props.data[_context.dataIndex];
+            return `${point.count} expense${point.count !== 1 ? 's' : ''}`;
           },
         },
       },
@@ -99,6 +93,9 @@ const chartOptions = computed(() => {
 
 <template>
   <div class="h-64">
-    <Bar :data="chartData" :options="chartOptions" />
+    <Bar v-if="data.length > 0" :data="chartData" :options="chartOptions" />
+    <div v-else class="h-full flex items-center justify-center text-secondary-500 dark:text-secondary-400">
+      No monthly data available
+    </div>
   </div>
 </template>

@@ -82,6 +82,13 @@ export function useKeyboardShortcuts() {
           action: () => router.push('/debts'),
         },
         {
+          key: 'v',
+          label: 'G then V',
+          description: 'Go to Vehicles',
+          category: 'Navigation',
+          action: () => router.push('/vehicles'),
+        },
+        {
           key: 's',
           label: 'G then S',
           description: 'Go to Settings',

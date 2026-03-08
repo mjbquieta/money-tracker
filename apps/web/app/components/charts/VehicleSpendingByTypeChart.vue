@@ -11,21 +11,37 @@ const props = defineProps<{
 
 const { isDark } = useTheme();
 
-const categoryColors: Record<string, string> = {
-  Bills: '#ef4444',
-  Food: '#f97316',
-  Transport: '#3b82f6',
-  Savings: '#22c55e',
-  Entertainment: '#a855f7',
+const typeLabels: Record<string, string> = {
+  FUEL: 'Fuel',
+  MAINTENANCE: 'Maintenance',
+  INSURANCE: 'Insurance',
+  PARKING: 'Parking',
+  TOLL: 'Toll',
+  ACCESSORIES: 'Accessories',
+  REGISTRATION: 'Registration',
+  WASH: 'Car Wash',
+  PARTICIPATION_FEE: 'Participation Fee',
+  OTHER: 'Other',
 };
 
-const defaultColors = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#84cc16', '#06b6d4'];
+const typeColors: Record<string, string> = {
+  FUEL: '#f59e0b',
+  MAINTENANCE: '#3b82f6',
+  INSURANCE: '#a855f7',
+  PARKING: '#06b6d4',
+  TOLL: '#f97316',
+  ACCESSORIES: '#ec4899',
+  REGISTRATION: '#6366f1',
+  WASH: '#14b8a6',
+  PARTICIPATION_FEE: '#f43f5e',
+  OTHER: '#6b7280',
+};
 
 const chartData = computed(() => {
-  const entries = Object.entries(props.data);
-  const labels = entries.map(([name]) => name);
-  const values = entries.map(([, data]) => data.total);
-  const colors = entries.map(([name], index) => categoryColors[name] || defaultColors[index % defaultColors.length]);
+  const entries = Object.entries(props.data).sort((a, b) => b[1].total - a[1].total);
+  const labels = entries.map(([key]) => typeLabels[key] || key);
+  const values = entries.map(([, d]) => d.total);
+  const colors = entries.map(([key]) => typeColors[key] || '#6b7280');
 
   return {
     labels,

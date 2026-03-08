@@ -10,6 +10,7 @@ import {
   ChartBarIcon,
   DocumentTextIcon,
   ArrowPathIcon,
+  TruckIcon,
 } from '@heroicons/vue/24/outline';
 
 const router = useRouter();
@@ -66,6 +67,14 @@ const commands = computed<CommandItem[]>(() => [
     description: 'Track debts and payments',
     icon: CurrencyDollarIcon,
     action: () => router.push('/debts'),
+    category: 'Navigation',
+  },
+  {
+    id: 'vehicles',
+    label: 'Vehicles',
+    description: 'Track car and vehicle expenses',
+    icon: TruckIcon,
+    action: () => router.push('/vehicles'),
     category: 'Navigation',
   },
   {

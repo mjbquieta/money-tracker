@@ -11,31 +11,43 @@ import {
   ClipboardDocumentListIcon,
   FlagIcon,
   CurrencyDollarIcon,
+  TruckIcon,
+  TableCellsIcon,
 } from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
 const mounted = ref(false);
 const mobileMenuOpen = ref(false);
 const accountMenuOpen = ref(false);
+const moreMenuOpen = ref(false);
+
+const route = useRoute();
+
+const isMoreRouteActive = computed(() =>
+  ['/financial-goals', '/debts', '/vehicles'].some(p => route.path.startsWith(p))
+);
 
 // Initialize keyboard shortcuts
 useKeyboardShortcuts();
 
 // Close menus on route change
-const route = useRoute();
 watch(
   () => route.path,
   () => {
     mobileMenuOpen.value = false;
     accountMenuOpen.value = false;
+    moreMenuOpen.value = false;
   },
 );
 
-// Close account menu when clicking outside
+// Close dropdowns when clicking outside
 function handleClickOutside(event: MouseEvent) {
   const target = event.target as HTMLElement;
   if (!target.closest(".account-menu-container")) {
     accountMenuOpen.value = false;
+  }
+  if (!target.closest(".more-menu-container")) {
+    moreMenuOpen.value = false;
   }
 }
 
@@ -100,24 +112,62 @@ onUnmounted(() => {
                 <ClipboardDocumentListIcon class="w-5 h-5" />
                 <span>Personal Budgets</span>
               </NuxtLink>
-              <NuxtLink
-                to="/financial-goals"
-                data-tour="goals"
-                class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
-                active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
-              >
-                <FlagIcon class="w-5 h-5" />
-                <span>Goals</span>
-              </NuxtLink>
-              <NuxtLink
-                to="/debts"
-                data-tour="debts"
-                class="flex items-center gap-2 px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
-                active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
-              >
-                <CurrencyDollarIcon class="w-5 h-5" />
-                <span>Debts</span>
-              </NuxtLink>
+              <!-- More Dropdown -->
+              <div class="relative more-menu-container" data-tour="more">
+                <button
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                  :class="isMoreRouteActive
+                    ? '!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium'
+                    : 'text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50'"
+                  @click.stop="moreMenuOpen = !moreMenuOpen"
+                >
+                  <TableCellsIcon class="w-5 h-5" />
+                  <span>More</span>
+                  <ChevronDownIcon
+                    class="w-3.5 h-3.5 transition-transform"
+                    :class="{ 'rotate-180': moreMenuOpen }"
+                  />
+                </button>
+
+                <Transition
+                  enter-active-class="transition duration-150 ease-out"
+                  enter-from-class="opacity-0 scale-95"
+                  enter-to-class="opacity-100 scale-100"
+                  leave-active-class="transition duration-100 ease-in"
+                  leave-from-class="opacity-100 scale-100"
+                  leave-to-class="opacity-0 scale-95"
+                >
+                  <div
+                    v-if="moreMenuOpen"
+                    class="absolute left-0 mt-2 w-52 bg-white dark:bg-secondary-800 rounded-xl shadow-elevated border border-secondary-100 dark:border-secondary-700 py-1 z-50"
+                  >
+                    <NuxtLink
+                      to="/financial-goals"
+                      class="flex items-center gap-3 px-4 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 transition-colors"
+                      active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-50 dark:!bg-primary-900/50 font-medium"
+                    >
+                      <FlagIcon class="w-5 h-5" />
+                      <span>Goals</span>
+                    </NuxtLink>
+                    <NuxtLink
+                      to="/debts"
+                      class="flex items-center gap-3 px-4 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 transition-colors"
+                      active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-50 dark:!bg-primary-900/50 font-medium"
+                    >
+                      <CurrencyDollarIcon class="w-5 h-5" />
+                      <span>Debts</span>
+                    </NuxtLink>
+                    <NuxtLink
+                      to="/vehicles"
+                      class="flex items-center gap-3 px-4 py-2.5 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 transition-colors"
+                      active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-50 dark:!bg-primary-900/50 font-medium"
+                    >
+                      <TruckIcon class="w-5 h-5" />
+                      <span>Vehicles</span>
+                    </NuxtLink>
+                  </div>
+                </Transition>
+              </div>
               <div data-tour="notifications">
                 <UiNotificationBell />
               </div>
@@ -313,6 +363,14 @@ onUnmounted(() => {
             >
               <CurrencyDollarIcon class="w-5 h-5" />
               <span>Debts</span>
+            </NuxtLink>
+            <NuxtLink
+              to="/vehicles"
+              class="flex items-center gap-3 px-3 py-3 text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-xl transition-colors"
+              active-class="!text-primary-700 dark:!text-primary-400 !bg-primary-100 dark:!bg-primary-900/50 font-medium"
+            >
+              <TruckIcon class="w-5 h-5" />
+              <span>Vehicles</span>
             </NuxtLink>
             <NuxtLink
               to="/settings"

@@ -20,6 +20,7 @@ import { FinancialGoalModule } from './financial-goal/financial-goal.module';
 import { DebtModule } from './debt/debt.module';
 import { ExportModule } from './export/export.module';
 import { NotificationModule } from './notification/notification.module';
+import { VehicleModule } from './vehicle/vehicle.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { NotificationModule } from './notification/notification.module';
     DebtModule,
     ExportModule,
     NotificationModule,
+    VehicleModule,
   ],
   providers: [
     {

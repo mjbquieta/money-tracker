@@ -641,6 +641,128 @@ export interface AppNotification {
   createdAt: string;
 }
 
+// Vehicle types
+export type VehicleExpenseType =
+  | 'FUEL'
+  | 'MAINTENANCE'
+  | 'INSURANCE'
+  | 'PARKING'
+  | 'TOLL'
+  | 'ACCESSORIES'
+  | 'REGISTRATION'
+  | 'WASH'
+  | 'PARTICIPATION_FEE'
+  | 'OTHER';
+
+export interface VehicleExpense {
+  id: string;
+  type: VehicleExpenseType;
+  amount: number;
+  description: string | null;
+  date: string;
+  odometer: number | null;
+  fuelLiters: number | null;
+  fuelPricePerLiter: number | null;
+  isFullTank: boolean | null;
+  notes: string | null;
+  vehicleId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Vehicle {
+  id: string;
+  name: string;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  licensePlate: string | null;
+  notes: string | null;
+  expenses: VehicleExpense[];
+  _count: { expenses: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VehicleSummary {
+  totalVehicles: number;
+  totalExpenses: number;
+  totalSpent: number;
+  byType: Record<string, { total: number; count: number }>;
+}
+
+export interface VehicleFuelDataPoint {
+  date: string;
+  liters: number;
+  amount: number;
+  pricePerLiter: number | null;
+  odometer: number | null;
+  isFullTank: boolean | null;
+}
+
+export interface VehicleMonthlySpending {
+  month: string;
+  total: number;
+  count: number;
+}
+
+export interface VehicleFuelStats {
+  totalFills: number;
+  avgCostPerFill: number;
+  totalLiters: number;
+  avgPricePerLiter: number;
+}
+
+export interface VehicleAnalytics {
+  fuelConsumption: VehicleFuelDataPoint[];
+  monthlySpending: VehicleMonthlySpending[];
+  byType: Record<string, { total: number; count: number }>;
+  fuelStats: VehicleFuelStats;
+  totalExpenses: number;
+}
+
+export interface CreateVehiclePayload {
+  name: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  licensePlate?: string;
+  notes?: string;
+}
+
+export interface UpdateVehiclePayload {
+  name?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  licensePlate?: string;
+  notes?: string;
+}
+
+export interface CreateVehicleExpensePayload {
+  type: VehicleExpenseType;
+  amount: number;
+  description?: string;
+  date?: string;
+  odometer?: number;
+  fuelLiters?: number;
+  fuelPricePerLiter?: number;
+  isFullTank?: boolean;
+  notes?: string;
+}
+
+export interface UpdateVehicleExpensePayload {
+  type?: VehicleExpenseType;
+  amount?: number;
+  description?: string;
+  date?: string;
+  odometer?: number;
+  fuelLiters?: number;
+  fuelPricePerLiter?: number;
+  isFullTank?: boolean;
+  notes?: string;
+}
+
 // Export / Import types
 export interface ImportExpenseRecord {
   name: string;

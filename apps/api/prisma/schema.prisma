@@ -12,6 +12,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // url      = env("DATABASE_URL")
 }
 
 enum UserStatus {
@@ -56,6 +57,19 @@ enum DebtStatus {
   CANCELLED
 }
 
+enum VehicleExpenseType {
+  FUEL
+  MAINTENANCE
+  INSURANCE
+  PARKING
+  TOLL
+  ACCESSORIES
+  REGISTRATION
+  WASH
+  PARTICIPATION_FEE
+  OTHER
+}
+
 enum NotificationType {
   BUDGET_LIMIT_EXCEEDED
   BUDGET_LIMIT_APPROACHING
@@ -67,30 +81,31 @@ enum NotificationType {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  email           String           @unique
-  name            String?
-  username        String           @unique
-  status          UserStatus       @default(ACTIVE)
-  password        String
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-  deletedAt       DateTime?        @map("deleted_at")
-  twoFactorSecret    String?  @map("two_factor_secret")
-  isTwoFactorEnabled Boolean  @default(false) @map("is_two_factor_enabled")
+  id                 String     @id @default(uuid())
+  email              String     @unique
+  name               String?
+  username           String     @unique
+  status             UserStatus @default(ACTIVE)
+  password           String
+  createdAt          DateTime   @default(now()) @map("created_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+  deletedAt          DateTime?  @map("deleted_at")
+  twoFactorSecret    String?    @map("two_factor_secret")
+  isTwoFactorEnabled Boolean    @default(false) @map("is_two_factor_enabled")
 
-  settings              Settings?
-  budgetPeriods         BudgetPeriod[]
-  categories            Category[]
-  personalBudgets       PersonalBudget[]
-  expenseTemplates      ExpenseTemplate[]
-  recurringExpenses     RecurringExpense[]
-  tags                  Tag[]
-  financialGoals        FinancialGoal[]
-  debts                 Debt[]
-  refreshTokens         RefreshToken[]
-  twoFactorBackupCodes  TwoFactorBackupCode[]
-  notifications         Notification[]
+  settings             Settings?
+  budgetPeriods        BudgetPeriod[]
+  categories           Category[]
+  personalBudgets      PersonalBudget[]
+  expenseTemplates     ExpenseTemplate[]
+  recurringExpenses    RecurringExpense[]
+  tags                 Tag[]
+  financialGoals       FinancialGoal[]
+  debts                Debt[]
+  refreshTokens        RefreshToken[]
+  twoFactorBackupCodes TwoFactorBackupCode[]
+  notifications        Notification[]
+  vehicles             Vehicle[]
 
   @@map("users")
 }
@@ -190,8 +205,8 @@ model Category {
   deletedAt       DateTime?        @map("deleted_at")
 
   // Relations
-  userId           String
-  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenses          Expense[]
   expenseTemplates  ExpenseTemplate[]
   recurringExpenses RecurringExpense[]
@@ -349,11 +364,11 @@ model RefreshToken {
 }
 
 model TwoFactorBackupCode {
-  id       String    @id @default(uuid())
-  codeHash String    @map("code_hash")
-  isUsed   Boolean   @default(false) @map("is_used")
-  usedAt   DateTime? @map("used_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  id        String    @id @default(uuid())
+  codeHash  String    @map("code_hash")
+  isUsed    Boolean   @default(false) @map("is_used")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   // Relations
   userId String
@@ -364,16 +379,16 @@ model TwoFactorBackupCode {
 }
 
 model FinancialGoal {
-  id          String     @id @default(uuid())
-  name        String
-  description String?
-  targetAmount Float     @map("target_amount")
-  currentAmount Float    @default(0) @map("current_amount")
-  targetDate  DateTime?  @map("target_date")
-  status      GoalStatus @default(ACTIVE)
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime?  @updatedAt @map("updated_at")
-  deletedAt   DateTime?  @map("deleted_at")
+  id            String     @id @default(uuid())
+  name          String
+  description   String?
+  targetAmount  Float      @map("target_amount")
+  currentAmount Float      @default(0) @map("current_amount")
+  targetDate    DateTime?  @map("target_date")
+  status        GoalStatus @default(ACTIVE)
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime?  @updatedAt @map("updated_at")
+  deletedAt     DateTime?  @map("deleted_at")
 
   // Relations
   userId        String
@@ -390,8 +405,8 @@ model GoalContribution {
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  goalId String         @map("goal_id")
-  goal   FinancialGoal  @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goalId String        @map("goal_id")
+  goal   FinancialGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   @@index([goalId])
   @@map("goal_contributions")
@@ -430,4 +445,48 @@ model DebtPayment {
 
   @@index([debtId])
   @@map("debt_payments")
+}
+
+model Vehicle {
+  id           String    @id @default(uuid())
+  name         String // e.g., "My Toyota Camry"
+  make         String? // e.g., "Toyota"
+  model        String? // e.g., "Camry"
+  year         Int?
+  licensePlate String?   @map("license_plate")
+  notes        String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  // Relations
+  userId   String
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses VehicleExpense[]
+
+  @@index([userId])
+  @@map("vehicles")
+}
+
+model VehicleExpense {
+  id                String             @id @default(uuid())
+  type              VehicleExpenseType
+  amount            Float
+  description       String?
+  date              DateTime           @default(now())
+  odometer          Float? // Odometer reading at time of expense
+  fuelLiters        Float?             @map("fuel_liters") // Only for FUEL type
+  fuelPricePerLiter Float?             @map("fuel_price_per_liter") // Only for FUEL type
+  isFullTank        Boolean?           @map("is_full_tank") // Only for FUEL type
+  notes             String?
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime?          @updatedAt @map("updated_at")
+  deletedAt         DateTime?          @map("deleted_at")
+
+  // Relations
+  vehicleId String  @map("vehicle_id")
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@map("vehicle_expenses")
 }
