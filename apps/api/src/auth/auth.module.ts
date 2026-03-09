@@ -10,12 +10,14 @@ import { AuthGuard } from './auth.guard';
 import { RefreshTokenService } from './refresh-token.service';
 import { TwoFactorService } from './two-factor.service';
 import { TwoFactorAuthGuard } from './two-factor-auth.guard';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule,
     forwardRef(() => UserModule),
     PassportModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

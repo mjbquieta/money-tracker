@@ -19,6 +19,7 @@ const auth_guard_1 = require("./auth.guard");
 const refresh_token_service_1 = require("./refresh-token.service");
 const two_factor_service_1 = require("./two-factor.service");
 const two_factor_auth_guard_1 = require("./two-factor-auth.guard");
+const mail_module_1 = require("../mail/mail.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -28,6 +29,7 @@ exports.AuthModule = AuthModule = __decorate([
             config_1.ConfigModule,
             (0, common_1.forwardRef)(() => user_module_1.UserModule),
             passport_1.PassportModule,
+            mail_module_1.MailModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({

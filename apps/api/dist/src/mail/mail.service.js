@@ -33,6 +33,20 @@ let MailService = MailService_1 = class MailService {
             this.logger.error(`Failed to send welcome email to ${email}`, error.stack);
         }
     }
+    async sendPasswordResetEmail(email, name, resetUrl) {
+        try {
+            await this.mailerService.sendMail({
+                to: email,
+                subject: 'Reset Your Password — Prospera',
+                template: 'reset-password',
+                context: { name, resetUrl },
+            });
+            this.logger.log(`Password reset email sent to ${email}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send password reset email to ${email}`, error.stack);
+        }
+    }
 };
 exports.MailService = MailService;
 exports.MailService = MailService = MailService_1 = __decorate([

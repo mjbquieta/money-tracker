@@ -18,6 +18,8 @@ import {
   VerifyTwoFactorDto,
   DisableTwoFactorDto,
   TwoFactorAuthenticateDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
@@ -85,6 +87,22 @@ export class AuthController {
     setRefreshTokenCookie(res, result.refreshToken);
 
     return { accessToken: result.accessToken };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
+    body: ForgotPasswordDto,
+  ) {
+    return this.authService.requestPasswordReset(body);
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
+    body: ResetPasswordDto,
+  ) {
+    return this.authService.resetPassword(body);
   }
 
   @Post('logout')

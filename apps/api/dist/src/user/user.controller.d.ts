@@ -37,6 +37,8 @@ export declare class UserController {
         deletedAt: Date | null;
         twoFactorSecret: string | null;
         isTwoFactorEnabled: boolean;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
     }) | null>;
     updateProfile(userId: UUID, body: UpdateProfileDto): Promise<import("lodash").Omit<{
         settings: {
@@ -72,6 +74,8 @@ export declare class UserController {
         deletedAt: Date | null;
         twoFactorSecret: string | null;
         isTwoFactorEnabled: boolean;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
     }, "password">>;
     changePassword(userId: UUID, body: ChangePasswordDto): Promise<{
         message: string;

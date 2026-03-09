@@ -99,6 +99,15 @@ async function handleSubmit() {
         </div>
       </div>
 
+      <div class="flex justify-end">
+        <NuxtLink
+          to="/auth/forgot-password"
+          class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+        >
+          Forgot password?
+        </NuxtLink>
+      </div>
+
       <button
         type="submit"
         class="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl transition-all shadow-card hover:shadow-card-hover font-semibold text-lg disabled:opacity-50 group"
