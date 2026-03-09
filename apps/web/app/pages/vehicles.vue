@@ -9,6 +9,8 @@ import {
   WrenchScrewdriverIcon,
   DocumentDuplicateIcon,
   ChartBarIcon,
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/vue/24/outline';
 
 definePageMeta({
@@ -24,6 +26,15 @@ const showExpenseModal = ref(false);
 const showDeleteConfirm = ref(false);
 const showExpenseHistory = ref(false);
 const showDeleteExpenseConfirm = ref(false);
+const showImportModal = ref(false);
+const importVehicle = ref<Vehicle | null>(null);
+const importCsvText = ref('');
+const importLoading = ref(false);
+const importError = ref<string | null>(null);
+const importResult = ref<{ importedCount: number } | null>(null);
+const exportLoading = ref<string | null>(null);
+const importMode = ref<'paste' | 'upload'>('upload');
+const fileInputRef = ref<HTMLInputElement | null>(null);
 const editingVehicle = ref<Vehicle | null>(null);
 const selectedVehicle = ref<Vehicle | null>(null);
 const vehicleToDelete = ref<Vehicle | null>(null);
@@ -296,6 +307,143 @@ async function handleDeleteExpense() {
     vehicleStore.fetchAnalytics();
   }
 }
+
+async function handleExport(vehicle: Vehicle) {
+  exportLoading.value = vehicle.id;
+  try {
+    const config = useRuntimeConfig();
+    const { getAccessToken } = useAuthInterceptor();
+    const token = getAccessToken();
+    const response = await fetch(`${config.public.apiBaseUrl}/api/v1/export/vehicles/${vehicle.id}/csv`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      error.value = 'Failed to export vehicle expenses';
+      exportLoading.value = null;
+      return;
+    }
+
+    const csvText = await response.text();
+    const blob = new Blob([csvText], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${vehicle.name.replace(/\s+/g, '-').toLowerCase()}-expenses.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    error.value = 'Failed to export vehicle expenses';
+  }
+  exportLoading.value = null;
+}
+
+function openImportModal(vehicle: Vehicle) {
+  importVehicle.value = vehicle;
+  importCsvText.value = '';
+  importError.value = null;
+  importResult.value = null;
+  importMode.value = 'upload';
+  showImportModal.value = true;
+}
+
+function handleFileUpload(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  if (!file.name.endsWith('.csv') && file.type !== 'text/csv') {
+    importError.value = 'Please select a CSV file';
+    return;
+  }
+
+  importError.value = null;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    importCsvText.value = e.target?.result as string;
+  };
+  reader.onerror = () => {
+    importError.value = 'Failed to read file';
+  };
+  reader.readAsText(file);
+}
+
+async function handleImport() {
+  if (!importVehicle.value || !importCsvText.value.trim()) return;
+  importLoading.value = true;
+  importError.value = null;
+  importResult.value = null;
+
+  try {
+    const { rows, error: csvError } = parseCsv(importCsvText.value);
+    if (csvError) {
+      importError.value = csvError;
+      importLoading.value = false;
+      return;
+    }
+
+    const records: Array<{
+      type: string;
+      amount: number;
+      description?: string;
+      date?: string;
+      odometer?: number;
+      fuelLiters?: number;
+      fuelPricePerLiter?: number;
+      isFullTank?: boolean;
+      notes?: string;
+    }> = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const type = row['Type'] || '';
+      const amount = parseFloat(row['Amount'] || '0');
+      if (!type || isNaN(amount) || amount <= 0) {
+        importError.value = `Row ${i + 2}: Invalid type or amount`;
+        importLoading.value = false;
+        return;
+      }
+
+      records.push({
+        type,
+        amount,
+        description: row['Description'] || undefined,
+        date: row['Date'] || undefined,
+        odometer: row['Odometer'] ? parseFloat(row['Odometer']) : undefined,
+        fuelLiters: row['FuelLiters'] ? parseFloat(row['FuelLiters']) : undefined,
+        fuelPricePerLiter: row['FuelPricePerLiter'] ? parseFloat(row['FuelPricePerLiter']) : undefined,
+        isFullTank: row['IsFullTank'] ? row['IsFullTank'].toLowerCase() === 'true' : undefined,
+        notes: row['Notes'] || undefined,
+      });
+    }
+
+    if (records.length === 0) {
+      importError.value = 'No valid records found in CSV';
+      importLoading.value = false;
+      return;
+    }
+
+    const api = useApi();
+    const { data, error: apiError } = await api.post<{ importedCount: number }>('/api/v1/import/vehicle-expenses', {
+      vehicleId: importVehicle.value.id,
+      records,
+    });
+
+    if (apiError) {
+      importError.value = typeof apiError.message === 'string' ? apiError.message : apiError.message[0];
+    } else if (data) {
+      importResult.value = data;
+      await vehicleStore.fetchVehicles();
+      vehicleStore.fetchSummary();
+      vehicleStore.fetchAnalytics();
+    }
+  } catch {
+    importError.value = 'Failed to import vehicle expenses';
+  }
+
+  importLoading.value = false;
+}
 </script>
 
 <template>
@@ -512,6 +660,21 @@ async function handleDeleteExpense() {
                 @click="openAddExpense(vehicle)"
               >
                 <PlusIcon class="w-4 h-4" />
+              </button>
+              <button
+                class="p-2 text-secondary-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/50 rounded-lg transition-colors"
+                :title="exportLoading === vehicle.id ? 'Exporting...' : 'Export CSV'"
+                :disabled="exportLoading === vehicle.id"
+                @click="handleExport(vehicle)"
+              >
+                <ArrowDownTrayIcon class="w-4 h-4" />
+              </button>
+              <button
+                class="p-2 text-secondary-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/50 rounded-lg transition-colors"
+                title="Import CSV"
+                @click="openImportModal(vehicle)"
+              >
+                <ArrowUpTrayIcon class="w-4 h-4" />
               </button>
               <button
                 class="p-2 text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50 rounded-lg transition-colors"
@@ -814,6 +977,116 @@ async function handleDeleteExpense() {
           <button
             class="w-full px-4 py-2 border border-secondary-200 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors"
             @click="showExpenseHistory = false"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import CSV Modal -->
+    <div v-if="showImportModal && importVehicle" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showImportModal = false">
+      <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-xl w-full max-w-lg p-6">
+        <h3 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-1">Import Vehicle Expenses</h3>
+        <p class="text-sm text-secondary-500 dark:text-secondary-400 mb-4">{{ importVehicle.name }}</p>
+
+        <div v-if="importError" class="mb-4 p-3 bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-800 rounded-lg text-sm text-danger-700 dark:text-danger-300">
+          {{ importError }}
+        </div>
+
+        <div v-if="importResult" class="mb-4 p-3 bg-success-50 dark:bg-success-900/30 border border-success-200 dark:border-success-800 rounded-lg text-sm text-success-700 dark:text-success-300">
+          Successfully imported {{ importResult.importedCount }} expense{{ importResult.importedCount !== 1 ? 's' : '' }}.
+        </div>
+
+        <div v-if="!importResult" class="space-y-4">
+          <!-- Mode Toggle -->
+          <div class="flex gap-1 p-1 bg-secondary-100 dark:bg-secondary-900 rounded-lg">
+            <button
+              class="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-all"
+              :class="importMode === 'upload'
+                ? 'bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 shadow-sm'
+                : 'text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200'"
+              @click="importMode = 'upload'"
+            >
+              <ArrowUpTrayIcon class="w-4 h-4 inline-block mr-1 -mt-0.5" />
+              Upload File
+            </button>
+            <button
+              class="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-all"
+              :class="importMode === 'paste'
+                ? 'bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 shadow-sm'
+                : 'text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200'"
+              @click="importMode = 'paste'"
+            >
+              Paste CSV
+            </button>
+          </div>
+
+          <!-- Upload Mode -->
+          <div v-if="importMode === 'upload'">
+            <label
+              class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-colors"
+              :class="importCsvText
+                ? 'border-primary-300 dark:border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-secondary-300 dark:border-secondary-600 bg-secondary-50 dark:bg-secondary-900 hover:bg-secondary-100 dark:hover:bg-secondary-800'"
+            >
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <ArrowUpTrayIcon class="w-8 h-8 mb-2" :class="importCsvText ? 'text-primary-500' : 'text-secondary-400 dark:text-secondary-500'" />
+                <p v-if="importCsvText" class="text-sm text-primary-600 dark:text-primary-400 font-medium">File loaded - ready to import</p>
+                <template v-else>
+                  <p class="text-sm text-secondary-500 dark:text-secondary-400"><span class="font-medium">Click to upload</span> a CSV file</p>
+                  <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-1">CSV files only</p>
+                </template>
+              </div>
+              <input
+                ref="fileInputRef"
+                type="file"
+                accept=".csv,text/csv"
+                class="hidden"
+                @change="handleFileUpload"
+              />
+            </label>
+          </div>
+
+          <!-- Paste Mode -->
+          <div v-else>
+            <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">CSV Data</label>
+            <textarea
+              v-model="importCsvText"
+              rows="10"
+              placeholder="Type,Amount,Description,Date,Odometer,FuelLiters,FuelPricePerLiter,IsFullTank,Notes
+FUEL,50.00,Shell station,2026-01-15,55000,45.5,1.10,true,Regular fill
+MAINTENANCE,200.00,Oil change,2026-01-20,56000,,,,"
+              class="w-full px-3 py-2 bg-white dark:bg-secondary-900 border border-secondary-200 dark:border-secondary-600 rounded-lg text-secondary-800 dark:text-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm font-mono"
+            />
+          </div>
+
+          <p class="text-xs text-secondary-400 dark:text-secondary-500">
+            Valid types: FUEL, MAINTENANCE, INSURANCE, PARKING, TOLL, ACCESSORIES, REGISTRATION, WASH, PARTICIPATION_FEE, OTHER
+          </p>
+
+          <div class="flex gap-3 pt-2">
+            <button
+              type="button"
+              class="flex-1 px-4 py-2 border border-secondary-200 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors"
+              @click="showImportModal = false"
+            >
+              Cancel
+            </button>
+            <button
+              :disabled="importLoading || !importCsvText.trim()"
+              class="flex-1 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all font-medium disabled:opacity-50"
+              @click="handleImport"
+            >
+              {{ importLoading ? 'Importing...' : 'Import' }}
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="pt-2">
+          <button
+            class="w-full px-4 py-2 border border-secondary-200 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors"
+            @click="showImportModal = false"
           >
             Close
           </button>

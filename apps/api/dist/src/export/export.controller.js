@@ -34,6 +34,15 @@ let ExportController = class ExportController {
     async importExpenses(userId, payload) {
         return this.exportService.importExpensesCsv(userId, payload.budgetPeriodId, payload.records);
     }
+    async exportVehicleCsv(userId, id, res) {
+        const csv = await this.exportService.exportVehicleExpensesCsv(userId, id);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename=vehicle-${id}.csv`);
+        res.send(csv);
+    }
+    async importVehicleExpenses(userId, payload) {
+        return this.exportService.importVehicleExpensesCsv(userId, payload.vehicleId, payload.records);
+    }
 };
 exports.ExportController = ExportController;
 __decorate([
@@ -55,6 +64,25 @@ __decorate([
     __metadata("design:paramtypes", [String, export_dto_1.ImportExpensesDto]),
     __metadata("design:returntype", Promise)
 ], ExportController.prototype, "importExpenses", null);
+__decorate([
+    (0, common_1.Get)('export/vehicles/:id/csv'),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], ExportController.prototype, "exportVehicleCsv", null);
+__decorate([
+    (0, common_1.Post)('import/vehicle-expenses'),
+    openapi.ApiResponse({ status: 201 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, export_dto_1.ImportVehicleExpensesDto]),
+    __metadata("design:returntype", Promise)
+], ExportController.prototype, "importVehicleExpenses", null);
 exports.ExportController = ExportController = __decorate([
     (0, swagger_1.ApiTags)('Export / Import'),
     (0, swagger_1.ApiBearerAuth)(),

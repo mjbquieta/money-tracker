@@ -38,6 +38,7 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
   TruckIcon,
+  ArrowUpTrayIcon,
 } from "@heroicons/vue/24/outline";
 
 definePageMeta({
@@ -121,6 +122,28 @@ const importResult = ref<{
   importedCount: number;
   categoriesCreated: number;
 } | null>(null);
+const importMode = ref<"paste" | "upload">("upload");
+
+function handleImportFileUpload(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  if (!file.name.endsWith(".csv") && file.type !== "text/csv") {
+    importError.value = "Please select a CSV file";
+    return;
+  }
+
+  importError.value = null;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    importCsvText.value = e.target?.result as string;
+  };
+  reader.onerror = () => {
+    importError.value = "Failed to read file";
+  };
+  reader.readAsText(file);
+}
 
 // Delete confirmation states
 const showDeleteExpenseConfirm = ref(false);
@@ -1178,37 +1201,37 @@ async function handleImportCsv() {
   importError.value = null;
   importResult.value = null;
 
-  const lines = importCsvText.value.trim().split("\n");
-  if (lines.length < 2) {
-    importError.value = "CSV must have a header row and at least one data row";
+  const { rows, error: csvError } = parseCsv(importCsvText.value);
+  if (csvError) {
+    importError.value = csvError;
     return;
   }
 
-  const header = lines[0].split(",").map((h) => h.trim().toLowerCase());
-  const nameIdx = header.findIndex((h) => h === "name");
-  const amountIdx = header.findIndex((h) => h === "amount");
-  const categoryIdx = header.findIndex(
-    (h) => h === "category" || h === "categoryname",
-  );
-  const descIdx = header.findIndex((h) => h === "description");
+  // Support both capitalized and lowercase header names
+  const sampleKeys = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const findKey = (names: string[]) =>
+    sampleKeys.find((k) => names.includes(k.toLowerCase())) || "";
+  const nameKey = findKey(["name"]);
+  const amountKey = findKey(["amount"]);
+  const categoryKey = findKey(["category", "categoryname"]);
+  const descKey = findKey(["description"]);
 
-  if (nameIdx === -1 || amountIdx === -1 || categoryIdx === -1) {
+  if (!nameKey || !amountKey || !categoryKey) {
     importError.value = "CSV must have Name, Amount, and Category columns";
     return;
   }
 
   const records = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(",").map((c) => c.trim());
-    if (!cols[nameIdx] || !cols[amountIdx] || !cols[categoryIdx]) continue;
-    const amount = parseFloat(cols[amountIdx]);
+  for (const row of rows) {
+    if (!row[nameKey] || !row[amountKey] || !row[categoryKey]) continue;
+    const amount = parseFloat(row[amountKey]);
     if (isNaN(amount) || amount <= 0) continue;
 
     records.push({
-      name: cols[nameIdx],
-      description: descIdx !== -1 ? cols[descIdx] || undefined : undefined,
+      name: row[nameKey],
+      description: row[descKey] || undefined,
       amount,
-      categoryName: cols[categoryIdx],
+      categoryName: row[categoryKey],
     });
   }
 
@@ -3674,7 +3697,56 @@ function getCategoryStyle(categoryName: string) {
           </div>
 
           <div class="space-y-4">
-            <div>
+            <!-- Mode Toggle -->
+            <div class="flex gap-1 p-1 bg-secondary-100 dark:bg-secondary-900 rounded-lg">
+              <button
+                class="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-all"
+                :class="importMode === 'upload'
+                  ? 'bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 shadow-sm'
+                  : 'text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200'"
+                @click="importMode = 'upload'"
+              >
+                <ArrowUpTrayIcon class="w-4 h-4 inline-block mr-1 -mt-0.5" />
+                Upload File
+              </button>
+              <button
+                class="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-all"
+                :class="importMode === 'paste'
+                  ? 'bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100 shadow-sm'
+                  : 'text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200'"
+                @click="importMode = 'paste'"
+              >
+                Paste CSV
+              </button>
+            </div>
+
+            <!-- Upload Mode -->
+            <div v-if="importMode === 'upload'">
+              <label
+                class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-colors"
+                :class="importCsvText
+                  ? 'border-primary-300 dark:border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                  : 'border-secondary-300 dark:border-secondary-600 bg-secondary-50 dark:bg-secondary-900 hover:bg-secondary-100 dark:hover:bg-secondary-800'"
+              >
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                  <ArrowUpTrayIcon class="w-8 h-8 mb-2" :class="importCsvText ? 'text-primary-500' : 'text-secondary-400 dark:text-secondary-500'" />
+                  <p v-if="importCsvText" class="text-sm text-primary-600 dark:text-primary-400 font-medium">File loaded - ready to import</p>
+                  <template v-else>
+                    <p class="text-sm text-secondary-500 dark:text-secondary-400"><span class="font-medium">Click to upload</span> a CSV file</p>
+                    <p class="text-xs text-secondary-400 dark:text-secondary-500 mt-1">CSV files only</p>
+                  </template>
+                </div>
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  class="hidden"
+                  @change="handleImportFileUpload"
+                />
+              </label>
+            </div>
+
+            <!-- Paste Mode -->
+            <div v-else>
               <label
                 class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1"
                 >CSV Data</label
@@ -3703,6 +3775,7 @@ Netflix,15.99,Entertainment,Monthly subscription"
                   importCsvText = '';
                   importError = null;
                   importResult = null;
+                  importMode = 'upload';
                 "
               >
                 Close

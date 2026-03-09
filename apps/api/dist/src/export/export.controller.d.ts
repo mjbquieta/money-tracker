@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { UUID } from 'crypto';
 import { ExportService } from './export.service';
-import { ImportExpensesDto } from './export.dto';
+import { ImportExpensesDto, ImportVehicleExpensesDto } from './export.dto';
 export declare class ExportController {
     private readonly exportService;
     constructor(exportService: ExportService);
@@ -9,5 +9,9 @@ export declare class ExportController {
     importExpenses(userId: UUID, payload: ImportExpensesDto): Promise<{
         importedCount: number;
         categoriesCreated: number;
+    }>;
+    exportVehicleCsv(userId: UUID, id: UUID, res: Response): Promise<void>;
+    importVehicleExpenses(userId: UUID, payload: ImportVehicleExpensesDto): Promise<{
+        importedCount: number;
     }>;
 }

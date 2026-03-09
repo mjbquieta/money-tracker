@@ -7,6 +7,7 @@ import {
   IsArray,
   ValidateNested,
   MinLength,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -36,4 +37,52 @@ export class ImportExpensesDto {
   @ValidateNested({ each: true })
   @Type(() => ImportExpenseRecord)
   records: ImportExpenseRecord[];
+}
+
+export class ImportVehicleExpenseRecord {
+  @IsString()
+  @MinLength(1)
+  type: string;
+
+  @IsNumber()
+  @IsPositive()
+  amount: number;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  date?: string;
+
+  @IsOptional()
+  @IsNumber()
+  odometer?: number;
+
+  @IsOptional()
+  @IsNumber()
+  fuelLiters?: number;
+
+  @IsOptional()
+  @IsNumber()
+  fuelPricePerLiter?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isFullTank?: boolean;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+export class ImportVehicleExpensesDto {
+  @IsUUID()
+  vehicleId: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImportVehicleExpenseRecord)
+  records: ImportVehicleExpenseRecord[];
 }
