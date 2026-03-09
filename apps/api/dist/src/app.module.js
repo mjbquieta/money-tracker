@@ -30,6 +30,7 @@ const debt_module_1 = require("./debt/debt.module");
 const export_module_1 = require("./export/export.module");
 const notification_module_1 = require("./notification/notification.module");
 const vehicle_module_1 = require("./vehicle/vehicle.module");
+const mail_module_1 = require("./mail/mail.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -72,6 +73,7 @@ exports.AppModule = AppModule = __decorate([
             export_module_1.ExportModule,
             notification_module_1.NotificationModule,
             vehicle_module_1.VehicleModule,
+            mail_module_1.MailModule,
         ],
         providers: [
             {

@@ -4,13 +4,15 @@ import { ConfigService } from '@nestjs/config';
 import { SettingsService } from 'src/settings/settings.service';
 import { UUID } from 'crypto';
 import { CategoryService } from 'src/category/category.service';
+import { MailService } from 'src/mail/mail.service';
 export declare class UserService {
     private readonly prisma;
     private readonly configService;
     private readonly settingsService;
     private readonly categoryService;
+    private readonly mailService;
     private saltRounds;
-    constructor(prisma: PrismaService, configService: ConfigService, settingsService: SettingsService, categoryService: CategoryService);
+    constructor(prisma: PrismaService, configService: ConfigService, settingsService: SettingsService, categoryService: CategoryService, mailService: MailService);
     createUser(payload: CreateUserWithSettingsDto): Promise<({
         settings: {
             id: string;

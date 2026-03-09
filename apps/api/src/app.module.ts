@@ -21,6 +21,7 @@ import { DebtModule } from './debt/debt.module';
 import { ExportModule } from './export/export.module';
 import { NotificationModule } from './notification/notification.module';
 import { VehicleModule } from './vehicle/vehicle.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { VehicleModule } from './vehicle/vehicle.module';
     ExportModule,
     NotificationModule,
     VehicleModule,
+    MailModule,
   ],
   providers: [
     {
