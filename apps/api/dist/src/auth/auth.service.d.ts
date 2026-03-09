@@ -1,12 +1,18 @@
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './auth.dto';
+import { ConfigService } from '@nestjs/config';
+import { LoginDto, ForgotPasswordDto, ResetPasswordDto } from './auth.dto';
 import { UserService } from '../user/user.service';
 import { RefreshTokenService } from './refresh-token.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 export declare class AuthService {
     private readonly userService;
     private readonly jwtService;
     private readonly refreshTokenService;
-    constructor(userService: UserService, jwtService: JwtService, refreshTokenService: RefreshTokenService);
+    private readonly prisma;
+    private readonly mailService;
+    private readonly configService;
+    constructor(userService: UserService, jwtService: JwtService, refreshTokenService: RefreshTokenService, prisma: PrismaService, mailService: MailService, configService: ConfigService);
     login(payload: LoginDto, userAgent?: string, ipAddress?: string): Promise<{
         requiresTwoFactor: boolean;
         accessToken: string;
@@ -20,6 +26,7 @@ export declare class AuthService {
                 updatedAt: Date | null;
                 deletedAt: Date | null;
                 currency: string;
+                includeVehicleExpenses: boolean;
                 userId: string;
             } | null;
         } & {
@@ -34,6 +41,8 @@ export declare class AuthService {
             deletedAt: Date | null;
             twoFactorSecret: string | null;
             isTwoFactorEnabled: boolean;
+            passwordResetToken: string | null;
+            passwordResetTokenExpiresAt: Date | null;
         }, "password">;
         accessToken: string;
         refreshToken: string;
@@ -53,6 +62,7 @@ export declare class AuthService {
                 updatedAt: Date | null;
                 deletedAt: Date | null;
                 currency: string;
+                includeVehicleExpenses: boolean;
                 userId: string;
             } | null;
             categories: {
@@ -79,8 +89,16 @@ export declare class AuthService {
             deletedAt: Date | null;
             twoFactorSecret: string | null;
             isTwoFactorEnabled: boolean;
+            passwordResetToken: string | null;
+            passwordResetTokenExpiresAt: Date | null;
         }, "password">;
         accessToken: string;
         refreshToken: string;
+    }>;
+    requestPasswordReset(payload: ForgotPasswordDto): Promise<{
+        message: string;
+    }>;
+    resetPassword(payload: ResetPasswordDto): Promise<{
+        message: string;
     }>;
 }

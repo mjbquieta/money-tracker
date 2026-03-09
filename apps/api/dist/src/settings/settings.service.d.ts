@@ -11,6 +11,7 @@ export declare class SettingsService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         currency: string;
+        includeVehicleExpenses: boolean;
         userId: string;
     }>;
     findByUserId(userId: UUID): Promise<{
@@ -19,6 +20,7 @@ export declare class SettingsService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         currency: string;
+        includeVehicleExpenses: boolean;
         userId: string;
     }>;
     update(userId: UUID, payload: UpdateSettingsDto): Promise<{
@@ -27,6 +29,7 @@ export declare class SettingsService {
         updatedAt: Date | null;
         deletedAt: Date | null;
         currency: string;
+        includeVehicleExpenses: boolean;
         userId: string;
     }>;
 }

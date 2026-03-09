@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ImportExpensesDto = exports.ImportExpenseRecord = void 0;
+exports.ImportVehicleExpensesDto = exports.ImportVehicleExpenseRecord = exports.ImportExpensesDto = exports.ImportExpenseRecord = void 0;
 const openapi = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
@@ -61,4 +61,82 @@ __decorate([
     (0, class_transformer_1.Type)(() => ImportExpenseRecord),
     __metadata("design:type", Array)
 ], ImportExpensesDto.prototype, "records", void 0);
+class ImportVehicleExpenseRecord {
+    type;
+    amount;
+    description;
+    date;
+    odometer;
+    fuelLiters;
+    fuelPricePerLiter;
+    isFullTank;
+    notes;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { type: { required: true, type: () => String, minLength: 1 }, amount: { required: true, type: () => Number, minimum: 1 }, description: { required: false, type: () => String }, date: { required: false, type: () => String }, odometer: { required: false, type: () => Number }, fuelLiters: { required: false, type: () => Number }, fuelPricePerLiter: { required: false, type: () => Number }, isFullTank: { required: false, type: () => Boolean }, notes: { required: false, type: () => String } };
+    }
+}
+exports.ImportVehicleExpenseRecord = ImportVehicleExpenseRecord;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    __metadata("design:type", String)
+], ImportVehicleExpenseRecord.prototype, "type", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], ImportVehicleExpenseRecord.prototype, "amount", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportVehicleExpenseRecord.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportVehicleExpenseRecord.prototype, "date", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], ImportVehicleExpenseRecord.prototype, "odometer", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], ImportVehicleExpenseRecord.prototype, "fuelLiters", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], ImportVehicleExpenseRecord.prototype, "fuelPricePerLiter", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], ImportVehicleExpenseRecord.prototype, "isFullTank", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportVehicleExpenseRecord.prototype, "notes", void 0);
+class ImportVehicleExpensesDto {
+    vehicleId;
+    records;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { vehicleId: { required: true, type: () => String, format: "uuid" }, records: { required: true, type: () => [require("./export.dto").ImportVehicleExpenseRecord] } };
+    }
+}
+exports.ImportVehicleExpensesDto = ImportVehicleExpensesDto;
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], ImportVehicleExpensesDto.prototype, "vehicleId", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => ImportVehicleExpenseRecord),
+    __metadata("design:type", Array)
+], ImportVehicleExpensesDto.prototype, "records", void 0);
 //# sourceMappingURL=export.dto.js.map

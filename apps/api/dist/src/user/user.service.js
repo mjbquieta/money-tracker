@@ -50,17 +50,20 @@ const config_1 = require("@nestjs/config");
 const lodash_1 = require("lodash");
 const settings_service_1 = require("../settings/settings.service");
 const category_service_1 = require("../category/category.service");
+const mail_service_1 = require("../mail/mail.service");
 let UserService = class UserService {
     prisma;
     configService;
     settingsService;
     categoryService;
+    mailService;
     saltRounds;
-    constructor(prisma, configService, settingsService, categoryService) {
+    constructor(prisma, configService, settingsService, categoryService, mailService) {
         this.prisma = prisma;
         this.configService = configService;
         this.settingsService = settingsService;
         this.categoryService = categoryService;
+        this.mailService = mailService;
         this.saltRounds = Number(this.configService.get('SALT_ROUNDS'));
     }
     async createUser(payload) {
@@ -75,11 +78,13 @@ let UserService = class UserService {
             });
             await this.settingsService.create(user.id, payload.settings, tx);
             await this.categoryService.createDefaultCategories(user.id, tx);
-            return tx.user.findUnique({
+            const created = await tx.user.findUnique({
                 where: { id: user.id },
                 omit: { password: true },
                 include: { settings: true, categories: true },
             });
+            this.mailService.sendWelcomeEmail(user.email, user.name ?? user.username);
+            return created;
         });
     }
     async findByCredentials(val, password, isEmail = true) {
@@ -137,6 +142,7 @@ exports.UserService = UserService = __decorate([
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         config_1.ConfigService,
         settings_service_1.SettingsService,
-        category_service_1.CategoryService])
+        category_service_1.CategoryService,
+        mail_service_1.MailService])
 ], UserService);
 //# sourceMappingURL=user.service.js.map

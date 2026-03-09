@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { LoginDto, VerifyTwoFactorDto, DisableTwoFactorDto, TwoFactorAuthenticateDto } from './auth.dto';
+import { LoginDto, VerifyTwoFactorDto, DisableTwoFactorDto, TwoFactorAuthenticateDto, ForgotPasswordDto, ResetPasswordDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { TwoFactorService } from './two-factor.service';
@@ -21,6 +21,7 @@ export declare class AuthController {
                 updatedAt: Date | null;
                 deletedAt: Date | null;
                 currency: string;
+                includeVehicleExpenses: boolean;
                 userId: string;
             } | null;
         } & {
@@ -35,12 +36,20 @@ export declare class AuthController {
             deletedAt: Date | null;
             twoFactorSecret: string | null;
             isTwoFactorEnabled: boolean;
+            passwordResetToken: string | null;
+            passwordResetTokenExpiresAt: Date | null;
         }, "password">;
         accessToken: string;
         requiresTwoFactor?: undefined;
     }>;
     refresh(req: Request, res: Response): Promise<{
         accessToken: string;
+    }>;
+    forgotPassword(body: ForgotPasswordDto): Promise<{
+        message: string;
+    }>;
+    resetPassword(body: ResetPasswordDto): Promise<{
+        message: string;
     }>;
     logout(req: Request, res: Response): Promise<{
         message: string;
@@ -82,6 +91,7 @@ export declare class AuthController {
                 updatedAt: Date | null;
                 deletedAt: Date | null;
                 currency: string;
+                includeVehicleExpenses: boolean;
                 userId: string;
             } | null;
             categories: {
@@ -108,6 +118,8 @@ export declare class AuthController {
             deletedAt: Date | null;
             twoFactorSecret: string | null;
             isTwoFactorEnabled: boolean;
+            passwordResetToken: string | null;
+            passwordResetTokenExpiresAt: Date | null;
         }, "password">;
         accessToken: string;
     }>;

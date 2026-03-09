@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LoginDto = exports.TwoFactorAuthenticateDto = exports.DisableTwoFactorDto = exports.VerifyTwoFactorDto = exports.IsUsernameOrEmailProvidedConstraint = void 0;
+exports.LoginDto = exports.ResetPasswordDto = exports.ForgotPasswordDto = exports.TwoFactorAuthenticateDto = exports.DisableTwoFactorDto = exports.VerifyTwoFactorDto = exports.IsUsernameOrEmailProvidedConstraint = void 0;
 exports.IsUsernameOrEmailProvided = IsUsernameOrEmailProvided;
 const openapi = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
@@ -122,4 +122,36 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], TwoFactorAuthenticateDto.prototype, "isBackupCode", void 0);
+class ForgotPasswordDto {
+    email;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { email: { required: true, type: () => String, format: "email" } };
+    }
+}
+exports.ForgotPasswordDto = ForgotPasswordDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], ForgotPasswordDto.prototype, "email", void 0);
+class ResetPasswordDto {
+    token;
+    newPassword;
+    static _OPENAPI_METADATA_FACTORY() {
+        return { token: { required: true, type: () => String }, newPassword: { required: true, type: () => String, minLength: 8, maxLength: 128 } };
+    }
+}
+exports.ResetPasswordDto = ResetPasswordDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ResetPasswordDto.prototype, "token", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Length)(8, 128),
+    __metadata("design:type", String)
+], ResetPasswordDto.prototype, "newPassword", void 0);
 //# sourceMappingURL=auth.dto.js.map

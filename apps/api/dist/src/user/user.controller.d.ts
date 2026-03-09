@@ -11,6 +11,7 @@ export declare class UserController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {
@@ -36,6 +37,8 @@ export declare class UserController {
         deletedAt: Date | null;
         twoFactorSecret: string | null;
         isTwoFactorEnabled: boolean;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
     }) | null>;
     updateProfile(userId: UUID, body: UpdateProfileDto): Promise<import("lodash").Omit<{
         settings: {
@@ -44,6 +47,7 @@ export declare class UserController {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {
@@ -70,6 +74,8 @@ export declare class UserController {
         deletedAt: Date | null;
         twoFactorSecret: string | null;
         isTwoFactorEnabled: boolean;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
     }, "password">>;
     changePassword(userId: UUID, body: ChangePasswordDto): Promise<{
         message: string;

@@ -13,4 +13,19 @@ export declare class ExportService {
         importedCount: number;
         categoriesCreated: number;
     }>;
+    exportVehicleExpensesCsv(userId: UUID, vehicleId: UUID): Promise<string>;
+    private readonly VALID_VEHICLE_EXPENSE_TYPES;
+    importVehicleExpensesCsv(userId: UUID, vehicleId: UUID, records: Array<{
+        type: string;
+        amount: number;
+        description?: string;
+        date?: string;
+        odometer?: number;
+        fuelLiters?: number;
+        fuelPricePerLiter?: number;
+        isFullTank?: boolean;
+        notes?: string;
+    }>): Promise<{
+        importedCount: number;
+    }>;
 }

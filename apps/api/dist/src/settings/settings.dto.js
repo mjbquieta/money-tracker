@@ -36,8 +36,9 @@ __decorate([
 ], SettingsDto.prototype, "currency", void 0);
 class UpdateSettingsDto {
     currency;
+    includeVehicleExpenses;
     static _OPENAPI_METADATA_FACTORY() {
-        return { currency: { required: false, enum: require("./settings.dto").Currency } };
+        return { currency: { required: false, enum: require("./settings.dto").Currency }, includeVehicleExpenses: { required: false, type: () => Boolean } };
     }
 }
 exports.UpdateSettingsDto = UpdateSettingsDto;
@@ -46,4 +47,9 @@ __decorate([
     (0, class_validator_1.IsEnum)(Currency),
     __metadata("design:type", String)
 ], UpdateSettingsDto.prototype, "currency", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateSettingsDto.prototype, "includeVehicleExpenses", void 0);
 //# sourceMappingURL=settings.dto.js.map

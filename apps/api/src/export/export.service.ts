@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Parser } from 'json2csv';
+import { VehicleExpenseType } from '@prisma/client';
 
 @Injectable()
 export class ExportService {
@@ -105,6 +106,97 @@ export class ExportService {
     return {
       importedCount: expenses.count,
       categoriesCreated: categoryNames.length - existingCategories.length,
+    };
+  }
+
+  async exportVehicleExpensesCsv(userId: UUID, vehicleId: UUID): Promise<string> {
+    const vehicle = await this.prisma.vehicle.findFirst({
+      where: { id: vehicleId, userId, deletedAt: null },
+      include: {
+        expenses: {
+          where: { deletedAt: null },
+          orderBy: { date: 'asc' },
+        },
+      },
+    });
+
+    if (!vehicle) {
+      throw new NotFoundException('Vehicle not found');
+    }
+
+    const fields = ['Type', 'Amount', 'Description', 'Date', 'Odometer', 'FuelLiters', 'FuelPricePerLiter', 'IsFullTank', 'Notes'];
+
+    const rows = vehicle.expenses.map((e) => ({
+      Type: e.type,
+      Amount: e.amount,
+      Description: e.description || '',
+      Date: new Date(e.date).toISOString().split('T')[0],
+      Odometer: e.odometer ?? '',
+      FuelLiters: e.fuelLiters ?? '',
+      FuelPricePerLiter: e.fuelPricePerLiter ?? '',
+      IsFullTank: e.isFullTank != null ? String(e.isFullTank) : '',
+      Notes: e.notes || '',
+    }));
+
+    if (rows.length === 0) {
+      return fields.join(',') + '\n';
+    }
+
+    const parser = new Parser({ fields });
+    return parser.parse(rows);
+  }
+
+  private readonly VALID_VEHICLE_EXPENSE_TYPES = new Set(Object.values(VehicleExpenseType));
+
+  async importVehicleExpensesCsv(
+    userId: UUID,
+    vehicleId: UUID,
+    records: Array<{
+      type: string;
+      amount: number;
+      description?: string;
+      date?: string;
+      odometer?: number;
+      fuelLiters?: number;
+      fuelPricePerLiter?: number;
+      isFullTank?: boolean;
+      notes?: string;
+    }>,
+  ) {
+    const vehicle = await this.prisma.vehicle.findFirst({
+      where: { id: vehicleId, userId, deletedAt: null },
+    });
+
+    if (!vehicle) {
+      throw new NotFoundException('Vehicle not found');
+    }
+
+    // Validate types
+    for (const record of records) {
+      if (!this.VALID_VEHICLE_EXPENSE_TYPES.has(record.type as VehicleExpenseType)) {
+        throw new BadRequestException(
+          `Invalid expense type: "${record.type}". Valid types: ${[...this.VALID_VEHICLE_EXPENSE_TYPES].join(', ')}`,
+        );
+      }
+    }
+
+    const result = await this.prisma.vehicleExpense.createMany({
+      data: records.map((r) => ({
+        type: r.type as VehicleExpenseType,
+        amount: r.amount,
+        description: r.description || null,
+        date: r.date ? new Date(r.date) : new Date(),
+        odometer: r.odometer ?? null,
+        fuelLiters: r.fuelLiters ?? null,
+        fuelPricePerLiter: r.fuelPricePerLiter ?? null,
+        isFullTank: r.isFullTank ?? null,
+        notes: r.notes || null,
+        vehicleId,
+      })),
+    });
+
+    return {
+      importedCount: result.count,
     };
   }
 }

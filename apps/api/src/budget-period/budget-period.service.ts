@@ -27,6 +27,50 @@ function computeIncome(budgetPeriod: BudgetPeriodWithIncomes): number {
 export class BudgetPeriodService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private async shouldIncludeVehicleExpenses(userId: string): Promise<boolean> {
+    const settings = await this.prisma.settings.findUnique({
+      where: { userId },
+      select: { includeVehicleExpenses: true },
+    });
+    return settings?.includeVehicleExpenses ?? false;
+  }
+
+  private async getVehicleExpensesForDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ) {
+    return this.prisma.vehicleExpense.findMany({
+      where: {
+        deletedAt: null,
+        date: { gte: startDate, lte: endDate },
+        vehicle: {
+          userId,
+          deletedAt: null,
+        },
+      },
+      include: {
+        vehicle: { select: { id: true, name: true } },
+      },
+      orderBy: { date: 'desc' },
+    });
+  }
+
+  private async getAllVehicleExpenses(userId: string) {
+    return this.prisma.vehicleExpense.findMany({
+      where: {
+        deletedAt: null,
+        vehicle: {
+          userId,
+          deletedAt: null,
+        },
+      },
+      include: {
+        vehicle: { select: { id: true, name: true } },
+      },
+    });
+  }
+
   async create(userId: UUID, payload: CreateBudgetPeriodDto) {
     const startDate = new Date(payload.startDate);
     const endDate = new Date(payload.endDate);
@@ -122,6 +166,29 @@ export class BudgetPeriodService {
 
     if (!budgetPeriod) {
       throw new NotFoundException('Budget period not found');
+    }
+
+    // Include vehicle expenses if setting is enabled
+    const includeVehicle = await this.shouldIncludeVehicleExpenses(userId);
+    if (includeVehicle) {
+      const vehicleExpenses = await this.getVehicleExpensesForDateRange(
+        userId,
+        budgetPeriod.startDate,
+        budgetPeriod.endDate,
+      );
+      return {
+        ...budgetPeriod,
+        vehicleExpenses: vehicleExpenses.map((ve) => ({
+          id: ve.id,
+          type: ve.type,
+          amount: ve.amount,
+          description: ve.description,
+          date: ve.date,
+          vehicleId: ve.vehicle.id,
+          vehicleName: ve.vehicle.name,
+          isReadOnly: true as const,
+        })),
+      };
     }
 
     return budgetPeriod;
@@ -251,10 +318,24 @@ export class BudgetPeriodService {
   }
 
   async getSummary(userId: UUID, budgetPeriodId: UUID) {
-    const budgetPeriod = await this.findOne(userId, budgetPeriodId);
+    // Use raw query to avoid triggering findOne's vehicle expense logic
+    const budgetPeriod = await this.prisma.budgetPeriod.findFirst({
+      where: { id: budgetPeriodId, userId, deletedAt: null },
+      include: {
+        expenses: {
+          where: { deletedAt: null },
+          include: { category: true },
+        },
+        incomes: { where: { deletedAt: null } },
+      },
+    });
+
+    if (!budgetPeriod) {
+      throw new NotFoundException('Budget period not found');
+    }
 
     const totalIncome = computeIncome(budgetPeriod);
-    const totalExpenses = budgetPeriod.expenses.reduce(
+    let totalExpenses = budgetPeriod.expenses.reduce(
       (sum, expense) => sum + expense.amount,
       0,
     );
@@ -272,11 +353,33 @@ export class BudgetPeriodService {
       {} as Record<string, { total: number; count: number }>,
     );
 
+    // Include vehicle expenses if setting is enabled
+    let vehicleExpensesTotal = 0;
+    const includeVehicle = await this.shouldIncludeVehicleExpenses(userId);
+    if (includeVehicle) {
+      const vehicleExpenses = await this.getVehicleExpensesForDateRange(
+        userId,
+        budgetPeriod.startDate,
+        budgetPeriod.endDate,
+      );
+      for (const ve of vehicleExpenses) {
+        vehicleExpensesTotal += ve.amount;
+        const categoryName = `Vehicle - ${ve.type.charAt(0) + ve.type.slice(1).toLowerCase()}`;
+        if (!expensesByCategory[categoryName]) {
+          expensesByCategory[categoryName] = { total: 0, count: 0 };
+        }
+        expensesByCategory[categoryName].total += ve.amount;
+        expensesByCategory[categoryName].count += 1;
+      }
+      totalExpenses += vehicleExpensesTotal;
+    }
+
     return {
       income: totalIncome,
       totalExpenses,
       remaining: totalIncome - totalExpenses,
       expensesByCategory,
+      vehicleExpensesTotal,
     };
   }
 
@@ -317,7 +420,7 @@ export class BudgetPeriodService {
 
     const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
     const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
-    const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    let totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
     const expensesByCategory = allExpenses.reduce(
       (acc, expense) => {
@@ -367,6 +470,30 @@ export class BudgetPeriodService {
       }
     }
 
+    // Include vehicle expenses if setting is enabled
+    const includeVehicle = await this.shouldIncludeVehicleExpenses(userId);
+    if (includeVehicle) {
+      const vehicleExpenses = await this.getVehicleExpensesForDateRange(
+        userId,
+        startOfYear,
+        endOfYear,
+      );
+      for (const ve of vehicleExpenses) {
+        totalExpenses += ve.amount;
+        const categoryName = `Vehicle - ${ve.type.charAt(0) + ve.type.slice(1).toLowerCase()}`;
+        if (!expensesByCategory[categoryName]) {
+          expensesByCategory[categoryName] = { total: 0, count: 0 };
+        }
+        expensesByCategory[categoryName].total += ve.amount;
+        expensesByCategory[categoryName].count += 1;
+
+        const veDate = new Date(ve.date);
+        if (veDate.getFullYear() === year) {
+          monthlyBreakdown[veDate.getMonth()].expenses += ve.amount;
+        }
+      }
+    }
+
     return {
       year,
       totalIncome,
@@ -399,7 +526,7 @@ export class BudgetPeriodService {
 
     const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
     const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
-    const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    let totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
     const expensesByCategory = allExpenses.reduce(
       (acc, expense) => {
@@ -413,6 +540,21 @@ export class BudgetPeriodService {
       },
       {} as Record<string, { total: number; count: number }>,
     );
+
+    // Include vehicle expenses if setting is enabled
+    const includeVehicle = await this.shouldIncludeVehicleExpenses(userId);
+    if (includeVehicle) {
+      const vehicleExpenses = await this.getAllVehicleExpenses(userId);
+      for (const ve of vehicleExpenses) {
+        totalExpenses += ve.amount;
+        const categoryName = `Vehicle - ${ve.type.charAt(0) + ve.type.slice(1).toLowerCase()}`;
+        if (!expensesByCategory[categoryName]) {
+          expensesByCategory[categoryName] = { total: 0, count: 0 };
+        }
+        expensesByCategory[categoryName].total += ve.amount;
+        expensesByCategory[categoryName].count += 1;
+      }
+    }
 
     return {
       totalIncome,
@@ -572,7 +714,7 @@ export class BudgetPeriodService {
 
     const totalIncome = budgetPeriods.reduce((sum, bp) => sum + computeIncome(bp), 0);
     const allExpenses = budgetPeriods.flatMap((bp) => bp.expenses);
-    const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    let totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
     const expensesByCategory = allExpenses.reduce(
       (acc, expense) => {
@@ -586,6 +728,32 @@ export class BudgetPeriodService {
       },
       {} as Record<string, { total: number; count: number }>,
     );
+
+    // Include vehicle expenses if setting is enabled
+    const includeVehicle = await this.shouldIncludeVehicleExpenses(userId);
+    let vehicleExpensesByMonth: Map<string, number> | undefined;
+
+    if (includeVehicle) {
+      const vehicleExpenses = await this.getVehicleExpensesForDateRange(
+        userId,
+        startOfRange,
+        endOfRange,
+      );
+      vehicleExpensesByMonth = new Map();
+      for (const ve of vehicleExpenses) {
+        totalExpenses += ve.amount;
+        const categoryName = `Vehicle - ${ve.type.charAt(0) + ve.type.slice(1).toLowerCase()}`;
+        if (!expensesByCategory[categoryName]) {
+          expensesByCategory[categoryName] = { total: 0, count: 0 };
+        }
+        expensesByCategory[categoryName].total += ve.amount;
+        expensesByCategory[categoryName].count += 1;
+
+        const veDate = new Date(ve.date);
+        const key = `${veDate.getFullYear()}-${veDate.getMonth()}`;
+        vehicleExpensesByMonth.set(key, (vehicleExpensesByMonth.get(key) || 0) + ve.amount);
+      }
+    }
 
     // Build yearly breakdown with monthly data for each year in range
     const yearlyBreakdown: Array<{
@@ -633,6 +801,18 @@ export class BudgetPeriodService {
           if (bp.startDate.getFullYear() === year) {
             monthlyBreakdown[expMonth].expenses += expense.amount;
             yearExpenses += expense.amount;
+          }
+        }
+      }
+
+      // Add vehicle expenses to monthly breakdown
+      if (vehicleExpensesByMonth) {
+        for (let m = 0; m < 12; m++) {
+          const key = `${year}-${m}`;
+          const veAmount = vehicleExpensesByMonth.get(key) || 0;
+          if (veAmount > 0) {
+            monthlyBreakdown[m].expenses += veAmount;
+            yearExpenses += veAmount;
           }
         }
       }

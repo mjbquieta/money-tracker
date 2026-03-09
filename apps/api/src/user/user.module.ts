@@ -6,9 +6,10 @@ import { IsEmailExistConstraint } from './validators/is-email.validator';
 import { IsUsernameExistConstraint } from './validators/is-username.validator';
 import { SettingsModule } from 'src/settings/settings.module';
 import { CategoryModule } from 'src/category/category.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
-  imports: [ConfigModule, SettingsModule, CategoryModule],
+  imports: [ConfigModule, SettingsModule, CategoryModule, MailModule],
   controllers: [UserController],
   providers: [UserService, IsEmailExistConstraint, IsUsernameExistConstraint],
   exports: [UserService],

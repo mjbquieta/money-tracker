@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Pie } from 'vue-chartjs';
+import { Doughnut } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -43,6 +43,7 @@ const chartData = computed(() => {
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
+  cutout: '55%',
   plugins: {
     legend: {
       position: 'right' as const,
@@ -66,9 +67,9 @@ const chartOptions = computed(() => ({
 </script>
 
 <template>
-  <div class="h-80">
-    <Pie v-if="Object.keys(data).length > 0" :data="chartData" :options="chartOptions" />
-    <div v-else class="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
+  <div class="h-72">
+    <Doughnut v-if="Object.keys(data).length > 0" :data="chartData" :options="chartOptions" />
+    <div v-else class="h-full flex items-center justify-center text-secondary-500 dark:text-secondary-400">
       No expense data available
     </div>
   </div>

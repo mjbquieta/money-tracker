@@ -15,12 +15,13 @@ const is_email_validator_1 = require("./validators/is-email.validator");
 const is_username_validator_1 = require("./validators/is-username.validator");
 const settings_module_1 = require("../settings/settings.module");
 const category_module_1 = require("../category/category.module");
+const mail_module_1 = require("../mail/mail.module");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
 exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
-        imports: [config_1.ConfigModule, settings_module_1.SettingsModule, category_module_1.CategoryModule],
+        imports: [config_1.ConfigModule, settings_module_1.SettingsModule, category_module_1.CategoryModule, mail_module_1.MailModule],
         controllers: [user_controller_1.UserController],
         providers: [user_service_1.UserService, is_email_validator_1.IsEmailExistConstraint, is_username_validator_1.IsUsernameExistConstraint],
         exports: [user_service_1.UserService],

@@ -12,7 +12,7 @@ import { UUID } from 'crypto';
 import { TwoFactorAuthGuard } from '../auth/two-factor-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ExportService } from './export.service';
-import { ImportExpensesDto } from './export.dto';
+import { ImportExpensesDto, ImportVehicleExpensesDto } from './export.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Export / Import')
@@ -43,6 +43,31 @@ export class ExportController {
     return this.exportService.importExpensesCsv(
       userId,
       payload.budgetPeriodId as UUID,
+      payload.records,
+    );
+  }
+
+  @Get('export/vehicles/:id/csv')
+  async exportVehicleCsv(
+    @CurrentUser('id') userId: UUID,
+    @Param('id') id: UUID,
+    @Res() res: Response,
+  ) {
+    const csv = await this.exportService.exportVehicleExpensesCsv(userId, id);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=vehicle-${id}.csv`);
+    res.send(csv);
+  }
+
+  @Post('import/vehicle-expenses')
+  async importVehicleExpenses(
+    @CurrentUser('id') userId: UUID,
+    @Body() payload: ImportVehicleExpensesDto,
+  ) {
+    return this.exportService.importVehicleExpensesCsv(
+      userId,
+      payload.vehicleId as UUID,
       payload.records,
     );
   }

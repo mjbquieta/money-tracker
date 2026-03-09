@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 
 enum Currency {
   PHP = 'PHP',
@@ -20,6 +20,10 @@ class UpdateSettingsDto {
   @IsOptional()
   @IsEnum(Currency)
   currency?: Currency;
+
+  @IsOptional()
+  @IsBoolean()
+  includeVehicleExpenses?: boolean;
 }
 
 export { SettingsDto, UpdateSettingsDto, Currency };

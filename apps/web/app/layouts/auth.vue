@@ -3,10 +3,7 @@ import { HomeIcon } from '@heroicons/vue/24/outline';
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-secondary-50 via-white to-primary-50/30 dark:from-secondary-950 dark:via-secondary-900 dark:to-primary-950/30 flex flex-col justify-center py-8 px-4 sm:py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-    <!-- Background decoration - hidden on small screens for performance -->
-    <div class="hidden sm:block absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-primary-100 dark:bg-primary-900/30 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
-    <div class="hidden sm:block absolute bottom-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-accent-100 dark:bg-accent-900/30 rounded-full blur-3xl opacity-20 translate-y-1/2 -translate-x-1/2"></div>
+  <div class="min-h-screen bg-white dark:bg-secondary-900 flex flex-col justify-center py-8 px-4 sm:py-12 sm:px-6 lg:px-8 relative overflow-hidden">
 
     <!-- Home button -->
     <div class="absolute top-4 left-4 sm:top-6 sm:left-6 z-10">
@@ -33,7 +30,7 @@ import { HomeIcon } from '@heroicons/vue/24/outline';
 
     <!-- Form Card -->
     <div class="relative mt-6 sm:mt-8 mx-auto w-full max-w-lg px-0 sm:px-4">
-      <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm py-8 px-5 sm:py-10 sm:px-10 shadow-elevated rounded-2xl border border-secondary-100 dark:border-secondary-700">
+      <div class="bg-white dark:bg-secondary-800 py-8 px-5 sm:py-10 sm:px-10 shadow-elevated rounded-2xl border border-secondary-100 dark:border-secondary-700">
         <slot />
       </div>
     </div>

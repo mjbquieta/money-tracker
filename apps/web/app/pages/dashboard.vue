@@ -10,17 +10,15 @@ import {
   ChartBarIcon,
   ChartPieIcon,
   CalendarIcon,
-  TagIcon,
   RocketLaunchIcon,
   BanknotesIcon,
   ArrowRightIcon,
   ArrowsRightLeftIcon,
   FlagIcon,
   CurrencyDollarIcon,
+  TruckIcon,
   ClockIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon,
-  FireIcon,
 } from "@heroicons/vue/24/outline";
 
 definePageMeta({
@@ -69,6 +67,7 @@ onMounted(async () => {
     personalBudgetStore.fetchPersonalBudgets(),
     budgetStore.fetchBudgetPeriods(),
     debtStore.fetchSummary(),
+    debtStore.fetchDebts(),
     goalStore.fetchSummary(),
     expenseStore.searchExpenses({ limit: 5 }).then((result) => {
       if (result.success && result.data) {
@@ -214,18 +213,6 @@ const savingsRateStatus = computed(() => {
   }
 });
 
-const categoryColors: Record<string, string> = {
-  Bills: "bg-danger-500",
-  Food: "bg-warning-500",
-  Transport: "bg-primary-500",
-  Savings: "bg-success-500",
-  Entertainment: "bg-accent-500",
-};
-
-function getCategoryBarColor(category: string) {
-  return categoryColors[category] || "bg-secondary-500";
-}
-
 // Goals computed
 const goalsProgress = computed(() => {
   const s = goalStore.summary;
@@ -251,6 +238,16 @@ const upcomingDebts = computed(() => {
     return due >= now && due <= weekFromNow;
   });
 });
+
+// Overdue debts
+const overdueDebts = computed(() => {
+  const now = new Date();
+  return debtStore.debts.filter((d) => {
+    if (d.status !== 'ACTIVE' || !d.dueDate) return false;
+    return new Date(d.dueDate) < now;
+  });
+});
+
 </script>
 
 <template>
@@ -413,6 +410,40 @@ const upcomingDebts = computed(() => {
         </div>
       </div>
 
+      <!-- Debt Alerts -->
+      <div v-if="overdueDebts.length > 0 || upcomingDebts.length > 0" class="space-y-3">
+        <div
+          v-for="debt in overdueDebts"
+          :key="'overdue-' + debt.id"
+          class="flex items-center gap-3 p-3 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg"
+        >
+          <ExclamationTriangleIcon class="w-5 h-5 text-danger-500 flex-shrink-0" />
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-danger-700 dark:text-danger-300">
+              Overdue: {{ debt.counterparty }} - {{ formatCurrency(debt.amount - debt.paidAmount) }} remaining
+            </p>
+            <p class="text-xs text-danger-500 dark:text-danger-400">
+              Due {{ new Date(debt.dueDate!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
+            </p>
+          </div>
+        </div>
+        <div
+          v-for="debt in upcomingDebts"
+          :key="'upcoming-' + debt.id"
+          class="flex items-center gap-3 p-3 bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg"
+        >
+          <ClockIcon class="w-5 h-5 text-warning-500 flex-shrink-0" />
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-warning-700 dark:text-warning-300">
+              Due soon: {{ debt.counterparty }} - {{ formatCurrency(debt.amount - debt.paidAmount) }} remaining
+            </p>
+            <p class="text-xs text-warning-500 dark:text-warning-400">
+              Due {{ new Date(debt.dueDate!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Goals & Debts Row -->
       <div class="grid lg:grid-cols-2 gap-6">
         <!-- Financial Goals Summary -->
@@ -563,47 +594,29 @@ const upcomingDebts = computed(() => {
 
       <!-- Charts Section -->
       <div v-if="nonZeroMonthlyData.length > 0" class="space-y-6 overflow-hidden">
-        <!-- Monthly Income vs Expenses -->
-        <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 overflow-hidden">
-          <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-2 flex items-center gap-2">
-            <ChartBarIcon class="w-5 h-5 text-primary-500" />
-            Monthly Income vs Expenses
-          </h2>
-          <p class="text-sm text-secondary-500 dark:text-secondary-400 mb-5">See how your income compares to expenses each month</p>
-          <ClientOnly>
-            <ChartsMonthlyBarChart :data="nonZeroMonthlyData" :currency="currency" />
-            <template #fallback>
-              <div class="h-80 flex items-center justify-center bg-secondary-50 dark:bg-secondary-900 rounded-xl">
-                <div class="w-8 h-8 border-3 border-primary-200 dark:border-primary-800 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"></div>
-              </div>
-            </template>
-          </ClientOnly>
-        </div>
-
-        <!-- Savings Trend and Category Breakdown -->
         <div class="grid lg:grid-cols-2 gap-6">
-          <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 overflow-hidden">
-            <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-2 flex items-center gap-2">
-              <ArrowTrendingUpIcon class="w-5 h-5 text-primary-500" />
-              Savings Trend
-            </h2>
-            <p class="text-sm text-secondary-500 dark:text-secondary-400 mb-5">Track how much you're saving over time</p>
+          <!-- Monthly Income vs Expenses (half width) -->
+          <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-5 overflow-hidden">
+            <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100 mb-4 flex items-center gap-2">
+              <ChartBarIcon class="w-4 h-4 text-primary-500" />
+              Monthly Income vs Expenses
+            </h3>
             <ClientOnly>
-              <ChartsSavingsLineChart :data="nonZeroMonthlyData" :currency="currency" />
+              <ChartsMonthlyBarChart :data="nonZeroMonthlyData" :currency="currency" />
               <template #fallback>
-                <div class="h-80 flex items-center justify-center bg-secondary-50 dark:bg-secondary-900 rounded-xl">
-                  <div class="w-8 h-8 border-3 border-primary-200 dark:border-primary-800 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"></div>
+                <div class="h-64 flex items-center justify-center">
+                  <div class="w-6 h-6 border-2 border-primary-200 dark:border-primary-800 border-t-primary-500 rounded-full animate-spin" />
                 </div>
               </template>
             </ClientOnly>
           </div>
 
-          <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6 overflow-hidden">
-            <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-2 flex items-center gap-2">
-              <ChartPieIcon class="w-5 h-5 text-primary-500" />
+          <!-- Expenses by Category (half width) -->
+          <div class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-5 overflow-hidden">
+            <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100 mb-4 flex items-center gap-2">
+              <ChartPieIcon class="w-4 h-4 text-primary-500" />
               Expenses by Category
-            </h2>
-            <p class="text-sm text-secondary-500 dark:text-secondary-400 mb-5">Understand where your money goes</p>
+            </h3>
             <ClientOnly>
               <ChartsCategoryPieChart
                 v-if="metrics"
@@ -611,45 +624,27 @@ const upcomingDebts = computed(() => {
                 :currency="currency"
               />
               <template #fallback>
-                <div class="h-80 flex items-center justify-center bg-secondary-50 dark:bg-secondary-900 rounded-xl">
-                  <div class="w-8 h-8 border-3 border-primary-200 dark:border-primary-800 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"></div>
+                <div class="h-72 flex items-center justify-center">
+                  <div class="w-6 h-6 border-2 border-primary-200 dark:border-primary-800 border-t-primary-500 rounded-full animate-spin" />
                 </div>
               </template>
             </ClientOnly>
           </div>
-        </div>
 
-        <!-- Category Breakdown Table -->
-        <div
-          v-if="metrics && Object.keys(metrics.expensesByCategory).length > 0"
-          class="bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-6"
-        >
-          <h2 class="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-5 flex items-center gap-2">
-            <TagIcon class="w-5 h-5 text-primary-500" />
-            Category Breakdown
-          </h2>
-          <div class="space-y-4">
-            <div v-for="(data, category) in metrics.expensesByCategory" :key="category" class="space-y-2">
-              <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                  <span class="font-medium text-secondary-900 dark:text-secondary-100">{{ category }}</span>
-                  <span class="text-sm text-secondary-400 dark:text-secondary-500">({{ data.count }} expense{{ data.count === 1 ? "" : "s" }})</span>
+          <!-- Savings Trend (full width) -->
+          <div class="lg:col-span-2 bg-white dark:bg-secondary-800 rounded-xl shadow-card border border-secondary-100 dark:border-secondary-700 p-5 overflow-hidden">
+            <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100 mb-4 flex items-center gap-2">
+              <ArrowTrendingUpIcon class="w-4 h-4 text-primary-500" />
+              Savings Trend
+            </h3>
+            <ClientOnly>
+              <ChartsSavingsLineChart :data="nonZeroMonthlyData" :currency="currency" />
+              <template #fallback>
+                <div class="h-72 flex items-center justify-center">
+                  <div class="w-6 h-6 border-2 border-primary-200 dark:border-primary-800 border-t-primary-500 rounded-full animate-spin" />
                 </div>
-                <div class="text-right">
-                  <span class="font-semibold text-secondary-900 dark:text-secondary-100">{{ formatCurrency(data.total) }}</span>
-                  <span class="text-sm text-primary-600 dark:text-primary-400 ml-2 font-medium">
-                    {{ ((data.total / metrics.totalExpenses) * 100).toFixed(1) }}%
-                  </span>
-                </div>
-              </div>
-              <div class="h-2 bg-secondary-100 dark:bg-secondary-700 rounded-full overflow-hidden">
-                <div
-                  class="h-full transition-all duration-500"
-                  :class="getCategoryBarColor(String(category))"
-                  :style="{ width: `${(data.total / metrics.totalExpenses) * 100}%` }"
-                />
-              </div>
-            </div>
+              </template>
+            </ClientOnly>
           </div>
         </div>
       </div>
@@ -734,6 +729,13 @@ const upcomingDebts = computed(() => {
             :count="debtSummary?.activeDebts || 0"
             count-label="active debts"
             description="Track who owes who"
+          />
+          <DashboardQuickActionCard
+            to="/vehicles"
+            :icon="TruckIcon"
+            label="Vehicles"
+            count-label="vehicles"
+            description="Track car expenses"
           />
         </div>
       </div>

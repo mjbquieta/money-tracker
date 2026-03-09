@@ -55,6 +55,12 @@ let AuthController = class AuthController {
         (0, cookie_helper_1.setRefreshTokenCookie)(res, result.refreshToken);
         return { accessToken: result.accessToken };
     }
+    async forgotPassword(body) {
+        return this.authService.requestPasswordReset(body);
+    }
+    async resetPassword(body) {
+        return this.authService.resetPassword(body);
+    }
     async logout(req, res) {
         const rawToken = (0, cookie_helper_1.getRefreshTokenFromCookie)(req.cookies);
         if (rawToken) {
@@ -124,6 +130,22 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "refresh", null);
+__decorate([
+    (0, common_1.Post)('forgot-password'),
+    openapi.ApiResponse({ status: 201 }),
+    __param(0, (0, common_1.Body)(new common_1.ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [auth_dto_1.ForgotPasswordDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, common_1.Post)('reset-password'),
+    openapi.ApiResponse({ status: 201 }),
+    __param(0, (0, common_1.Body)(new common_1.ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [auth_dto_1.ResetPasswordDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetPassword", null);
 __decorate([
     (0, common_1.Post)('logout'),
     openapi.ApiResponse({ status: 201 }),

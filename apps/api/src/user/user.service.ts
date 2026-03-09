@@ -15,6 +15,7 @@ import { omit } from 'lodash';
 import { SettingsService } from 'src/settings/settings.service';
 import { UUID } from 'crypto';
 import { CategoryService } from 'src/category/category.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -25,6 +26,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly settingsService: SettingsService,
     private readonly categoryService: CategoryService,
+    private readonly mailService: MailService,
   ) {
     this.saltRounds = Number(this.configService.get('SALT_ROUNDS'));
   }
@@ -44,11 +46,16 @@ export class UserService {
       await this.settingsService.create(user.id as UUID, payload.settings, tx);
       await this.categoryService.createDefaultCategories(user.id as UUID, tx);
 
-      return tx.user.findUnique({
+      const created = await tx.user.findUnique({
         where: { id: user.id },
         omit: { password: true },
         include: { settings: true, categories: true },
       });
+
+      // Fire-and-forget: don't block registration if email fails
+      this.mailService.sendWelcomeEmail(user.email, user.name ?? user.username);
+
+      return created;
     });
   }
 

@@ -13,5 +13,6 @@ declare class SettingsDto {
 }
 declare class UpdateSettingsDto {
     currency?: Currency;
+    includeVehicleExpenses?: boolean;
 }
 export { SettingsDto, UpdateSettingsDto, Currency };

@@ -1,10 +1,18 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UUID } from 'crypto';
-import { LoginDto } from './auth.dto';
+import { ConfigService } from '@nestjs/config';
+import { UUID, randomBytes, createHash } from 'crypto';
+import { LoginDto, ForgotPasswordDto, ResetPasswordDto } from './auth.dto';
 import { isEmpty } from 'lodash';
+import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { RefreshTokenService } from './refresh-token.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +20,9 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async login(
@@ -126,5 +137,75 @@ export class AuthService {
       accessToken: this.jwtService.sign(tokenPayload),
       refreshToken,
     };
+  }
+
+  async requestPasswordReset(payload: ForgotPasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: payload.email, deletedAt: null },
+    });
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return { message: 'If an account with that email exists, a reset link has been sent.' };
+    }
+
+    const rawToken = randomBytes(32).toString('hex');
+    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetToken: tokenHash,
+        passwordResetTokenExpiresAt: expiresAt,
+      },
+    });
+
+    const appUrl = this.configService.get('APP_URL', 'http://localhost:3000');
+    const resetUrl = `${appUrl}/auth/reset-password?token=${rawToken}`;
+
+    // Fire-and-forget
+    this.mailService.sendPasswordResetEmail(
+      user.email,
+      user.name ?? user.username,
+      resetUrl,
+    );
+
+    return { message: 'If an account with that email exists, a reset link has been sent.' };
+  }
+
+  async resetPassword(payload: ResetPasswordDto) {
+    const tokenHash = createHash('sha256')
+      .update(payload.token)
+      .digest('hex');
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        passwordResetToken: tokenHash,
+        passwordResetTokenExpiresAt: { gt: new Date() },
+        deletedAt: null,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    const saltRounds = Number(this.configService.get('SALT_ROUNDS', 10));
+    const hashedPassword = await bcrypt.hash(payload.newPassword, saltRounds);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetTokenExpiresAt: null,
+      },
+    });
+
+    // Revoke all refresh tokens for security
+    await this.refreshTokenService.revokeAllUserTokens(user.id);
+
+    return { message: 'Password has been reset successfully' };
   }
 }

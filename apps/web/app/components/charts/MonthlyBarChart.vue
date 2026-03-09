@@ -32,12 +32,18 @@ const chartData = computed(() => ({
   datasets: [
     {
       label: 'Income',
-      backgroundColor: '#22c55e',
+      backgroundColor: isDark.value ? 'rgba(34, 197, 94, 0.7)' : 'rgba(34, 197, 94, 0.8)',
+      borderColor: '#22c55e',
+      borderWidth: 1,
+      borderRadius: 4,
       data: props.data.map((m) => m.income),
     },
     {
       label: 'Expenses',
-      backgroundColor: '#ef4444',
+      backgroundColor: isDark.value ? 'rgba(239, 68, 68, 0.7)' : 'rgba(239, 68, 68, 0.8)',
+      borderColor: '#ef4444',
+      borderWidth: 1,
+      borderRadius: 4,
       data: props.data.map((m) => m.expenses),
     },
   ],
@@ -92,7 +98,7 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-  <div class="h-80">
+  <div class="h-64">
     <Bar :data="chartData" :options="chartOptions" />
   </div>
 </template>

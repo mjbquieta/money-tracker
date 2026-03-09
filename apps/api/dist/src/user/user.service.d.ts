@@ -4,13 +4,15 @@ import { ConfigService } from '@nestjs/config';
 import { SettingsService } from 'src/settings/settings.service';
 import { UUID } from 'crypto';
 import { CategoryService } from 'src/category/category.service';
+import { MailService } from 'src/mail/mail.service';
 export declare class UserService {
     private readonly prisma;
     private readonly configService;
     private readonly settingsService;
     private readonly categoryService;
+    private readonly mailService;
     private saltRounds;
-    constructor(prisma: PrismaService, configService: ConfigService, settingsService: SettingsService, categoryService: CategoryService);
+    constructor(prisma: PrismaService, configService: ConfigService, settingsService: SettingsService, categoryService: CategoryService, mailService: MailService);
     createUser(payload: CreateUserWithSettingsDto): Promise<({
         settings: {
             id: string;
@@ -18,6 +20,7 @@ export declare class UserService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {
@@ -43,6 +46,8 @@ export declare class UserService {
         deletedAt: Date | null;
         twoFactorSecret: string | null;
         isTwoFactorEnabled: boolean;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
     }) | null>;
     findByCredentials(val: string, password: string, isEmail?: boolean): Promise<import("lodash").Omit<{
         settings: {
@@ -51,6 +56,7 @@ export declare class UserService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
     } & {
@@ -65,6 +71,8 @@ export declare class UserService {
         deletedAt: Date | null;
         twoFactorSecret: string | null;
         isTwoFactorEnabled: boolean;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
     }, "password">>;
     findOne(userId: UUID): Promise<import("lodash").Omit<{
         settings: {
@@ -73,6 +81,7 @@ export declare class UserService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {
@@ -99,6 +108,8 @@ export declare class UserService {
         deletedAt: Date | null;
         twoFactorSecret: string | null;
         isTwoFactorEnabled: boolean;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
     }, "password">>;
     updateProfile(userId: UUID, payload: UpdateProfileDto): Promise<import("lodash").Omit<{
         settings: {
@@ -107,6 +118,7 @@ export declare class UserService {
             updatedAt: Date | null;
             deletedAt: Date | null;
             currency: string;
+            includeVehicleExpenses: boolean;
             userId: string;
         } | null;
         categories: {
@@ -133,6 +145,8 @@ export declare class UserService {
         deletedAt: Date | null;
         twoFactorSecret: string | null;
         isTwoFactorEnabled: boolean;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
     }, "password">>;
     changePassword(userId: UUID, payload: ChangePasswordDto): Promise<{
         message: string;
