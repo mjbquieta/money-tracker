@@ -81,19 +81,19 @@ enum NotificationType {
 }
 
 model User {
-  id                 String     @id @default(uuid())
-  email              String     @unique
-  name               String?
-  username           String     @unique
-  status             UserStatus @default(ACTIVE)
-  password           String
-  createdAt          DateTime   @default(now()) @map("created_at")
-  updatedAt          DateTime   @updatedAt @map("updated_at")
-  deletedAt          DateTime?  @map("deleted_at")
-  twoFactorSecret              String?    @map("two_factor_secret")
-  isTwoFactorEnabled           Boolean    @default(false) @map("is_two_factor_enabled")
-  passwordResetToken           String?    @map("password_reset_token")
-  passwordResetTokenExpiresAt  DateTime?  @map("password_reset_token_expires_at")
+  id                          String     @id @default(uuid())
+  email                       String     @unique
+  name                        String?
+  username                    String     @unique
+  status                      UserStatus @default(ACTIVE)
+  password                    String
+  createdAt                   DateTime   @default(now()) @map("created_at")
+  updatedAt                   DateTime   @updatedAt @map("updated_at")
+  deletedAt                   DateTime?  @map("deleted_at")
+  twoFactorSecret             String?    @map("two_factor_secret")
+  isTwoFactorEnabled          Boolean    @default(false) @map("is_two_factor_enabled")
+  passwordResetToken          String?    @map("password_reset_token")
+  passwordResetTokenExpiresAt DateTime?  @map("password_reset_token_expires_at")
 
   settings             Settings?
   budgetPeriods        BudgetPeriod[]
